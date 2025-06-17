@@ -1,0 +1,218 @@
+@charset "UTF-8";
+/* Import Local SCSS Files */
+/* Font Icon CDN */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css");
+/* Font Family CDN */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@font-face {
+  font-family: "SpoqaHanSansNeo-Regular";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SpoqaHanSansNeo-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+/* Font Family */
+/* Text Color */
+/* Object Color */
+* {
+  box-sizing: border-box;
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 500;
+}
+
+button {
+  cursor: pointer;
+}
+
+input {
+  border: none;
+}
+
+* {
+  font-family: "Noto Sans KR", sans-serif;
+  color: #333333;
+}
+
+body {
+  font-weight: 300;
+  margin: 0;
+  font-size: 15px;
+}
+
+/* temporary css */
+/* ########## Common CSS ##########*/
+/* ########## Front-Page ##########*/
+.container.front .layout-wrap {
+  width: 100%;
+  height: 3459px;
+  display: flex;
+  margin: 0 auto;
+}
+.container.front .layout-wrap .side-bar {
+  position: fixed;
+  display: flex;
+  border-right: #F9F9F9;
+  width: 300px;
+  height: 100%;
+}
+.container.front .layout-wrap .side-bar .side-content {
+  width: inherit;
+  height: inherit;
+  /* 로그인,회원가입 버튼*/
+  /* 회원사 리스트 */
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap {
+  width: inherit;
+  height: 284px;
+  border-bottom: 1px solid #EEEEEE;
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-logo {
+  width: inherit;
+  height: 115px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 45px;
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-logo img {
+  width: 202px;
+  height: 92px;
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 26px;
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .btn-login,
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .btn-signup {
+  width: 252px;
+  height: 40px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: white;
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .btn-login {
+  background: white;
+  border: 1px solid #BDBDBD;
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .btn-signup {
+  background: #2196F3;
+  color: #F9F9F9;
+}
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .find-account {
+  font-size: 12px;
+  color: #737373;
+  text-decoration: underline;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header {
+  width: 300px;
+  height: 112px;
+  padding: 18px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  width: 100%;
+  text-align: left;
+  padding-left: 24px;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-search {
+  width: 276px;
+  height: 44px;
+  background: #EEEEEE;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-search input[type=text] {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 400;
+  color: #333333;
+  padding: 0;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-search input[type=text]::placeholder {
+  color: #999999;
+  font-size: 14px;
+  font-weight: 400;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-search input[type=text]:focus::placeholder {
+  visibility: hidden;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-search .bi-search {
+  font-size: 18px;
+  color: #a6a6a6;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-search:has(input:focus) {
+  border: 1.5px solid #2196F3;
+  background: white;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-header .side-member-search:has(input:focus) .bi-search {
+  color: #2196F3;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-list {
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: contain;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: contain;
+  height: calc(100vh - 412px);
+  overflow-y: auto;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-list::-webkit-scrollbar {
+  display: none;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-list .side-member-item {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+  background: white;
+  align-items: center;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-list .side-member-item:hover {
+  background: #F9F9F9;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-list .side-member-item .company-name {
+  font-size: 14px;
+  font-weight: 400;
+  color: #777777;
+}
+.container.front .layout-wrap .side-bar .side-content .side-member-list-box .side-member-list .side-member-item .bi.bi-arrow-up-right-square {
+  color: #777777;
+}
+.container.front .layout-wrap .main-content {
+  margin-left: 300px;
+  width: calc(100% - 300px);
+  min-width: 0;
+  height: 100%;
+  border: 1px solid red;
+}
+
+/*# sourceMappingURL=style.css.map */
