@@ -1,2 +1,223 @@
 /* Import Local SCSS Files */
 @import "fonts", "variables", "reset";
+
+* {
+  font-family: $primary-kr;
+  color: $dark-black;
+}
+body {
+  font-weight: 300;
+  margin: 0;
+  font-size: 15px;
+}
+
+/* temporary css */
+
+/* ########## Common CSS ##########*/
+
+/* ########## Front-Page ##########*/
+.container.front {
+  // 최상위 스타일
+
+  .layout-wrap {
+    width: 100%;
+    height: 3459px;
+    display: flex;
+    margin: 0 auto;
+
+    .side-bar {
+      position: fixed;
+      display: flex;
+      border-right: $cloudy-gray;
+      width: 300px;
+      height: 100%;
+      .side-content {
+        width: inherit;
+        height: inherit;
+        /* 로그인,회원가입 버튼*/
+        .side-content-wrap {
+          width: inherit;
+          height: 284px;
+          border-bottom: 1px solid $silver-gray;
+          .side-logo {
+            width: inherit;
+            height: 115px;
+            display: flex;               // flex
+            justify-content: center;     // 가로 가운데
+            align-items: center;         // 세로 가운데
+            padding-top: 45px;
+
+            img {
+              width: 202px;
+              height: 92px;
+            }
+          }
+
+          .side-login-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding-top: 26px;
+            .btn-login,
+            .btn-signup {
+              width: 252px;
+              height: 40px;
+              border-radius: 15px;
+              display: flex;             // flex 레이아웃 적용
+              justify-content: center;   // 가로 중앙 정렬
+              align-items: center;       // 세로 중앙 정렬
+              font-size: 14px;
+              font-weight: bold;
+              border: white;
+            }
+            .btn-login {
+              background: white;
+              border: 1px solid $dark-gray;
+            }
+            .btn-signup {
+              background: $main-color;
+              color: $cloudy-gray;
+            }
+            .find-account {
+              font-size: 12px;
+              color: #737373;
+              text-decoration: underline;
+            }
+          }
+        }
+        /* 회원사 리스트 */
+        .side-member-list-box {
+          .side-member-header {
+            width: 300px;
+            height: 112px;
+            padding: 18px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .side-member-title {
+              font-size: 16px;
+              font-weight: bold;
+              margin-bottom: 12px;
+              width: 100%;
+              text-align: left;
+              padding-left: 24px;
+            }
+
+            .side-member-search {
+              width: 276px;
+              height: 44px;
+              background: $silver-gray;
+              border-radius: 18px;
+              display: flex;
+              align-items: center;
+              padding: 0 18px;
+
+              input[type="text"] {
+                border: none;
+                background: transparent;
+                outline: none;
+                width: 100%;
+                font-size: 14px;
+                font-weight: 400;
+                color: $dark-black;
+                padding: 0;
+                &::placeholder {
+                  color: $light-black;
+                  font-size: 14px;
+                  font-weight: 400;
+                }
+                &:focus::placeholder {
+                  visibility: hidden;
+                }
+              }
+
+              .bi-search {
+                font-size: 18px;
+                color: #a6a6a6;
+                cursor: pointer;
+                flex-shrink: 0;
+              }
+
+              &:has(input:focus) {
+                border: 1.5px solid $main-color;
+                background: white;
+                .bi-search {
+                  color: $main-color;
+                }
+              }
+
+            }
+          }
+          .side-member-list {
+            display: flex;
+            flex-direction: column;
+            overscroll-behavior: contain;
+            overscroll-behavior-x: contain;
+            overscroll-behavior-y: contain;
+            height: calc(100vh - 412px);
+            overflow-y: auto;
+
+            &::-webkit-scrollbar {
+              display: none;
+            }
+
+            .side-member-item {
+              width: 100%;
+              height: 44px;
+              display: flex;
+              justify-content: space-between;
+              padding: 24px;
+              background: white;
+              align-items: center;
+
+              &:hover {
+                background: $cloudy-gray;
+              }
+
+              .company-name {
+                font-size: 14px;
+                font-weight: 400;
+                color: $silver-black;
+              }
+              .bi.bi-arrow-up-right-square {
+                color: $silver-black;
+              }
+
+
+            }
+          }
+        }
+      }
+
+    }
+
+    .main-content {
+      margin-left: 300px;
+      width: calc(100% - 300px); // 전체에서 사이드바만큼 빼기
+      min-width: 0; // (필요시, flex 속성 대응용)
+      height: 100%;
+      border: 1px solid red;
+      .main-section {
+        // 모든 섹션 공통 스타일
+
+        &.main-hero {
+          // 메인 히어로 섹션
+        }
+        &.main-platform {
+          // 메인 플랫폼 섹션
+        }
+        &.main-community {
+          // 메인 커뮤니티 섹션
+        }
+        &.main-bottom-banner {
+          // 하단 배너 섹션
+        }
+        &.main-footer-info {
+          // 푸터 섹션
+        }
+      }
+    }
+  }
+}
