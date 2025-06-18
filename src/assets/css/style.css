@@ -112,6 +112,10 @@ body {
   font-weight: bold;
   border: white;
 }
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .btn-login:active,
+.container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .btn-signup:active {
+  transform: translateY(2px);
+}
 .container.front .layout-wrap .side-bar .side-content .side-content-wrap .side-login-box .btn-login {
   background: white;
   border: 1px solid #BDBDBD;
@@ -279,6 +283,9 @@ body {
 }
 .container.front .layout-wrap .main-content .main-section.main-hero .main-hero-inner .main-hero-left .main-hero-download .btn:hover {
   opacity: 0.8;
+}
+.container.front .layout-wrap .main-content .main-section.main-hero .main-hero-inner .main-hero-left .main-hero-download .btn:active {
+  transform: translateY(2px);
 }
 .container.front .layout-wrap .main-content .main-section.main-hero .main-hero-inner .main-hero-left .main-hero-download .appstore-logo {
   width: 19px;
@@ -625,6 +632,9 @@ body {
 .container.front .layout-wrap .main-content .main-section.main-bottom-banner .banner-download-wrap .btn:hover {
   opacity: 0.8;
 }
+.container.front .layout-wrap .main-content .main-section.main-bottom-banner .banner-download-wrap .btn:active {
+  transform: translateY(2px);
+}
 .container.front .layout-wrap .main-content .main-section.main-bottom-banner .banner-download-wrap .appstore-logo {
   width: 19px;
   height: 24px;
@@ -681,7 +691,7 @@ body {
   margin-right: 12px;
 }
 
-/* SignUp-Page */
+/* ######### SignUp-Page ##########*/
 .signup-container {
   width: 100%;
   height: 100vh;
@@ -836,5 +846,7 @@ body {
 .signup-container .signup-inner .signup-sns-box .signup-sns-list .google {
   background: #eeeeee;
 }
+
+/* ######### LogIn-Page ##########*/
 
 /*# sourceMappingURL=style.css.map */
