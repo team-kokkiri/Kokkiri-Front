@@ -820,6 +820,7 @@ body {
       &:hover {
         opacity: 0.8;
       }
+
     }
 
     .signup-sns-box {
@@ -877,6 +878,11 @@ body {
             box-shadow: 0 4px 8px rgba(34, 153, 248, 0.12);
             transform: translateY(-2px) scale(1.06);
           }
+
+          &:active {
+            transform: translateY(2px);
+          }
+
         }
         // 개별 배경색
         .kakao {

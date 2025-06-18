@@ -31,6 +31,10 @@ h1, h2, h3, h4, h5, h6 {
 
 button {
   cursor: pointer;
+  transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+}
+button:active {
+  transform: translateY(2px);
 }
 
 input {
@@ -822,6 +826,9 @@ body {
 .signup-container .signup-inner .signup-sns-box .signup-sns-list .sns-btn:hover {
   box-shadow: 0 4px 8px rgba(34, 153, 248, 0.12);
   transform: translateY(-2px) scale(1.06);
+}
+.signup-container .signup-inner .signup-sns-box .signup-sns-list .sns-btn:active {
+  transform: translateY(2px);
 }
 .signup-container .signup-inner .signup-sns-box .signup-sns-list .kakao {
   background: #ffd43b;
