@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import FrontPage from '../pages/FrontPage.vue'
 import SignUp from '../pages/SignUp.vue'
+import LogIn from "@/pages/LogIn.vue";
 
 const routes = [
   {
@@ -12,6 +13,11 @@ const routes = [
     path: '/signup',
     name: 'SignUp',
     component: SignUp
+  },
+  {
+    path: '/login',
+    name: 'LogIn',
+    component: LogIn
   },
   // 기타 라우트들...
 ]

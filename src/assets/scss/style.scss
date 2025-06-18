@@ -85,6 +85,12 @@ body {
               font-size: 12px;
               color: #737373;
               text-decoration: underline;
+              &:hover {
+                color: $main-color;
+              }
+              &:active {
+                transform: translateY(2px);
+              }
             }
           }
         }
@@ -143,7 +149,7 @@ body {
               }
 
               &:has(input:focus) {
-                border: 1.5px solid $main-color;
+                border: 2px solid $main-color;
                 background: white;
                 .bi-search {
                   color: $main-color;
@@ -198,16 +204,15 @@ body {
     .main-content {
       margin-left: 300px;
       width: calc(100% - 300px); // 전체에서 사이드바만큼 빼기
-      min-width: 0; // (필요시, flex 속성 대응용)
       height: 100%;
       // 모든 섹션 공통 스타일
       .main-section {
+        min-width: 1200px;
         // 메인 히어로 섹션
         &.main-hero {
           background: $cloudy-gray;
           height: 716px;
           padding: 40px;
-
           .main-hero-inner {
             background: white;
             border-radius: 0 500px 500px 0;
@@ -232,7 +237,7 @@ body {
               flex-direction: column;
               align-items: flex-start;
               justify-content: center;
-
+              min-width: 430px;
               .main-hero-title {
                 font-size: 58px;
                 font-weight: 700;
@@ -802,15 +807,16 @@ body {
             align-items: center;
             font-size: 14px;
             margin-left: 2px;
-            color: $light-black;
+            font-weight: 430;
 
             .bi {
               font-size: 14px;
               margin-right: 5px;
-              color: $light-black;
+              color: $dark-gray;
             }
             span {
               line-height: 1.5;
+              color: $dark-gray;
             }
           }
         }
@@ -850,6 +856,7 @@ body {
         span {
           color: #999999;
           font-size: 14px;
+          font-weight: 400;
           margin: 0 14px;
           white-space: nowrap;
         }
@@ -910,3 +917,184 @@ body {
 
 }
 /* ######### LogIn-Page ##########*/
+.login-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .login-inner {
+    width: 360px;
+    height: 446px;
+    margin: 0 auto;
+
+    .login-header-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 48px;
+      margin-right: 25px;
+      .logo {
+        width: 191px;
+        height: 56px;
+      }
+    }
+    .login-main-box {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+
+      .login-field-box {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        input[type="text"],
+        input[type="password"] {
+          width: 100%;
+          height: 44px;
+          border: none;
+          border-radius: 15px;
+          background: #f5f5f5;
+          padding: 0 18px;
+          font-size: 16px;
+          color: $dark-black;
+          outline: none;
+          box-sizing: border-box;
+
+          &::placeholder {
+            color: #bdbdbd;
+            font-size: 16px;
+          }
+          &:focus {
+            border: 2px solid $main-color;
+            background: white;
+          }
+          &:focus::placeholder {
+            color: white;
+          }
+        }
+      }
+
+      .login-button {
+        margin-top: 8px;
+        button.btn-login {
+          width: 100%;
+          height: 44px;
+          background: $main-color;
+          border: none;
+          border-radius: 15px;
+          color: white;
+          font-weight: bold;
+          font-size: 16px;
+          cursor: pointer;
+          transition: background 0.15s;
+
+          &:hover {
+            opacity: 0.8;
+          }
+          &:active {
+            opacity: 1;
+          }
+        }
+      }
+
+      .login-link-box {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+
+        a {
+          font-size: 14px;
+          color: #777;
+          text-decoration: none;
+          transition: color 0.1s;
+
+          &:hover {
+            color: $main-color;
+          }
+          &:active {
+            transform: translateY(2px);
+          }
+        }
+      }
+    }
+
+    // 구분선 + 간편로그인
+    .login-divider {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 28px 0 0 0;
+
+      // 구분선 + 텍스트
+      span {
+        color: #999999;
+        font-size: 14px;
+        font-weight: 400;
+        margin: 0 0 14px 0;
+        position: relative;
+        width: 100%;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &::before,
+        &::after {
+          content: "";
+          flex: 1 0 0;
+          height: 1px;
+          background: #e5e5e5;
+          border-radius: 1px;
+        }
+        &::before {
+          margin-right: 12px;
+        }
+        &::after {
+          margin-left: 12px;
+        }
+      }
+
+      .easy-login-box {
+        display: flex;
+        gap: 16px;
+        margin-top: 4px;
+
+        a {
+          width: 44px;
+          height: 44px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+          transition: box-shadow 0.1s, transform 0.1s;
+
+          img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+          }
+
+          &:hover {
+            box-shadow: 0 4px 8px rgba(34, 153, 248, 0.12);
+            transform: translateY(-2px) scale(1.06);
+          }
+          &:active {
+            transform: translateY(2px);
+          }
+        }
+        // 배경색
+        .kakao {
+          background: #ffd43b;
+        }
+        .google {
+          background: #eeeeee;
+        }
+      }
+    }
+  }
+}
