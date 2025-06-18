@@ -18,13 +18,12 @@ body {
 /* ########## Front-Page ##########*/
 .container.front {
   // 최상위 스타일
-
   .layout-wrap {
     width: 100%;
     height: 3459px;
     display: flex;
     margin: 0 auto;
-
+    /* 사이드바 */
     .side-bar {
       position: fixed;
       display: flex;
@@ -192,31 +191,529 @@ body {
       }
 
     }
-
+    /* 메인 콘텐츠 영역 */
     .main-content {
       margin-left: 300px;
       width: calc(100% - 300px); // 전체에서 사이드바만큼 빼기
       min-width: 0; // (필요시, flex 속성 대응용)
       height: 100%;
-      border: 1px solid red;
+      // 모든 섹션 공통 스타일
       .main-section {
-        // 모든 섹션 공통 스타일
-
+        // 메인 히어로 섹션
         &.main-hero {
-          // 메인 히어로 섹션
+          background: $cloudy-gray;
+          height: 716px;
+          padding: 40px;
+
+          .main-hero-inner {
+            background: white;
+            border-radius: 0 500px 500px 0;
+            height: 100%;
+            min-height: 556px;
+            padding: 160px 198px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .main-hero-content-box {
+              display: flex;
+              width: 100%;
+              height: 100%;
+              align-items: center;
+              justify-content: space-between;
+            }
+
+            .main-hero-left {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+              justify-content: center;
+
+              .main-hero-title {
+                font-size: 58px;
+                font-weight: 700;
+                color: #333333;
+                line-height: 1.2;
+                letter-spacing: 0.8px;
+              }
+
+              .main-hero-desc {
+                font-size: 22px;
+                font-weight: 400;
+                color: #444444;
+                margin-bottom: 32px;
+                line-height: 1.5;
+              }
+
+              .main-hero-download {
+                display: flex;
+                gap: 8px;
+
+                .btn {
+                  width: 158px;
+                  height: 58px;
+                  background: #292929;
+                  border-radius: 12px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 8px;
+                  text-decoration: none;
+
+                  &:hover {
+                    opacity: 0.8;
+                  }
+                }
+
+                .appstore-logo {
+                  width: 19px;
+                  height: 24px;
+                }
+
+                .appstore-text {
+                  width: 75px;
+                  height: 20px;
+                }
+
+                .googleplay-logo {
+                  width: 23px;
+                  height: 26px;
+                }
+
+                .googleplay-text {
+                  width: 87px;
+                  height: 18px;
+                }
+              }
+            }
+
+            .main-hero-right {
+              flex: 1;
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+
+              .main-hero-elephant {
+                width: 343px;
+                height: 343px;
+                object-fit: contain;
+                opacity: 0;
+                transform: translateY(50px) scale(0.92);
+                transition: opacity 2s cubic-bezier(0.19,1,0.22,1) 0.5s,
+                transform 1.6s cubic-bezier(0.19,1,0.22,1) 0.5s;
+
+                &.show {
+                  opacity: 1;
+                  transform: translateY(0) scale(1);
+                }
+
+                // 호버시 바운스 효과 (선택)
+                &:hover {
+                  animation: bounce 0.7s;
+                }
+              }
+              @keyframes bounce {
+                0%   { transform: translateY(0) scale(1); }
+                20%  { transform: translateY(-16px) scale(1.05);}
+                40%  { transform: translateY(0) scale(0.98);}
+                60%  { transform: translateY(-10px) scale(1.03);}
+                100% { transform: translateY(0) scale(1);}
+              }
+            }
+          }
         }
+        // 메인 플랫폼 섹션
         &.main-platform {
-          // 메인 플랫폼 섹션
+          min-height: 698px;
+          padding: 120px 0;
+          background: #fff; // 필요에 따라
+
+          .main-platform-inner {
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+
+          .platform-title-wrap {
+            text-align: center;
+
+            .platform-title {
+              font-size: 48px;
+              font-weight: 700;
+              color: #333333;
+              line-height: 1.2;
+              margin-bottom: 20px;
+            }
+            .platform-desc {
+              font-size: 22px;
+              font-weight: 400;
+              color: #333333;
+              line-height: 1.4;
+              margin-bottom: 40px; // 리스트 박스와의 간격
+            }
+          }
+
+          .platform-feature-list {
+            width: 1044px;
+            height: 221px;
+            background: #f9f9f9;
+            border-radius: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 48px 96px;
+            margin-top: 40px;
+            //box-shadow: 0 8px 24px 0 rgba(0,0,0,0.04);
+
+            .platform-feature-item {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              flex: 1;
+              margin-top: 30px;
+
+              .feature-icon-wrap {
+                margin-bottom: 16px;
+                img {
+                  width: 40px;
+                  height: 40px;
+                  display: block;
+                }
+              }
+
+              .feature-desc-wrap {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                .feature-title {
+                  font-size: 16px;
+                  font-weight: 700;
+                  color: #737373;
+                  margin-bottom: 8px;
+                }
+
+                .feature-count {
+                  display: flex;
+                  align-items: flex-end;
+                  gap: 4px;
+
+                  .number {
+                    font-size: 35.33px;
+                    font-weight: 700;
+                    color: #333333;
+                    line-height: 1;
+                  }
+                  .unit {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #333333;
+                    line-height: 1;
+                  }
+                }
+              }
+            }
+            .vertical-divider {
+              display: inline-block;
+              transform: rotate(90deg);
+              font-size: 28px;
+              color: #ededed;
+              margin: 0 16px;
+              vertical-align: middle;
+              user-select: none;
+              pointer-events: none;
+            }
+          }
         }
+        // 메인 커뮤니티 섹션
         &.main-community {
-          // 메인 커뮤니티 섹션
+          height: 1412px;
+          background: #fff;
+          background: $cloudy-gray;
+          .main-community-inner {
+            display: flex;
+            align-items: flex-start;
+            padding: 120px 112px;
+            height: 100%;
+
+            .community-left {
+              display: flex;
+              flex-direction: column;
+              gap: 60px;
+
+              .community-info-wrap {
+                width: 528px;
+                height: 300px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 24px;
+                .community-icon {
+                  width: 80px;
+                  height: 80px;
+                  .bi.bi-chat-text-fill {
+                    color: $main-color;
+                    font-size: 80px;
+                  }
+                }
+                .community-title-wrap {
+                  color: $dark-black;
+                  h2.community-title {
+                    font-size: 48px;
+                    font-weight: 700;
+                  }
+                  p.community-desc {
+                    margin-top: 10px;
+                    font-size: 22px;
+                    font-weight: normal;
+                  }
+                }
+              }
+              .community-board-wrap {
+                height: 792px;
+                position: relative;
+                img {
+                  width: 100%;
+                  height: 100%;
+                  object-fit: contain;
+                }
+                .board-popup {
+                  width: 357px;
+                  height: 259px;
+                  position: absolute;
+                  background: white;
+                  border-radius: 30px;
+                  box-shadow: 0 8px 32px rgba(50, 70, 128, 0.11);
+                  padding: 24px;
+                  opacity: 0;
+                  transform: translateY(30px);
+                  transition: opacity 0.8s cubic-bezier(0.19,1,0.22,1),
+                              transform 0.8s cubic-bezier(0.19,1,0.22,1);
+
+                  &.show {
+                    opacity: 1;
+                    transform: translateY(0);
+                  }
+                }
+                .board-popup-main {
+                  top: 130px;
+                  left: 0;
+                  z-index: 2;
+                  transform: translateX(-30px) translateY(20px);
+
+                  &.show {
+                    transform: translateX(0) translateY(0);
+                  }
+                }
+
+                .board-popup-comment {
+                  bottom: 80px;
+                  right: 0;
+                  z-index: 3;
+                  transform: translateX(30px) translateY(20px);
+
+                  &.show {
+                    transform: translateX(0) translateY(0);
+                  }
+                }
+              }
+            }
+
+            .community-right {
+              margin: auto;
+              width: 380px;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 24px;
+              .community-type-box {
+
+                .community-type-info-wrap {
+                  color: $dark-black;
+                  h3.community-type-title {
+                    font-size: 36px;
+                    font-weight: 700;
+                    margin-bottom: 16px;
+                  }
+                  p.community-type-desc {
+                    font-size: 18px;
+                    margin-bottom: 28px;
+                    font-weight: normal;
+                  }
+                }
+                .community-type-list {
+                  .community-type-item {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 28px;
+                    .type-icon {
+                      width: 80px;
+                      height: 80px;
+                      margin-right: 16px;
+                      background: #f2f2f2;
+                      border-radius: 50px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      .bi {
+                        color: $main-color;
+                        font-size: 34px;
+                      }
+                    }
+                    .type-info-wrap {
+                      h4.type-title {
+                        font-size: 22px;
+                        font-weight: 700;
+                        margin-bottom: 6px;
+                        color: $dark-black;
+                      }
+                      p.type-desc {
+                        font-size: 16px;
+                        font-weight: 400;
+                        color: $dark-black;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
+        // 메인 하단 섹션
         &.main-bottom-banner {
-          // 하단 배너 섹션
+          height: 537px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: white;
+
+          .main-bottom-banner-inner {
+            width: 100%;
+            padding: 125px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .banner-image-wrap {
+            margin-bottom: 28px;
+            width: 103px;
+            height: 103px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08),
+            -8px -8px 24px rgba(0, 0, 0, 0.08);
+
+            img {
+              width: 80px;
+              height: 80px;
+              object-fit: contain;
+            }
+          }
+
+          .banner-title-wrap {
+            margin-bottom: 32px;
+            .banner-title {
+              font-size: 32px;
+              font-weight: 700;
+              text-align: center;
+              line-height: 1.2;
+            }
+          }
+
+          .banner-download-wrap {
+            display: flex;
+            gap: 8px;
+            .btn {
+              width: 158px;
+              height: 58px;
+              background: #292929;
+              border-radius: 12px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              text-decoration: none;
+
+              &:hover {
+                opacity: 0.8;
+              }
+            }
+
+            .appstore-logo {
+              width: 19px;
+              height: 24px;
+            }
+
+            .appstore-text {
+              width: 75px;
+              height: 20px;
+            }
+
+            .googleplay-logo {
+              width: 23px;
+              height: 26px;
+            }
+
+            .googleplay-text {
+              width: 87px;
+              height: 18px;
+            }
+          }
         }
+        // 푸터 섹션
         &.main-footer-info {
-          // 푸터 섹션
+          height: 176px;
+          background: $cloudy-gray;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 35px 35px;
+          color: #777777;
+          .main-footer-info-inner {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          }
+
+          .footer-info-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 15px;
+          }
+
+          .footer-info-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .contact-title,
+            .fax-title {
+              font-weight: 700;
+              color: #222;
+              font-size: 15px;
+              margin-right: 2px;
+            }
+            .contact-num,
+            .fax-num {
+              color: #888;
+              font-size: 15px;
+              margin-right: 12px;
+            }
+          }
         }
+
       }
     }
   }
