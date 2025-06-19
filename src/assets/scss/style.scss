@@ -961,7 +961,7 @@ body {
         flex-direction: column;
         gap: 4px;
 
-        input[type="text"],
+        input[type="email"],
         input[type="password"] {
           width: 100%;
           height: 44px;
@@ -976,7 +976,7 @@ body {
 
           &::placeholder {
             color: $light-black;
-            font-size: 18px;
+            font-size: 16px;
           }
           &:focus {
             border: 2px solid $main-color;
@@ -984,6 +984,26 @@ body {
           }
           &:focus::placeholder {
             color: white;
+          }
+        }
+      }
+
+      .input-msg-list {
+        .input-msg {
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          margin-left: 4px;
+          margin-top: 4px;
+          font-weight: 400;
+          .bi {
+            font-size: 14px;
+            margin-right: 5px;
+            color: $crimson;
+          }
+          span {
+            line-height: 1.5;
+            color: $crimson;
           }
         }
       }

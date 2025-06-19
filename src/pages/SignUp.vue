@@ -83,7 +83,7 @@
 import {ref, onMounted, onUnmounted} from 'vue';
 import { useRouter } from 'vue-router';
 
-/*####### 인풋 관련 v모델 변수들 #######*/
+/*####### 변수들 #######*/
 const email = ref('');
 const password = ref('');
 const passwordCheck = ref('');

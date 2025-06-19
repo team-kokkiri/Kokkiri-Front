@@ -3,6 +3,8 @@ import FrontPage from '../pages/FrontPage.vue'
 import SignUp from '../pages/SignUp.vue'
 import LogIn from "@/pages/LogIn.vue";
 import EmailVerify from "@/pages/EmailVerify.vue";
+import FindPassword from "@/pages/FindPassword.vue";
+import MainPage from "@/pages/MainPage.vue";
 
 const routes = [
   {
@@ -24,6 +26,16 @@ const routes = [
     path: '/email-verify',
     name: 'EmailVerify',
     component: EmailVerify
+  },
+  {
+    path: '/find-password',
+    name: 'FindPassword',
+    component: FindPassword
+  },
+  {
+    path: '/main-page',
+    name: 'MainPage',
+    component: MainPage
   },
 ]
 
