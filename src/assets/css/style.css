@@ -777,6 +777,7 @@ body {
   font-size: 18px;
 }
 .signup-container .signup-inner .signup-form-box .form-group .input-msg-list {
+  min-height: 20px;
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -793,9 +794,22 @@ body {
   margin-right: 5px;
   color: #BDBDBD;
 }
+.signup-container .signup-inner .signup-form-box .form-group .input-msg-list .input-msg .bi.bi-x-lg {
+  font-size: 14px;
+  margin-right: 5px;
+  color: #ED2040;
+}
 .signup-container .signup-inner .signup-form-box .form-group .input-msg-list .input-msg span {
   line-height: 1.5;
   color: #BDBDBD;
+}
+.signup-container .signup-inner .signup-form-box .form-group .input-msg-list .input-msg .password-check-error {
+  line-height: 1.5;
+  color: #ED2040;
+}
+.signup-container .signup-inner .signup-form-box .form-group .input-msg-list .input-msg .bi.active,
+.signup-container .signup-inner .signup-form-box .form-group .input-msg-list .input-msg span.active {
+  color: #2ECC71;
 }
 .signup-container .signup-inner .btn-signup {
   width: 100%;
@@ -934,6 +948,9 @@ body {
 .login-container .login-inner .login-main-box .login-field-box input[type=password]:focus::placeholder {
   color: white;
 }
+.login-container .login-inner .login-main-box .input-msg-list {
+  height: 20px;
+}
 .login-container .login-inner .login-main-box .input-msg-list .input-msg {
   display: flex;
   align-items: center;
@@ -952,7 +969,7 @@ body {
   color: #ED2040;
 }
 .login-container .login-inner .login-main-box .login-button {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 .login-container .login-inner .login-main-box .login-button button.btn-login {
   width: 100%;

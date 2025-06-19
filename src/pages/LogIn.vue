@@ -25,8 +25,8 @@
         </div>
 
         <!-- 에러 메시지 출력 영역 -->
-        <div v-if="errorMessage" class="input-msg-list" style="margin-bottom:12px;">
-          <div class="input-msg">
+        <div class="input-msg-list" style="margin-bottom:12px;">
+          <div v-if="errorMessage" class="input-msg">
             <i class="bi bi-x-lg"></i>
             <span>{{ errorMessage }}</span>
           </div>

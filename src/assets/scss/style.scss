@@ -809,6 +809,7 @@ body {
         }
 
         .input-msg-list {
+          min-height: 20px;
           display: flex;
           flex-direction: column;
           gap: 1px;
@@ -825,9 +826,22 @@ body {
               margin-right: 5px;
               color: $dark-gray;
             }
+            .bi.bi-x-lg {
+              font-size: 14px;
+              margin-right: 5px;
+              color: $crimson;
+            }
             span {
               line-height: 1.5;
               color: $dark-gray;
+            }
+            .password-check-error {
+              line-height: 1.5;
+              color: $crimson;
+            }
+            .bi.active,
+            span.active {
+              color: $forestgreen;
             }
           }
         }
@@ -989,6 +1003,7 @@ body {
       }
 
       .input-msg-list {
+        height: 20px;
         .input-msg {
           display: flex;
           align-items: center;
@@ -1009,7 +1024,7 @@ body {
       }
 
       .login-button {
-        margin-top: 8px;
+        margin-top: 4px;
         button.btn-login {
           width: 100%;
           height: 44px;

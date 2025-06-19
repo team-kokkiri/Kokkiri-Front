@@ -19,29 +19,37 @@
         <div class="form-group email-group">
           <label for="signup-email">이메일</label>
           <input type="email" id="signup-email" placeholder="example@email.com" v-model="email"/>
-          <div class="input-msg-list">
-            <div class="input-msg">
-              <i class="bi bi-x-lg"></i>
-              <span>이메일 형식이 올바르지 않습니다</span>
-            </div>
-          </div>
         </div>
 
         <div class="form-group password-group">
           <label for="signup-password">비밀번호</label>
-          <input type="password" id="signup-password" placeholder="pass0603#" v-model="password"/>
+          <input
+              type="password"
+              id="signup-password"
+              placeholder="pass0603#"
+              v-model="password"
+          />
           <div class="input-msg-list">
             <div class="input-msg">
-              <i class="bi bi-check-lg"></i>
-              <span>영문/숫자/특수문자 중, 2가지 이상 포함</span>
+              <i class="bi bi-check-lg"
+                 :class="{ 'active': isPasswordMixed }"></i>
+              <span :class="{ 'active': isPasswordMixed }">
+                영문/숫자/특수문자 중, 2가지 이상 포함
+              </span>
             </div>
             <div class="input-msg">
-              <i class="bi bi-check-lg"></i>
-              <span>8자 이상 32자 이하 입력 (공백 제외)</span>
+              <i class="bi bi-check-lg"
+                 :class="{ 'active': isPasswordLengthValid }"></i>
+              <span :class="{ 'active': isPasswordLengthValid }">
+                8자 이상 32자 이하 입력 (공백 제외)
+              </span>
             </div>
             <div class="input-msg">
-              <i class="bi bi-check-lg"></i>
-              <span>연속 3자 이상 동일한 문자/숫자 제외</span>
+              <i class="bi bi-check-lg"
+                 :class="{ 'active': isPasswordNoRepeat }"></i>
+              <span :class="{ 'active': isPasswordNoRepeat }">
+               연속 3자 이상 동일한 문자/숫자 제외
+              </span>
             </div>
           </div>
         </div>
@@ -50,9 +58,9 @@
           <label for="signup-password-check">비밀번호 확인</label>
           <input type="password" id="signup-password-check" placeholder="pass0603#" v-model="passwordCheck"/>
           <div class="input-msg-list">
-            <div class="input-msg">
+            <div v-if="passwordCheckError" class="input-msg">
               <i class="bi bi-x-lg"></i>
-              <span>비밀번호가 일치하지 않습니다</span>
+              <span class="password-check-error">{{ passwordCheckError }}</span>
             </div>
           </div>
         </div>
@@ -80,14 +88,17 @@
 
 <script setup>
 /*####### 임포트 #######*/
-import {ref, onMounted, onUnmounted} from 'vue';
-import { useRouter } from 'vue-router';
+import {ref, onMounted, onUnmounted, computed} from 'vue';
+import {useRouter} from 'vue-router';
 
 /*####### 변수들 #######*/
 const email = ref('');
 const password = ref('');
 const passwordCheck = ref('');
 const router = useRouter();
+
+/* 에러 메시지 변수 */
+const passwordCheckError = ref('');
 
 /*####### 회원가입 데이터 전송 #######*/
 const onSignup = () => {
@@ -96,18 +107,53 @@ const onSignup = () => {
   console.log('비밀번호:', password.value);
   console.log('비밀번호확인:', passwordCheck.value);
 
-  // 여기서 유효성 체크 등 처리
-  /* 이메일, 비밀번호가 입력되었는지 검사
-  if (!email.value || !password.value || !passwordCheck.value) {
-    alert('모든 값을 입력해주세요!');
+  // 모든 에러 메시지 초기화
+  passwordCheckError.value = '';
+
+  // 입력값 비었는지 검사
+  if (!passwordCheck.value) {
+    passwordCheckError.value = '비밀번호 확인을 입력해주세요.';
+  }
+
+  // 에러가 있으면 중단
+  if (passwordCheckError.value) {
     return;
-  } */
+  }
+
+  // 비밀번호 확인 검사
+  if (password.value !== passwordCheck.value) {
+    passwordCheckError.value = '비밀번호가 일치하지 않습니다';
+    return;
+  }
 
   // 필요 시 이메일, 비밀번호 유효성 검사 후 라우터 이동
   // 현재 페이지 데이터가 다음 페이지로 전달되진 않음 !
   router.push('/email-verify');
 };
 
+/*##### 비밀번호 정규표현식 ######*/
+// 1. 영문/숫자/특수문자 중 2가지 이상 포함
+const isPasswordMixed = computed(() => {
+  const pwd = password.value;
+  let types = 0;
+  if (/[A-Za-z]/.test(pwd)) types++;
+  if (/[0-9]/.test(pwd)) types++;
+  if (/[^A-Za-z0-9]/.test(pwd)) types++;
+  return types >= 2;
+});
+
+// 2. 8자 이상 32자 이하, 공백 없음
+const isPasswordLengthValid = computed(() => {
+  const pwd = password.value;
+  return pwd.length >= 8 && pwd.length <= 32 && !/\s/.test(pwd);
+});
+
+// 3. 연속 3자 이상 동일 문자/숫자 없음
+const isPasswordNoRepeat = computed(() => {
+  const pwd = password.value;
+  if (pwd.length < 3) return false; // 8자 미만이면 항상 false
+  return !/(.)\1\1/.test(pwd); // 8자 이상부터만 검사
+});
 
 /*##### 회원가입 텍스트 애니메이션 ######*/
 const messages = [
