@@ -1,10 +1,9 @@
 <template>
   <div class="signup-container">
     <div class="signup-inner">
-
       <div class="signup-header-box">
         <div class="signup-logo">
-          <img src="../assets/img/마스코트잔디.png" alt="로고" />
+          <img src="../assets/img/마스코트잔디.png" alt="로고"/>
         </div>
         <h2 class="signup-title">회원가입</h2>
         <div class="rolling-banner-wrap">
@@ -16,10 +15,10 @@
         </div>
       </div>
 
-      <div class="signup-form-box">
+      <form class="signup-form-box" @submit.prevent="onSignup">
         <div class="form-group email-group">
           <label for="signup-email">이메일</label>
-          <input type="email" id="signup-email" />
+          <input type="email" id="signup-email" placeholder="example@email.com" v-model="email"/>
           <div class="input-msg-list">
             <div class="input-msg">
               <i class="bi bi-x-lg"></i>
@@ -30,7 +29,7 @@
 
         <div class="form-group password-group">
           <label for="signup-password">비밀번호</label>
-          <input type="password" id="signup-password" />
+          <input type="password" id="signup-password" placeholder="pass0603#" v-model="password"/>
           <div class="input-msg-list">
             <div class="input-msg">
               <i class="bi bi-check-lg"></i>
@@ -49,7 +48,7 @@
 
         <div class="form-group password-check-group">
           <label for="signup-password-check">비밀번호 확인</label>
-          <input type="password" id="signup-password-check" />
+          <input type="password" id="signup-password-check" placeholder="pass0603#" v-model="passwordCheck"/>
           <div class="input-msg-list">
             <div class="input-msg">
               <i class="bi bi-x-lg"></i>
@@ -57,9 +56,8 @@
             </div>
           </div>
         </div>
-
-        <button class="btn-signup" type="button">가입하기</button>
-      </div>
+        <button class="btn-signup" type="submit">가입하기</button>
+      </form>
 
       <div class="signup-sns-box">
         <div class="signup-sns-divider">
@@ -81,8 +79,37 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+/*####### 임포트 #######*/
+import {ref, onMounted, onUnmounted} from 'vue';
+import { useRouter } from 'vue-router';
 
+/*####### 인풋 관련 v모델 변수들 #######*/
+const email = ref('');
+const password = ref('');
+const passwordCheck = ref('');
+const router = useRouter();
+
+/*####### 회원가입 데이터 전송 #######*/
+const onSignup = () => {
+  // 값 확인
+  console.log('이메일:', email.value);
+  console.log('비밀번호:', password.value);
+  console.log('비밀번호확인:', passwordCheck.value);
+
+  // 여기서 유효성 체크 등 처리
+  /* 이메일, 비밀번호가 입력되었는지 검사
+  if (!email.value || !password.value || !passwordCheck.value) {
+    alert('모든 값을 입력해주세요!');
+    return;
+  } */
+
+  // 필요 시 이메일, 비밀번호 유효성 검사 후 라우터 이동
+  // 현재 페이지 데이터가 다음 페이지로 전달되진 않음 !
+  router.push('/email-verify');
+};
+
+
+/*##### 회원가입 텍스트 애니메이션 ######*/
 const messages = [
   "이곳에서 성장해 보세요   ",
   "KOKKIRI에서 다양한 학습의 기회를 얻으세요!   ",

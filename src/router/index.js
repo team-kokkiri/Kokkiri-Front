@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import FrontPage from '../pages/FrontPage.vue'
 import SignUp from '../pages/SignUp.vue'
 import LogIn from "@/pages/LogIn.vue";
+import EmailVerify from "@/pages/EmailVerify.vue";
 
 const routes = [
   {
@@ -19,7 +20,11 @@ const routes = [
     name: 'LogIn',
     component: LogIn
   },
-  // 기타 라우트들...
+  {
+    path: '/email-verify',
+    name: 'EmailVerify',
+    component: EmailVerify
+  },
 ]
 
 const router = createRouter({
