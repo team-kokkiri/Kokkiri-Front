@@ -114,6 +114,17 @@ const router = useRouter();
 const emailError = ref('');
 const passwordCheckError = ref('');
 
+import { watch } from 'vue';
+
+// 이메일 입력이 바뀔 때 에러 즉시 제거
+watch(email, () => {
+  if (emailError.value) emailError.value = '';
+});
+
+// 비밀번호/비밀번호 확인 입력이 바뀔 때 에러 즉시 제거
+watch([password, passwordCheck], () => {
+  if (passwordCheckError.value) passwordCheckError.value = '';
+});
 
 /*####### 회원가입 데이터 전송 #######*/
 const onSignup = () => {
