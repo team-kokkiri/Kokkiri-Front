@@ -46,12 +46,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const code = ref('');
 const error = ref('');
 const router = useRouter();
+
+// 코드 입력 시 에러 자동 제거
+watch(code, () => {
+  if (error.value) error.value = '';
+});
 
 // 서버에서 온 인증코드가 "123456"이라고 가정
 const correctCode = "123456";
