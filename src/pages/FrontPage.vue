@@ -8,9 +8,9 @@
               <img src="../assets/img/kosa로고2.jpg" alt="" />
             </div>
             <div class="side-login-box">
-              <a class="btn-login" href="/login">로그인</a>
-              <a class="btn-signup" href="/signup">KOSA 회원가입</a>
-              <a class="find-account" href="#">아이디/비밀번호 찾기</a>
+              <router-link class="btn-login" to="/login">로그인</router-link>
+              <router-link class="btn-signup" to="/signup">KOSA 회원가입</router-link>
+              <router-link class="find-account" to="/find-password">비밀번호 찾기</router-link>
               <hr />
             </div>
           </div>
