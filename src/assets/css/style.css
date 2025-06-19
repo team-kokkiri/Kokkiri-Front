@@ -1658,6 +1658,7 @@ body {
   opacity: 0.85;
 }
 
+/* ######### Main-Page ##########*/
 /* ###### MainPage-Header #######*/
 .mainpage-header {
   width: 100%;
@@ -1672,7 +1673,6 @@ body {
   height: 100%;
   display: flex;
   align-items: center;
-  border: 1px solid black;
 }
 .mainpage-header .header-inner .header-row {
   width: 100%;
@@ -1731,34 +1731,36 @@ body {
   height: 40px;
   border-radius: 10px;
 }
-.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap {
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-btn {
   display: flex;
   align-items: center;
   position: relative;
   font-size: 24px;
+  background: white;
+  border: none;
 }
-.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap i {
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-btn i {
   font-size: 24px;
   transition: color 0.2s;
 }
-.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap .bi.bi-bell-fill {
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-btn .bi.bi-bell-fill {
   width: 20px;
   height: 20px;
   fill: white;
   stroke: #333333;
   stroke-width: 1.5px;
 }
-.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap .bi.bi-chat-dots-fill {
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-btn .bi.bi-chat-dots-fill {
   width: 20px;
   height: 20px;
   fill: #555555;
 }
-.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap .bi.bi-person-fill {
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-btn .bi.bi-person-fill {
   width: 24px;
   height: 24px;
   fill: #555555;
 }
-.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap em {
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-btn em {
   width: 20px;
   height: 20px;
   position: absolute;
@@ -1773,8 +1775,223 @@ body {
   align-items: center;
   justify-content: center;
 }
-.mainpage-header .header-inner .header-row .header-right .util-icon-item:hover i {
-  color: #006be5;
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 458px;
+  height: 380px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px 0 rgba(80, 86, 127, 0.15);
+  border: 2px solid #DDDDDD;
+  z-index: 100;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.18s;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #DDDDDD;
+  padding: 34px 27px;
+  height: 80px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-header h3.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
+  margin: 0;
+  margin-right: 10px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-header em.badge-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  font-weight: 400;
+  background: #FD5631;
+  color: #fff;
+  border-radius: 7px;
+  margin-left: 4px;
+  margin-top: 3px;
+  font-family: SpoqaHanSansNeo-Regular, serif;
+  font-style: normal;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-header .btn-read-all {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #FD5631;
+  font-size: 16px;
+  font-weight: 430;
+  cursor: pointer;
+  padding: 0;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list {
+  flex: 1 1 0%;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list::-webkit-scrollbar {
+  width: 8px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 8px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: 60px;
+  border-bottom: 1px solid #DDDDDD;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item:last-child {
+  border-bottom: none;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .item-mark {
+  width: 15px;
+  height: 58px;
+  background: white;
+  flex-shrink: 0;
+  border: none;
+  margin-top: 1px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .item-mark.invite {
+  background: #FD5631;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .item-content {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 12px;
+  margin-left: 22px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .item-content p.message {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333333;
+  margin: 0;
+  line-height: 1.2;
+  font-family: "SpoqaHanSansNeo-Regular";
+  letter-spacing: 1px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .item-content span.datetime {
+  font-size: 12px;
+  color: #555555;
+  margin-top: 2px;
+  font-weight: normal;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .btn-action-wrap {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-top: 15px;
+  margin-right: 6px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .btn-action-wrap .btn-delete,
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .btn-action-wrap .btn-accept,
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .notification-dropdown .notification-list .notification-item .btn-action-wrap .btn-reject {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 430;
+  color: #555555;
+  margin-left: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ###### Calendar-Page #######*/
+.calendar-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.calendar-container .calendar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1180px;
+  height: 100vh;
+  background: red;
+}
+.calendar-container .calendar-inner span {
+  color: white;
+  font-size: 300px;
+}
+
+/* ###### Party-Page #######*/
+.party-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.party-container .party-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1180px;
+  height: 100vh;
+  background: red;
+}
+.party-container .party-inner span {
+  color: white;
+  font-size: 250px;
+}
+
+/* ###### Notice-Page #######*/
+.notice-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.notice-container .notice-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1180px;
+  height: 100vh;
+  background: red;
+}
+.notice-container .notice-inner span {
+  color: white;
+  font-size: 250px;
+}
+
+/* ###### Admin-Page #######*/
+.admin-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-container .admin-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1180px;
+  height: 100vh;
+  background: red;
+}
+.admin-container .admin-inner span {
+  color: white;
+  font-size: 250px;
 }
 
 /*# sourceMappingURL=style.css.map */

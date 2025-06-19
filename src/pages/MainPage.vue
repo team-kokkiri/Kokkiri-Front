@@ -11,7 +11,9 @@ import MainHeader from '@/components/MainHeader.vue'
     <div class="mainpage-body">
       <div class="mainbody-inner">
         <div class="mainbody-left"></div>
-        <div class="mainbody-center"></div>
+        <div class="mainbody-center">
+          <router-view />
+        </div>
         <div class="mainbody-right"></div>
       </div>
     </div>
