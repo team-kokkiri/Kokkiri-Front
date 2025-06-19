@@ -30,6 +30,14 @@ const routes = [
         path: 'admin',
         component: () => import('@/pages/AdminPage.vue')
       },
+      {
+        path: 'mypage',
+        component: () => import('@/pages/MyPage.vue')
+      },
+      {
+        path: 'chat',
+        component: () => import('@/pages/ChatPage.vue')
+      },
     ]
   },
   // 로그인/회원가입 등은 계속 루트에

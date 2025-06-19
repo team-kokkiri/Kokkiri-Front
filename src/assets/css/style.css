@@ -1994,4 +1994,42 @@ body {
   font-size: 250px;
 }
 
+/* ###### My-Page #######*/
+.mypage-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mypage-container .mypage-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1180px;
+  height: 100vh;
+  background: red;
+}
+.mypage-container .mypage-inner span {
+  color: white;
+  font-size: 250px;
+}
+
+/* ###### Chat-Page #######*/
+.chat-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-container .chat-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1180px;
+  height: 100vh;
+  background: red;
+}
+.chat-container .chat-inner span {
+  color: white;
+  font-size: 250px;
+}
+
 /*# sourceMappingURL=style.css.map */

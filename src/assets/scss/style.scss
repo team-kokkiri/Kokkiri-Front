@@ -2151,3 +2151,41 @@ body {
     }
   }
 }
+/* ###### My-Page #######*/
+.mypage-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .mypage-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1180px;
+    height: 100vh;
+    background: red;
+
+    span {
+      color: white;
+      font-size: 250px;
+    }
+  }
+}
+/* ###### Chat-Page #######*/
+.chat-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .chat-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1180px;
+    height: 100vh;
+    background: red;
+
+    span {
+      color: white;
+      font-size: 250px;
+    }
+  }
+}
