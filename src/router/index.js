@@ -6,6 +6,7 @@ import EmailVerify from "@/pages/EmailVerify.vue";
 import FindPassword from "@/pages/FindPassword.vue";
 import MainPage from "@/pages/MainPage.vue";
 import ResetPassword from "@/pages/ResetPassword.vue";
+import TeamCodeVerify from "@/pages/TeamCodeVerify.vue";
 
 const routes = [
   {
@@ -42,6 +43,11 @@ const routes = [
     path: '/reset-password',
     name: 'ResetPassword',
     component: ResetPassword
+  },
+  {
+    path: '/teamcode-verify',
+    name: 'TeamCodeVerify',
+    component: TeamCodeVerify
   },
 ]
 

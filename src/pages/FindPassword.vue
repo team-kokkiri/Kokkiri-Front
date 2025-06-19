@@ -45,6 +45,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
+import { toast } from 'vue3-toastify';
 
 const email = ref('');
 const emailError = ref('');
@@ -66,9 +67,10 @@ const onFindPassword = () => {
   }
 
   if (emailError.value) return;
-
-  // 성공 시 라우팅 (이메일 인증 등)
-  router.push('/email-verify');
+  toast.success('이메일로 재설정 코드가 전송되었습니다.');
+  setTimeout(() => {
+    router.push('/email-verify');
+  }, 1500);
 };
 </script>
 

@@ -48,6 +48,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { toast } from 'vue3-toastify';
 
 const code = ref('');
 const error = ref('');
@@ -83,9 +84,11 @@ const onVerify = async () => {
   }
 
   // 인증 성공 시 알림메세지
-  alert('인증이 완료되었습니다.');
+  toast.success('인증이 완료되었습니다.');
   // 성공 시 다음 페이지 이동
-  router.push('/login');
+  setTimeout(() => {
+    router.push('/login');
+  }, 1500);
 };
 </script>
 
