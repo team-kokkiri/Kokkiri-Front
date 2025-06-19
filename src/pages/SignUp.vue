@@ -101,7 +101,7 @@
 
 <script setup>
 /*####### 임포트 #######*/
-import {ref, onMounted, onUnmounted, computed, watch} from 'vue';
+import {ref, onMounted, onUnmounted, computed} from 'vue';
 import {useRouter} from 'vue-router';
 
 /*####### 변수들 #######*/
