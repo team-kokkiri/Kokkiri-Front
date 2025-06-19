@@ -1155,7 +1155,7 @@ body {
 }
 .email-verification-container .email-code-form .email-code-input-wrap input[type=text]::placeholder {
   color: #999999;
-  font-size: 18px;
+  font-size: 16px;
 }
 .email-verification-container .email-code-form .email-code-input-wrap input[type=text]:focus {
   border: 2px solid #2196F3;
@@ -1175,11 +1175,11 @@ body {
 .email-verification-container .email-code-form .email-code-error .bi {
   font-size: 14px;
   margin-right: 5px;
-  color: #BDBDBD;
+  color: #ED2040;
 }
 .email-verification-container .email-code-form .email-code-error span {
   line-height: 1.5;
-  color: #BDBDBD;
+  color: #ED2040;
 }
 .email-verification-container .email-code-form .email-submit-box {
   width: 100%;
