@@ -18,7 +18,15 @@
       <form class="signup-form-box" @submit.prevent="onSignup">
         <div class="form-group email-group">
           <label for="signup-email">이메일</label>
-          <input type="email" id="signup-email" placeholder="example@email.com" v-model="email"/>
+          <input type="text" id="signup-email"
+                 placeholder="example@email.com"
+                 v-model="email"
+                 :class="{ error: !!emailError }"
+          />
+          <div class="email-code-error" v-if="emailError">
+            <i class="bi bi-x-lg"></i>
+            <span>{{ emailError }}</span>
+          </div>
         </div>
 
         <div class="form-group password-group">
@@ -26,7 +34,7 @@
           <input
               type="password"
               id="signup-password"
-              placeholder="pass0603#"
+              placeholder="example001"
               v-model="password"
           />
           <div class="input-msg-list">
@@ -56,7 +64,13 @@
 
         <div class="form-group password-check-group">
           <label for="signup-password-check">비밀번호 확인</label>
-          <input type="password" id="signup-password-check" placeholder="pass0603#" v-model="passwordCheck"/>
+          <input
+              type="password"
+              id="signup-password-check"
+              placeholder="example001"
+              v-model="passwordCheck"
+              :class="{ error: !!passwordCheckError }"
+          />
           <div class="input-msg-list">
             <div v-if="passwordCheckError" class="input-msg">
               <i class="bi bi-x-lg"></i>
@@ -80,7 +94,6 @@
           </a>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -88,7 +101,7 @@
 
 <script setup>
 /*####### 임포트 #######*/
-import {ref, onMounted, onUnmounted, computed} from 'vue';
+import {ref, onMounted, onUnmounted, computed, watch} from 'vue';
 import {useRouter} from 'vue-router';
 
 /*####### 변수들 #######*/
@@ -98,61 +111,74 @@ const passwordCheck = ref('');
 const router = useRouter();
 
 /* 에러 메시지 변수 */
+const emailError = ref('');
 const passwordCheckError = ref('');
+
 
 /*####### 회원가입 데이터 전송 #######*/
 const onSignup = () => {
-  // 값 확인
+  // 콘솔 체크
   console.log('이메일:', email.value);
   console.log('비밀번호:', password.value);
   console.log('비밀번호확인:', passwordCheck.value);
 
-  // 모든 에러 메시지 초기화
+  // 에러 변수 초기화
+  emailError.value = '';
   passwordCheckError.value = '';
 
-  // 입력값 비었는지 검사
+  // 이메일 검사
+  if (!email.value) {
+    emailError.value = '이메일을 입력해주세요.';
+  } else if (!/^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/.test(email.value)) {
+    emailError.value = '이메일 형식이 올바르지 않습니다.';
+  }
+
+  // 비밀번호 확인 비었는지
   if (!passwordCheck.value) {
     passwordCheckError.value = '비밀번호 확인을 입력해주세요.';
   }
 
-  // 에러가 있으면 중단
-  if (passwordCheckError.value) {
-    return;
-  }
-
-  // 비밀번호 확인 검사
-  if (password.value !== passwordCheck.value) {
+  // 비밀번호와 비밀번호 확인값이 다를 때
+  else if (password.value !== passwordCheck.value) {
     passwordCheckError.value = '비밀번호가 일치하지 않습니다';
+  }
+
+      // 비밀번호 조건 3가지 체크(길이 등)
+  // **비밀번호가 비었을 때도 바로 조건문에서 잡도록 추가**
+  else {
+    let types = 0;
+    if (/[A-Za-z]/.test(password.value)) types++;
+    if (/[0-9]/.test(password.value)) types++;
+    if (/[^A-Za-z0-9]/.test(password.value)) types++;
+    const isPasswordMixed = types >= 2;
+
+    const isPasswordLengthValid =
+        password.value.length >= 8 &&
+        password.value.length <= 32 &&
+        !/\s/.test(password.value);
+
+    const isPasswordNoRepeat =
+        password.value.length >= 8
+            ? !/(.)\1\1/.test(password.value)
+            : false;
+
+    if (!password.value) {
+      passwordCheckError.value = '비밀번호를 입력해주세요.';
+    } else if (!isPasswordMixed || !isPasswordLengthValid || !isPasswordNoRepeat) {
+      passwordCheckError.value = '비밀번호 조건을 만족시켜 주세요.';
+    }
+  }
+
+  // 에러가 하나라도 있으면 함수 종료
+  if (emailError.value || passwordCheckError.value) {
     return;
   }
-  // === 비밀번호 정규표현식 조건 3개 ===
-  // 1. 영문/숫자/특수문자 중 2가지 이상 포함
-  let types = 0;
-  if (/[A-Za-z]/.test(password.value)) types++;
-  if (/[0-9]/.test(password.value)) types++;
-  if (/[^A-Za-z0-9]/.test(password.value)) types++;
-  const isPasswordMixed = types >= 2;
 
-  // 2. 8자 이상 32자 이하, 공백 없음
-  const isPasswordLengthValid = password.value.length >= 8 &&
-      password.value.length <= 32 &&
-      !/\s/.test(password.value);
-
-  // 3. 연속 3자 이상 동일 문자/숫자 없음 (8자 이상일 때만 체크)
-  const isPasswordNoRepeat =
-      password.value.length >= 8
-          ? !/(.)\1\1/.test(password.value)
-          : false;
-
-  // 3개 중 하나라도 미달이면 진행 막기
-  if (!isPasswordMixed || !isPasswordLengthValid || !isPasswordNoRepeat) {
-    alert('비밀번호 조건을 만족시켜 주세요.');
-    return;
-  }
-  // 필요 시 이메일, 비밀번호 유효성 검사 후 라우터 이동
-  // 현재 페이지 데이터가 다음 페이지로 전달되진 않음 !
+  // 성공 시
   router.push('/email-verify');
 };
+
+
 
 /*##### 비밀번호 정규표현식 (css효과) ######*/
 

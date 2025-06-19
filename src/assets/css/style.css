@@ -747,11 +747,28 @@ body {
   flex-direction: column;
   gap: 4px;
 }
+.signup-container .signup-inner .signup-form-box .form-group .email-code-error {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin-left: 4px;
+  margin-top: 4px;
+  font-weight: 430;
+}
+.signup-container .signup-inner .signup-form-box .form-group .email-code-error .bi {
+  font-size: 14px;
+  margin-right: 5px;
+  color: #ED2040;
+}
+.signup-container .signup-inner .signup-form-box .form-group .email-code-error span {
+  line-height: 1.5;
+  color: #ED2040;
+}
 .signup-container .signup-inner .signup-form-box .form-group label {
   font-size: 16px;
   font-weight: 500;
 }
-.signup-container .signup-inner .signup-form-box .form-group input[type=email],
+.signup-container .signup-inner .signup-form-box .form-group input[type=text],
 .signup-container .signup-inner .signup-form-box .form-group input[type=password] {
   width: 100%;
   height: 50px;
@@ -762,19 +779,36 @@ body {
   transition: border-color 0.2s;
   outline: none;
 }
-.signup-container .signup-inner .signup-form-box .form-group input[type=email]:focus,
+.signup-container .signup-inner .signup-form-box .form-group input[type=text]:focus,
 .signup-container .signup-inner .signup-form-box .form-group input[type=password]:focus {
   border: 2px solid #2196F3;
   background: white;
 }
-.signup-container .signup-inner .signup-form-box .form-group input[type=email]:focus::placeholder,
+.signup-container .signup-inner .signup-form-box .form-group input[type=text]:focus::placeholder,
 .signup-container .signup-inner .signup-form-box .form-group input[type=password]:focus::placeholder {
   color: white;
 }
-.signup-container .signup-inner .signup-form-box .form-group input[type=email]::placeholder,
+.signup-container .signup-inner .signup-form-box .form-group input[type=text]::placeholder,
 .signup-container .signup-inner .signup-form-box .form-group input[type=password]::placeholder {
   color: #999999;
   font-size: 18px;
+}
+.signup-container .signup-inner .signup-form-box .form-group input[type=text].error,
+.signup-container .signup-inner .signup-form-box .form-group input[type=password].error {
+  border: 1px solid #ED2040;
+  color: #ED2040;
+}
+.signup-container .signup-inner .signup-form-box .form-group input[type=text].error::placeholder,
+.signup-container .signup-inner .signup-form-box .form-group input[type=password].error::placeholder {
+  color: #ED2040;
+}
+.signup-container .signup-inner .signup-form-box .form-group input[type=text].error:focus,
+.signup-container .signup-inner .signup-form-box .form-group input[type=password].error:focus {
+  border: 2px solid #ED2040;
+}
+.signup-container .signup-inner .signup-form-box .form-group input[type=text].error:focus::placeholder,
+.signup-container .signup-inner .signup-form-box .form-group input[type=password].error:focus::placeholder {
+  color: white;
 }
 .signup-container .signup-inner .signup-form-box .form-group .input-msg-list {
   min-height: 20px;
@@ -1162,6 +1196,19 @@ body {
   background: white;
 }
 .email-verification-container .email-code-form .email-code-input-wrap input[type=text]:focus::placeholder {
+  color: white;
+}
+.email-verification-container .email-code-form .email-code-input-wrap input[type=text].error {
+  border: 1px solid #ED2040;
+  color: #ED2040;
+}
+.email-verification-container .email-code-form .email-code-input-wrap input[type=text].error::placeholder {
+  color: #ED2040;
+}
+.email-verification-container .email-code-form .email-code-input-wrap input[type=text].error:focus {
+  border: 2px solid #ED2040;
+}
+.email-verification-container .email-code-form .email-code-input-wrap input[type=text].error:focus::placeholder {
   color: white;
 }
 .email-verification-container .email-code-form .email-code-error {

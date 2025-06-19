@@ -30,6 +30,7 @@
               v-model="code"
               placeholder="인증코드 입력"
               maxlength="10"
+              :class="{ error: !!error }"
           />
         </div>
         <div class="email-code-error" v-if="error">
