@@ -1770,5 +1770,135 @@ body {
     }
   }
 }
+/* ###### MainPage-Header #######*/
+.mainpage-header {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  background: #fff; // 필요시 배경색 조절
 
+  .header-inner {
+    width: 1180px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border: 1px solid black;
+
+    .header-row {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        img {
+          width: 246px;
+          height: 80px; // 로고 이미지 크기 조절
+        }
+      }
+
+      .header-center {
+        display: flex;
+        gap: 42px;
+        margin-right: 90px;
+
+        .gnb-menu-item {
+          position: relative;
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          height: 80px;
+
+          .menu-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: $dark-black;
+            transition: color 0.2s;
+          }
+
+          &.active {
+            border-bottom: 5px solid $main-color;
+            padding-top: 10px;
+          }
+          &:hover .menu-text {
+            color: $main-color;
+          }
+          &.active .menu-text {
+            color: $main-color // 활성화된 메뉴 글씨 색상
+          }
+        }
+      }
+
+      .header-right {
+        display: flex;
+        gap: 24px;
+
+        .util-icon-item {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid $light-black;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+
+          .icon-badge-wrap {
+            display: flex;
+            align-items: center;
+            position: relative;
+            font-size: 24px;
+
+            i {
+              font-size: 24px;
+              transition: color 0.2s;
+            }
+            .bi.bi-bell-fill {
+              width: 20px;
+              height: 20px;
+              fill: white;
+              stroke: $dark-black;
+              stroke-width: 1.5px;
+            }
+            .bi.bi-chat-dots-fill {
+              width: 20px;
+              height: 20px;
+              fill: $dim-black;
+            }
+            .bi.bi-person-fill {
+              width: 24px;
+              height: 24px;
+              fill: $dim-black;
+            }
+
+            em {
+              width: 20px;
+              height: 20px;
+              position: absolute;
+              top: -15px;
+              right: -10px;
+              background: $orangered;
+              color: white;
+              font-size: 12px;
+              font-weight: normal;
+              border-radius: 30px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+          }
+
+          &:hover i {
+            color: #006be5;
+          }
+        }
+      }
+    }
+  }
+}
 

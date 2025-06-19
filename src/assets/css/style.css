@@ -1658,4 +1658,123 @@ body {
   opacity: 0.85;
 }
 
+/* ###### MainPage-Header #######*/
+.mainpage-header {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  background: #fff;
+}
+.mainpage-header .header-inner {
+  width: 1180px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border: 1px solid black;
+}
+.mainpage-header .header-inner .header-row {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mainpage-header .header-inner .header-row .header-left {
+  display: flex;
+  align-items: center;
+}
+.mainpage-header .header-inner .header-row .header-left img {
+  width: 246px;
+  height: 80px;
+}
+.mainpage-header .header-inner .header-row .header-center {
+  display: flex;
+  gap: 42px;
+  margin-right: 90px;
+}
+.mainpage-header .header-inner .header-row .header-center .gnb-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  height: 80px;
+}
+.mainpage-header .header-inner .header-row .header-center .gnb-menu-item .menu-text {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333333;
+  transition: color 0.2s;
+}
+.mainpage-header .header-inner .header-row .header-center .gnb-menu-item.active {
+  border-bottom: 5px solid #2196F3;
+  padding-top: 10px;
+}
+.mainpage-header .header-inner .header-row .header-center .gnb-menu-item:hover .menu-text {
+  color: #2196F3;
+}
+.mainpage-header .header-inner .header-row .header-center .gnb-menu-item.active .menu-text {
+  color: #2196F3;
+}
+.mainpage-header .header-inner .header-row .header-right {
+  display: flex;
+  gap: 24px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #999999;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap {
+  display: flex;
+  align-items: center;
+  position: relative;
+  font-size: 24px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap i {
+  font-size: 24px;
+  transition: color 0.2s;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap .bi.bi-bell-fill {
+  width: 20px;
+  height: 20px;
+  fill: white;
+  stroke: #333333;
+  stroke-width: 1.5px;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap .bi.bi-chat-dots-fill {
+  width: 20px;
+  height: 20px;
+  fill: #555555;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap .bi.bi-person-fill {
+  width: 24px;
+  height: 24px;
+  fill: #555555;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item .icon-badge-wrap em {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  top: -15px;
+  right: -10px;
+  background: #FD5631;
+  color: white;
+  font-size: 12px;
+  font-weight: normal;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mainpage-header .header-inner .header-row .header-right .util-icon-item:hover i {
+  color: #006be5;
+}
+
 /*# sourceMappingURL=style.css.map */
