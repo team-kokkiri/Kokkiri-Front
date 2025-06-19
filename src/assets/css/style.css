@@ -1248,4 +1248,134 @@ body {
   opacity: 0.85;
 }
 
+/* ###### FindPassword-Page #######*/
+.findpw-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.findpw-container .findpw-inner {
+  width: 360px;
+  height: 546px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 150px;
+}
+.findpw-container .findpw-logo-box {
+  margin-top: 24px;
+  margin-bottom: 14px;
+}
+.findpw-container .findpw-logo-box img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.findpw-container .findpw-title-box {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.findpw-container .findpw-title-box .findpw-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 10px;
+}
+.findpw-container .findpw-title-box .findpw-desc {
+  font-size: 16px;
+  color: #333333;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.findpw-container .findpw-title-box .findpw-desc span {
+  display: block;
+}
+.findpw-container .findpw-form-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.findpw-container .findpw-form-box .form-group {
+  width: 100%;
+}
+.findpw-container .findpw-form-box .form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  border: 1px solid #BDBDBD;
+  border-radius: 10px;
+  font-size: 18px;
+  transition: border-color 0.2s;
+  outline: none;
+  margin-bottom: 6px;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input::placeholder {
+  color: #999999;
+  font-size: 16px;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input:focus {
+  border: 2px solid #2196F3;
+  background: white;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input:focus::placeholder {
+  color: white;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input.error {
+  border: 1px solid #ED2040;
+  color: #ED2040;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input.error::placeholder {
+  color: #ED2040;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input.error:focus {
+  border: 2px solid #ED2040;
+}
+.findpw-container .findpw-form-box .form-group .findpw-input.error:focus::placeholder {
+  color: white;
+}
+.findpw-container .findpw-form-box .form-group .input-msg-list {
+  margin-top: 6px;
+  margin-bottom: 18px;
+}
+.findpw-container .findpw-form-box .form-group .input-msg-list .input-msg {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 430;
+}
+.findpw-container .findpw-form-box .form-group .input-msg-list .input-msg .bi {
+  font-size: 14px;
+  margin-right: 5px;
+  color: #ED2040;
+}
+.findpw-container .findpw-form-box .form-group .input-msg-list .input-msg span {
+  line-height: 1.5;
+  color: #ED2040;
+}
+.findpw-container .findpw-form-box .btn-findpw {
+  width: 100%;
+  height: 50px;
+  border-radius: 15px;
+  background: #2196F3;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 6px;
+}
+.findpw-container .findpw-form-box .btn-findpw:hover {
+  opacity: 0.85;
+}
+
 /*# sourceMappingURL=style.css.map */
