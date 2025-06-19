@@ -1461,3 +1461,173 @@ body {
     }
   }
 }
+/* ###### ResetPassword-Page #######*/
+.resetpw-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .resetpw-inner {
+    width: 360px;
+    height: 546px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 150px;
+  }
+
+  .resetpw-logo-box {
+    margin-top: 24px;
+    margin-bottom: 14px;
+    img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+    }
+  }
+
+  .resetpw-title-box {
+    text-align: center;
+    margin-bottom: 24px;
+    .resetpw-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: $dark-black;
+      margin-bottom: 10px;
+    }
+  }
+
+  .resetpw-form-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .form-group {
+      width: 100%;
+      margin-bottom: 28px;
+
+      label {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        color: $dark-black;
+        margin-bottom: 8px;
+        padding-left: 4px;
+      }
+
+      input[type="password"] {
+        width: 100%;
+        height: 50px;
+        padding: 0 14px;
+        border: 1px solid $dark-gray;
+        border-radius: 10px;
+        font-size: 18px;
+        transition: border-color 0.2s;
+        outline: none;
+        margin-bottom: 6px;
+        &::placeholder {
+          color: $light-black;
+          font-size: 16px;
+        }
+        &:focus {
+          border: 2px solid $main-color;
+          background: white;
+        }
+        &:focus::placeholder {
+          color: white;
+        }
+        &.error {
+          border: 1px solid $crimson;
+          color: $crimson;
+        }
+        &.error::placeholder {
+          color: $crimson;
+        }
+        &.error:focus {
+          border: 2px solid $crimson;
+        }
+        &.error:focus::placeholder {
+          color: white;
+        }
+      }
+
+      // 조건 리스트(체크)
+      &.password-group {
+        .input-msg-list {
+          min-height: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+
+          .input-msg {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-left: 2px;
+            font-weight: 430;
+
+            .bi {
+              font-size: 14px;
+              margin-right: 5px;
+              color: $dark-gray;
+              transition: color 0.2s;
+            }
+            span {
+              line-height: 1.5;
+              color: $dark-gray;
+              transition: color 0.2s;
+            }
+            .bi.active,
+            span.active {
+              color: $forestgreen;
+            }
+          }
+        }
+      }
+
+      // 비밀번호 확인 에러
+      &.password-check-group {
+        .input-msg-list {
+          .input-msg {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-left: 2px;
+            font-weight: 430;
+
+            .bi {
+              font-size: 14px;
+              margin-right: 5px;
+              color: $crimson;
+            }
+            .password-check-error,
+            span {
+              line-height: 1.5;
+              color: $crimson;
+            }
+          }
+        }
+      }
+    }
+
+    .btn-resetpw {
+      width: 100%;
+      height: 50px;
+      border-radius: 15px;
+      background: $main-color;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0;
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+  }
+}
+
+

@@ -5,6 +5,7 @@ import LogIn from "@/pages/LogIn.vue";
 import EmailVerify from "@/pages/EmailVerify.vue";
 import FindPassword from "@/pages/FindPassword.vue";
 import MainPage from "@/pages/MainPage.vue";
+import ResetPassword from "@/pages/ResetPassword.vue";
 
 const routes = [
   {
@@ -36,6 +37,11 @@ const routes = [
     path: '/main-page',
     name: 'MainPage',
     component: MainPage
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: ResetPassword
   },
 ]
 

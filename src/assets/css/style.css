@@ -1378,4 +1378,152 @@ body {
   opacity: 0.85;
 }
 
+/* ###### ResetPassword-Page #######*/
+.resetpw-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.resetpw-container .resetpw-inner {
+  width: 360px;
+  height: 546px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 150px;
+}
+.resetpw-container .resetpw-logo-box {
+  margin-top: 24px;
+  margin-bottom: 14px;
+}
+.resetpw-container .resetpw-logo-box img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.resetpw-container .resetpw-title-box {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.resetpw-container .resetpw-title-box .resetpw-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 10px;
+}
+.resetpw-container .resetpw-form-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.resetpw-container .resetpw-form-box .form-group {
+  width: 100%;
+  margin-bottom: 28px;
+}
+.resetpw-container .resetpw-form-box .form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password] {
+  width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  border: 1px solid #BDBDBD;
+  border-radius: 10px;
+  font-size: 18px;
+  transition: border-color 0.2s;
+  outline: none;
+  margin-bottom: 6px;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password]::placeholder {
+  color: #999999;
+  font-size: 16px;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password]:focus {
+  border: 2px solid #2196F3;
+  background: white;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password]:focus::placeholder {
+  color: white;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password].error {
+  border: 1px solid #ED2040;
+  color: #ED2040;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password].error::placeholder {
+  color: #ED2040;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password].error:focus {
+  border: 2px solid #ED2040;
+}
+.resetpw-container .resetpw-form-box .form-group input[type=password].error:focus::placeholder {
+  color: white;
+}
+.resetpw-container .resetpw-form-box .form-group.password-group .input-msg-list {
+  min-height: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.resetpw-container .resetpw-form-box .form-group.password-group .input-msg-list .input-msg {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin-left: 2px;
+  font-weight: 430;
+}
+.resetpw-container .resetpw-form-box .form-group.password-group .input-msg-list .input-msg .bi {
+  font-size: 14px;
+  margin-right: 5px;
+  color: #BDBDBD;
+  transition: color 0.2s;
+}
+.resetpw-container .resetpw-form-box .form-group.password-group .input-msg-list .input-msg span {
+  line-height: 1.5;
+  color: #BDBDBD;
+  transition: color 0.2s;
+}
+.resetpw-container .resetpw-form-box .form-group.password-group .input-msg-list .input-msg .bi.active,
+.resetpw-container .resetpw-form-box .form-group.password-group .input-msg-list .input-msg span.active {
+  color: #2ECC71;
+}
+.resetpw-container .resetpw-form-box .form-group.password-check-group .input-msg-list .input-msg {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin-left: 2px;
+  font-weight: 430;
+}
+.resetpw-container .resetpw-form-box .form-group.password-check-group .input-msg-list .input-msg .bi {
+  font-size: 14px;
+  margin-right: 5px;
+  color: #ED2040;
+}
+.resetpw-container .resetpw-form-box .form-group.password-check-group .input-msg-list .input-msg .password-check-error,
+.resetpw-container .resetpw-form-box .form-group.password-check-group .input-msg-list .input-msg span {
+  line-height: 1.5;
+  color: #ED2040;
+}
+.resetpw-container .resetpw-form-box .btn-resetpw {
+  width: 100%;
+  height: 50px;
+  border-radius: 15px;
+  background: #2196F3;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0;
+}
+.resetpw-container .resetpw-form-box .btn-resetpw:hover {
+  opacity: 0.85;
+}
+
 /*# sourceMappingURL=style.css.map */
