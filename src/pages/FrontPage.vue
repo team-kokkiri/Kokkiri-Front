@@ -9,7 +9,7 @@
             </div>
             <div class="side-login-box">
               <router-link class="btn-login" to="/login">로그인</router-link>
-              <router-link class="btn-signup" to="/signup">KOSA 회원가입</router-link>
+              <router-link class="btn-signup" to="/teamcode-verify">KOSA 회원가입</router-link>
               <router-link class="find-account" to="/find-password">비밀번호 찾기</router-link>
               <hr />
             </div>
