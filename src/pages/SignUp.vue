@@ -125,13 +125,37 @@ const onSignup = () => {
     passwordCheckError.value = '비밀번호가 일치하지 않습니다';
     return;
   }
+  // === 비밀번호 정규표현식 조건 3개 ===
+  // 1. 영문/숫자/특수문자 중 2가지 이상 포함
+  let types = 0;
+  if (/[A-Za-z]/.test(password.value)) types++;
+  if (/[0-9]/.test(password.value)) types++;
+  if (/[^A-Za-z0-9]/.test(password.value)) types++;
+  const isPasswordMixed = types >= 2;
 
+  // 2. 8자 이상 32자 이하, 공백 없음
+  const isPasswordLengthValid = password.value.length >= 8 &&
+      password.value.length <= 32 &&
+      !/\s/.test(password.value);
+
+  // 3. 연속 3자 이상 동일 문자/숫자 없음 (8자 이상일 때만 체크)
+  const isPasswordNoRepeat =
+      password.value.length >= 8
+          ? !/(.)\1\1/.test(password.value)
+          : false;
+
+  // 3개 중 하나라도 미달이면 진행 막기
+  if (!isPasswordMixed || !isPasswordLengthValid || !isPasswordNoRepeat) {
+    alert('비밀번호 조건을 만족시켜 주세요.');
+    return;
+  }
   // 필요 시 이메일, 비밀번호 유효성 검사 후 라우터 이동
   // 현재 페이지 데이터가 다음 페이지로 전달되진 않음 !
   router.push('/email-verify');
 };
 
-/*##### 비밀번호 정규표현식 ######*/
+/*##### 비밀번호 정규표현식 (css효과) ######*/
+
 // 1. 영문/숫자/특수문자 중 2가지 이상 포함
 const isPasswordMixed = computed(() => {
   const pwd = password.value;
@@ -152,7 +176,7 @@ const isPasswordLengthValid = computed(() => {
 const isPasswordNoRepeat = computed(() => {
   const pwd = password.value;
   if (pwd.length < 3) return false; // 8자 미만이면 항상 false
-  return !/(.)\1\1/.test(pwd); // 8자 이상부터만 검사
+  return !/(.)\1\1/.test(pwd); // 3자 이상부터만 검사
 });
 
 /*##### 회원가입 텍스트 애니메이션 ######*/
