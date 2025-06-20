@@ -1,12 +1,7 @@
-<script setup>
-import MainHeader from '@/components/MainHeader.vue'
-import MainNav from "@/components/MainNav.vue";
-</script>
-
 <template>
   <div class="container mainpage">
     <MainHeader />
-    <MainNav />
+    <MainNav v-if="route.meta.showNav" />
     <div class="mainpage-body">
       <div class="mainbody-inner">
         <div class="mainbody-left"></div>
@@ -22,6 +17,13 @@ import MainNav from "@/components/MainNav.vue";
   </div>
 
 </template>
+
+<script setup>
+import MainHeader from '@/components/MainHeader.vue'
+import MainNav from "@/components/MainNav.vue";
+import { useRoute } from 'vue-router'
+const route = useRoute()
+</script>
 
 <style scoped>
 

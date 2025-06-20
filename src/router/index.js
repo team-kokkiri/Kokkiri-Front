@@ -13,30 +13,37 @@ const routes = [
   {
     path: '/main-page',
     component: MainPage,
+    meta: { showNav: true },
     children: [
       {
         path: 'calendar',
-        component: CalendarPage
+        component: CalendarPage,
+        meta: { showNav: false },
       },
       {
         path: 'party',
-        component: () => import('@/pages/PartyPage.vue')
+        component: () => import('@/pages/PartyPage.vue'),
+        meta: { showNav: false },
       },
       {
         path: 'notice',
-        component: () => import('@/pages/NoticePage.vue')
+        component: () => import('@/pages/NoticePage.vue'),
+        meta: { showNav: false },
       },
       {
         path: 'admin',
-        component: () => import('@/pages/AdminPage.vue')
+        component: () => import('@/pages/AdminPage.vue'),
+        meta: { showNav: false },
       },
       {
         path: 'mypage',
-        component: () => import('@/pages/MyPage.vue')
+        component: () => import('@/pages/MyPage.vue'),
+        meta: { showNav: false },
       },
       {
         path: 'chat',
-        component: () => import('@/pages/ChatPage.vue')
+        component: () => import('@/pages/ChatPage.vue'),
+        meta: { showNav: false },
       },
       {
         path: 'free-board',

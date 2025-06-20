@@ -1939,6 +1939,7 @@ body {
   margin-left: 550px;
 }
 .mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item {
+  height: 73px;
   background: none;
   border: none;
   outline: none;
