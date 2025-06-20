@@ -72,13 +72,17 @@
 
 <script setup>
 import {ref, computed, watch} from 'vue';
-import {useRouter} from 'vue-router';
+import {useRouter, useRoute} from 'vue-router';
+import axios from "axios";
 
 // 변수
 const password = ref('');
 const passwordCheck = ref('');
 const passwordCheckError = ref('');
 const router = useRouter();
+const route = useRoute();
+
+const email = route.query.email || '';
 
 // 비밀번호/비밀번호 확인 입력이 바뀔 때 에러 즉시 제거
 watch([password, passwordCheck], () => {
@@ -109,7 +113,7 @@ const isPasswordNoRepeat = computed(() => {
 });
 
 // 비밀번호 재설정(또는 변경) 함수 예시
-const onResetPassword = () => {
+const onResetPassword = async () => {
   passwordCheckError.value = '';
 
   // 비어있음 체크
@@ -132,12 +136,22 @@ const onResetPassword = () => {
     return;
   }
 
-  // 성공 시 알림
-  alert('비밀번호가 변경되었습니다.');
-  // 성공 처리
-  router.push('/login'); // 또는 원하는 라우트로 이동
-};
+  try {
+    await axios.post('http://localhost:9090/api/members/reset', {
+      email: email,
+      newPassword: password.value
+    });
 
+    alert('비밀번호가 성공적으로 변경되었습니다.');
+    router.push('/login');
+  } catch (err) {
+    if (err.response && err.response.data) {
+      passwordCheckError.value = err.response.data;
+    } else {
+      passwordCheckError.value = '비밀번호 변경 중 오류가 발생했습니다.';
+    }
+  }
+};
 </script>
 <style scoped>
 
