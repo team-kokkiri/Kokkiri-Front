@@ -1,0 +1,22 @@
+export const companyList = [
+    { name: '주식회사 시프트 바이오', url: 'https://shiftbio.net' },
+    { name: 'HR인사노무닷컴', url: 'https://www.hrledu.com/' },
+    { name: '(주)페르소나에이아이', url: 'https://www.bottalks.co.kr/' },
+    { name: '주식회사 비전와이드', url: 'https://visionwide.kr/' },
+    { name: '주식회사 모레', url: 'https://moreh.io/?ref=thevc' },
+    { name: '주식회사 시원스포유', url: 'https://sysforu.co.kr/' },
+    { name: '주식회사 비이랩', url: 'https://www.belab.co.kr/' },
+    { name: '주식회사 청명씨앤아이', url: 'https://cmcni.com/' },
+    { name: '주식회사 정우마루', url: 'https://realdataecho.mycafe24.com/' },
+    { name: '(주)직스테크놀로지', url: 'https://www.zyx.co.kr/' },
+    { name: '(주)파워인포텍', url: 'https://itkorea.net/' },
+    { name: '주식회사 유성', url: 'http://www.iyusung.co.kr/html/main.php' },
+    { name: '엑스투이(주)', url: 'https://www.x2e.co.kr/' },
+    { name: '주식회사 클러쉬', url: 'https://www.kb-sys.co.kr/ko/index' },
+    { name: '(주)비즈허브', url: 'https://bizhub.co.kr/' },
+    { name: '다올티에스 주식회사', url: 'https://www.daolts.co.kr/' },
+    { name: '(주)에이아이로솔루션', url: 'http://airosolution.com/' },
+    { name: '주식회사 에버온', url: 'https://www.everon.co.kr/' },
+    { name: '(주)이엑스솔루션', url: 'https://exss.co.kr/about' },
+    { name: '어벤투스모빌리티', url: 'https://www.aventusm.com/aventus/index.html' }
+]
