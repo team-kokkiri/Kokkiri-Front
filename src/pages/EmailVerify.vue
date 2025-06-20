@@ -46,13 +46,19 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import axios from 'axios';
 import { toast } from 'vue3-toastify';
+
+import { watch } from 'vue';
 
 const code = ref('');
 const error = ref('');
 const router = useRouter();
+const route = useRoute();
+const email = route.query.email || '';
+const type = route.query.type || "signup";
 
 // 코드 입력 시 에러 자동 제거
 watch(code, () => {
@@ -60,7 +66,7 @@ watch(code, () => {
 });
 
 // 서버에서 온 인증코드가 "123456"이라고 가정
-const correctCode = "123456";
+//const correctCode = "123456";
 
 const onVerify = async () => {
   error.value = '';
@@ -77,18 +83,35 @@ const onVerify = async () => {
     return;
   }
 
-  // 예시: 코드가 다르면 에러
-  if (code.value !== correctCode) {
-    error.value = '인증코드가 올바르지 않습니다';
-    return;
-  }
+  try {
+    // 서버에 인증 요청 보내기
+    await axios.post('http://localhost:9090/api/email/verify', null, {
+      params: {
+        email: email,
+        code: code.value,
+        type: type
+      }
+    });
 
-  // 인증 성공 시 알림메세지
-  toast.success('인증이 완료되었습니다.');
-  // 성공 시 다음 페이지 이동
-  setTimeout(() => {
-    router.push('/login');
-  }, 1500);
+    if (type === 'signup') {
+      toast.success('인증이 완료되었습니다.');
+      setTimeout(() => {
+        router.push('/login');
+      }, 1500);
+    } else if (type === 'reset') {
+      toast.success('이메일 인증 성공! 비밀번호를 재설정해주세요.');
+      setTimeout(() => {
+        router.push({ path: '/reset-password', query: { email } }); // 비번 재설정 페이지
+      }, 1500);
+    }
+
+  } catch (err) {
+    if (err.response && err.response.data) {
+      error.value = err.response.data;
+    } else {
+      error.value = '인증 중 오류가 발생했습니다.';
+    }
+  }
 };
 </script>
 

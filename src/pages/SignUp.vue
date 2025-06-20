@@ -102,19 +102,32 @@
 <script setup>
 /*####### 임포트 #######*/
 import {ref, onMounted, onUnmounted, computed} from 'vue';
-import {useRouter} from 'vue-router';
+import axios from 'axios';
+import {useRouter,useRoute} from 'vue-router';
+
 
 /*####### 변수들 #######*/
 const email = ref('');
 const password = ref('');
 const passwordCheck = ref('');
 const router = useRouter();
+const route = useRoute();
+const teamCode = ref('');
+const nickname = ref('');
 
 /* 에러 메시지 변수 */
 const emailError = ref('');
 const passwordCheckError = ref('');
 
 import { watch } from 'vue';
+
+onMounted(() => {
+  teamCode.value = route.query.teamCode || '';
+  if (!teamCode.value) {
+    // 팀 코드 없으면 첫 페이지로
+    router.push('/classcode');
+  }
+});
 
 // 이메일 입력이 바뀔 때 에러 즉시 제거
 watch(email, () => {
@@ -127,7 +140,7 @@ watch([password, passwordCheck], () => {
 });
 
 /*####### 회원가입 데이터 전송 #######*/
-const onSignup = () => {
+const onSignup = async () => {
   // 콘솔 체크
   console.log('이메일:', email.value);
   console.log('비밀번호:', password.value);
@@ -185,11 +198,31 @@ const onSignup = () => {
     return;
   }
 
-  // 성공 시
-  router.push('/email-verify');
+  try {
+    // 1) 회원가입 정보 임시 저장
+    await axios.post('http://localhost:9090/api/members/signup', {
+      email: email.value,
+      password: password.value,
+      teamCode: teamCode.value,
+      nickname: nickname.value,
+    });
+
+    // 2) 이메일 인증 코드 발송
+    await axios.post('http://localhost:9090/api/email/send', null, {
+      params: { email: email.value, type: 'signup' },
+    });
+
+    // 3) 인증 페이지로 이동 (email 쿼리 포함)
+    router.push({ path: '/email-verify', query: { email: email.value } });
+  } catch (error) {
+    console.error('회원가입 실패:', error);
+    if (error.response?.status === 409) {
+      emailError.value = '이미 존재하는 이메일입니다.';
+    } else {
+      emailError.value = '회원가입에 실패했습니다. 다시 시도해주세요.';
+    }
+  }
 };
-
-
 
 /*##### 비밀번호 정규표현식 (css효과) ######*/
 
