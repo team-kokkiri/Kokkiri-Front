@@ -2201,6 +2201,9 @@ body {
 .board-free-content .board-free-inner .board-free-footer .pagination button .bi {
   color: #ed2040;
 }
+.board-free-content .board-free-inner .board-free-footer .pagination .btn-first {
+  margin-right: 5px;
+}
 
 /* ###### Calendar-Page #######*/
 .calendar-container {
