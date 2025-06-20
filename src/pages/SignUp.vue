@@ -86,10 +86,10 @@
           <span>간편 회원가입</span>
         </div>
         <div class="signup-sns-list">
-          <a href="#" class="sns-btn kakao">
+          <a :href="`http://localhost:9090/oauth2/authorization/kakao?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn kakao">
             <img src="../assets/img/카카오로고.svg" alt="">
           </a>
-          <a href="#" class="sns-btn google">
+          <a :href="`http://localhost:9090/oauth2/authorization/google?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn google">
             <img src="../assets/img/구글로고.svg" alt="">
           </a>
         </div>
@@ -103,7 +103,7 @@
 /*####### 임포트 #######*/
 import {ref, onMounted, onUnmounted, computed} from 'vue';
 import axios from 'axios';
-import {useRouter,useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 
 
 /*####### 변수들 #######*/
@@ -121,11 +121,33 @@ const passwordCheckError = ref('');
 
 import { watch } from 'vue';
 
-onMounted(() => {
-  teamCode.value = route.query.teamCode || '';
-  if (!teamCode.value) {
-    // 팀 코드 없으면 첫 페이지로
-    router.push('/classcode');
+onMounted(async () => {
+  const code = route.query.teamCode;
+
+  // teamCode가 쿼리로 넘어왔으면 세션에 저장 시도
+  if (code) {
+    try {
+      await axios.post('http://localhost:9090/api/team/session', {
+        teamCode: code
+      }, {
+        withCredentials: true
+      });
+      console.log('쿼리로 받은 teamCode를 세션에 저장:', code);
+    } catch (e) {
+      console.error('쿼리 teamCode 세션 저장 실패:', e);
+    }
+  }
+
+  // 세션에서 teamCode 꺼내기
+  try {
+    const res = await axios.get('http://localhost:9090/api/team/session', {
+      withCredentials: true
+    });
+    teamCode.value = res.data.teamCode;
+    console.log('세션에서 teamCode 가져옴:', teamCode.value);
+  } catch (err) {
+    console.error('세션에서 팀 코드 가져오기 실패:', err);
+    router.push('/classcode'); // 못 가져오면 다시 인증하게
   }
 });
 
@@ -203,8 +225,9 @@ const onSignup = async () => {
     await axios.post('http://localhost:9090/api/members/signup', {
       email: email.value,
       password: password.value,
-      teamCode: teamCode.value,
       nickname: nickname.value,
+    },{
+      withCredentials: true,
     });
 
     // 2) 이메일 인증 코드 발송

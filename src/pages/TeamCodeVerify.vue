@@ -61,21 +61,29 @@ const onVerifyClasscode = async () => {
   }
 
   try {
-    console.log('반 코드 검증 요청 전송:', classcode.value);
-    // 백엔드 API 호출 (/api/team/verify?code=반코드)
-    const response = await axios.get(`http://localhost:9090/api/team/verify?code=${encodeURIComponent(classcode.value)}`);
+    // 1. 백엔드에서 코드 유효성 검사
+    const verifyRes = await axios.get(
+        `http://localhost:9090/api/team/verify?code=${encodeURIComponent(classcode.value.trim())}`,
+        { withCredentials: true }
+    );
 
-    console.log('반 코드 검증 응답:', response);
+    if (!verifyRes.data.valid) {
+      classcodeError.value = '존재하지 않는 반 코드입니다.';
+      return;
+    }
+
+    // 2. 유효하면 teamCode를 세션에 저장 요청
+    await axios.post('http://localhost:9090/api/team/session', {
+      teamCode: classcode.value.trim(),
+    }, { withCredentials: true });
 
     toast.success('인증이 완료되었습니다.');
-
-    // 1.5초 후 회원가입 페이지로 이동하며 teamCode 쿼리 전달
     setTimeout(() => {
-      router.push(`/signup?teamCode=${encodeURIComponent(classcode.value)}`);
-    }, 1500);
+      router.push('/signup'); // teamCode는 세션에서 가져오게 됨
+    }, 1000);
   } catch (error) {
-    // API가 400 오류 등 반환 시
-    classcodeError.value = '반 코드가 일치하지 않습니다.';
+    console.error('반 코드 검증 실패:', error);
+    classcodeError.value = '반 코드 인증에 실패했습니다.';
   }
 };
 </script>
