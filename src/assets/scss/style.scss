@@ -1827,6 +1827,7 @@ body {
       .header-left {
         display: flex;
         align-items: center;
+        cursor: pointer;
         img {
           width: 246px;
           height: 80px; // 로고 이미지 크기 조절

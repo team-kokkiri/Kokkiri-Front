@@ -1685,6 +1685,7 @@ body {
 .mainpage-header .header-inner .header-row .header-left {
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 .mainpage-header .header-inner .header-row .header-left img {
   width: 246px;
