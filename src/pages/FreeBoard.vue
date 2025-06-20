@@ -10,7 +10,7 @@
       <div class="board-free-question">
         <img class="icon-question" src="../assets/icon/question.png" alt="질문 아이콘"/>
         <div class="question-bubble">
-          <span class="question-title">질문을 입력하세요</span>
+          <span class="question-title">질문에 답변을 달아주세요</span>
         </div>
       </div>
 
@@ -19,7 +19,7 @@
         <input
             type="text"
             class="write-placeholder"
-            placeholder="글을 작성해보세요."
+            placeholder="새 글을 작성해주세요!"
             @focus="showWriteForm = true"
         />
         <i class="bi bi-vector-pen"></i>

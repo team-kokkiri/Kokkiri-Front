@@ -2001,82 +2001,94 @@ body {
 }
 .board-free-content .board-free-inner {
   width: 832px;
-  margin: 0 auto;
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 .board-free-content .board-free-inner .board-free-heading {
-  margin-bottom: 24px;
+  border: 1px solid #DDDDDD;
+  padding: 14px 17px;
 }
 .board-free-content .board-free-inner .board-free-heading h2.board-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #222;
+  font-size: 22px;
+  font-weight: 500;
+  color: #333333;
 }
 .board-free-content .board-free-inner .board-free-question {
+  max-height: 75px;
+  min-height: 75px;
   display: flex;
   align-items: center;
-  background: #f9f9f9;
-  border-radius: 10px;
-  padding: 18px 24px;
-  margin-bottom: 24px;
-  border: 1px solid #ececec;
+  padding: 19px 24px;
+  border: 1px solid #DDDDDD;
+  gap: 8px;
 }
 .board-free-content .board-free-inner .board-free-question .icon-question {
   width: 24px;
   height: 24px;
-  margin-right: 14px;
+}
+.board-free-content .board-free-inner .board-free-question .question-bubble {
+  display: block;
+  background: rgba(0, 210, 211, 0.1);
+  border-radius: 15px;
+  padding: 12px;
+  min-height: 44px;
+  max-width: 100%;
+  box-sizing: border-box;
+  /* 한 줄 처리 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .board-free-content .board-free-inner .board-free-question .question-bubble .question-title {
-  font-size: 16px;
-  color: #555;
+  font-size: 12px;
+  color: #686868;
 }
 .board-free-content .board-free-inner .board-free-write-toggle {
   display: flex;
   align-items: center;
-  background: #fff;
-  border: 1px solid #ececec;
-  border-radius: 10px;
-  height: 54px;
-  padding: 0 18px;
-  margin-bottom: 32px;
+  border: 2px solid #DDDDDD;
+  height: 60px;
+  padding: 0 10px;
+  background: #F9F9F9;
 }
 .board-free-content .board-free-inner .board-free-write-toggle .write-placeholder {
   flex: 1 1 0;
   border: none;
-  font-size: 16px;
-  outline: none;
-  background: transparent;
+  font-size: 14px;
+  background: #F9F9F9;
+  font-weight: 400;
 }
 .board-free-content .board-free-inner .board-free-write-toggle .bi-vector-pen {
   font-size: 22px;
-  color: #bdbdbd;
-  margin-left: 12px;
+  color: #777777;
+  margin-left: 15px;
 }
 .board-free-content .board-free-inner .board-free-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 36px;
+  gap: 5px;
 }
 .board-free-content .board-free-inner .board-free-list .board-free-item {
-  background: #fff;
-  border: 1px solid #ececec;
-  border-radius: 10px;
-  padding: 24px 28px 18px 28px;
+  min-height: 92px;
+  max-height: 114px;
+  border: 1px solid #DDDDDD;
+  padding: 19px 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  box-shadow: none;
 }
 .board-free-content .board-free-inner .board-free-list .board-free-item h3.title {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 7px;
+  color: #333333;
+  margin: 0 0 0 1px;
 }
 .board-free-content .board-free-inner .board-free-list .board-free-item .preview {
-  font-size: 15px;
-  color: #555;
-  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #686868;
+  margin: 0;
 }
 .board-free-content .board-free-inner .board-free-list .board-free-item .item-info {
   display: flex;
@@ -2084,6 +2096,7 @@ body {
   gap: 16px;
   font-size: 13px;
   color: #bdbdbd;
+  margin: 0;
 }
 .board-free-content .board-free-inner .board-free-list .board-free-item .item-info .likes, .board-free-content .board-free-inner .board-free-list .board-free-item .item-info .comments {
   display: flex;
