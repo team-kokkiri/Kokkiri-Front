@@ -3,7 +3,7 @@
   <div class="mainpage-header">
     <div class="header-inner">
       <div class="header-row">
-        <div class="header-left">
+        <div class="header-left" @click="goMain">
           <img src="../assets/img/메인페이지로고.png" alt="로고" />
         </div>
         <div class="header-center">
@@ -200,5 +200,8 @@
   }
   function goMypage() {
     router.push('/main-page/mypage')
+  }
+  function goMain() {
+    router.push('/main-page')
   }
 </script>
