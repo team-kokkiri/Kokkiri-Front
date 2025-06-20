@@ -1808,7 +1808,7 @@ body {
   display: flex;
   align-items: center;
   background: #fff; // 필요시 배경색 조절
-
+  border-bottom: 1px solid $dim-gray;
   .header-inner {
     width: 1180px;
     margin: 0 auto;
@@ -1830,6 +1830,7 @@ body {
         img {
           width: 246px;
           height: 80px; // 로고 이미지 크기 조절
+          margin-bottom: 1.5px;
         }
       }
 

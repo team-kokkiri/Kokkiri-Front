@@ -1666,6 +1666,7 @@ body {
   display: flex;
   align-items: center;
   background: #fff;
+  border-bottom: 1px solid #DDDDDD;
 }
 .mainpage-header .header-inner {
   width: 1180px;
@@ -1688,6 +1689,7 @@ body {
 .mainpage-header .header-inner .header-row .header-left img {
   width: 246px;
   height: 80px;
+  margin-bottom: 1.5px;
 }
 .mainpage-header .header-inner .header-row .header-center {
   display: flex;

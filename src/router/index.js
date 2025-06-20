@@ -38,6 +38,18 @@ const routes = [
         path: 'chat',
         component: () => import('@/pages/ChatPage.vue')
       },
+      {
+        path: 'free-board',
+        component: () => import('@/pages/FreeBoard.vue')
+      },
+      {
+        path: 'hot-board',
+        component: () => import('@/pages/HotBoard.vue')
+      },
+      {
+        path: 'share-board',
+        component: () => import('@/pages/ShareBoard.vue')
+      },
     ]
   },
   // 로그인/회원가입 등은 계속 루트에

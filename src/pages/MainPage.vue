@@ -1,13 +1,12 @@
 <script setup>
 import MainHeader from '@/components/MainHeader.vue'
+import MainNav from "@/components/MainNav.vue";
 </script>
 
 <template>
   <div class="container mainpage">
     <MainHeader />
-    <div class="mainpage-nav">
-      <div class="mainnav-inner"></div>
-    </div>
+    <MainNav />
     <div class="mainpage-body">
       <div class="mainbody-inner">
         <div class="mainbody-left"></div>
