@@ -46,6 +46,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
 import { toast } from 'vue3-toastify';
+import axios from "axios";
 
 const email = ref('');
 const emailError = ref('');
@@ -57,7 +58,7 @@ watch(email, () => {
 });
 
 // 비밀번호 찾기 제출
-const onFindPassword = () => {
+const onFindPassword = async () => {
   emailError.value = '';
 
   if (!email.value) {
@@ -66,11 +67,27 @@ const onFindPassword = () => {
     emailError.value = '이메일 형식이 올바르지 않습니다.';
   }
 
-  if (emailError.value) return;
-  toast.success('이메일로 재설정 코드가 전송되었습니다.');
-  setTimeout(() => {
-    router.push('/email-verify');
-  }, 1500);
+    if (emailError.value) return;
+  try {
+    await axios.post('http://localhost:9090/api/email/send', null, {
+      params: {
+        email: email.value,
+        type: 'reset'
+      }
+    });
+
+    // 성공 시 인증 코드 입력 페이지로 이동
+    toast.success('이메일로 재설정 코드가 전송되었습니다.');
+    setTimeout(() => {
+      router.push({ path: '/email-verify', query: { email: email.value, type: 'reset' } });
+    }, 1500);
+  } catch (err) {
+    if (err.response?.status === 404) {
+      emailError.value = '가입된 이메일이 아닙니다.';
+    } else {
+      emailError.value = '이메일 전송 중 오류가 발생했습니다.';
+    }
+  }
 };
 </script>
 

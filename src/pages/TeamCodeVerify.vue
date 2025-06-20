@@ -41,39 +41,42 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
+import axios from 'axios';
 
 const classcode = ref('');
 const classcodeError = ref('');
 const router = useRouter();
 
-// 입력 시 에러메시지 제거
+// 입력 시 에러 메시지 제거
 watch(classcode, () => {
   if (classcodeError.value) classcodeError.value = '';
 });
 
-// 서버에 저장된 올바른 반 코드(예시)
-const correctClasscode = "123456";
-
-// 인증 버튼 클릭 시
-const onVerifyClasscode = () => {
+const onVerifyClasscode = async () => {
   classcodeError.value = '';
 
-  // 1. 빈 값
   if (!classcode.value) {
     classcodeError.value = '반 코드를 입력해주세요.';
     return;
   }
 
-  // 2. 코드 불일치
-  if (classcode.value !== correctClasscode) {
-    classcodeError.value = '반 코드가 일치하지 않습니다';
-    return;
-  }
+  try {
+    console.log('반 코드 검증 요청 전송:', classcode.value);
+    // 백엔드 API 호출 (/api/team/verify?code=반코드)
+    const response = await axios.get(`http://localhost:9090/api/team/verify?code=${encodeURIComponent(classcode.value)}`);
 
-  toast.success('인증이 완료되었습니다.');
-  setTimeout(() => {
-    router.push('/signup');
-  }, 1500);
+    console.log('반 코드 검증 응답:', response);
+
+    toast.success('인증이 완료되었습니다.');
+
+    // 1.5초 후 회원가입 페이지로 이동하며 teamCode 쿼리 전달
+    setTimeout(() => {
+      router.push(`/signup?teamCode=${encodeURIComponent(classcode.value)}`);
+    }, 1500);
+  } catch (error) {
+    // API가 400 오류 등 반환 시
+    classcodeError.value = '반 코드가 일치하지 않습니다.';
+  }
 };
 </script>
 
