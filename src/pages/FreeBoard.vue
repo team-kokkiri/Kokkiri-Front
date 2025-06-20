@@ -15,7 +15,7 @@
       </div>
 
       <!-- 글쓰기 토글 -->
-      <div class="board-free-write-toggle">
+      <div class="board-free-write-toggle" v-if="!showWriteForm">
         <input
             type="text"
             class="write-placeholder"
@@ -27,6 +27,7 @@
 
       <!-- 글쓰기 폼 -->
       <form
+          ref="formRef"
           class="board-free-form"
           v-if="showWriteForm"
           @submit.prevent="submitPost"
@@ -35,21 +36,25 @@
           tabindex="0"
       >
         <div class="form-title">
-          <input type="text" class="input-title" placeholder="제목을 입력하세요"/>
+          <input type="text" class="input-title" placeholder="글 제목"/>
         </div>
         <div class="form-body">
           <textarea class="input-body" placeholder="내용을 입력하세요"></textarea>
         </div>
         <div class="form-footer">
           <div class="form-actions-left">
-            <button type="button" class="btn-upload-image">이미지 첨부</button>
+            <button type="button" class="btn-upload-image">
+              <i class="bi bi-image"></i>
+            </button>
           </div>
           <div class="form-actions-right">
             <label class="checkbox-wrap">
               <input type="checkbox"/>
-              <span class="label-text">익명</span>
+              <span class="label-text">질문</span>
             </label>
-            <button type="submit" class="btn-submit">등록</button>
+            <button type="submit" class="btn-submit">
+              <i class="bi bi-vector-pen"></i>
+            </button>
           </div>
         </div>
       </form>
@@ -123,7 +128,7 @@
 <script setup>
 // 포스트맨에서 가져온거 data폴더 안에 json파일로 저장해뒀음.
 import boardData from '@/data/boardList.json'
-import {ref} from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 //현재 페이지 저장하는 변수
 const currentPage = ref(1)
@@ -131,6 +136,7 @@ const currentPage = ref(1)
 // json 불러온거 보드리스트 변수에다가 담음
 const boardList = boardData.boardListResDtos
 const showWriteForm = ref(false)
+const formRef = ref(null)
 
 // 글쓰기 폼이 포커스 되었는지 체크 (폼 안에서 클릭·포커스 이동시 안사라지게)
 let formFocusTimer = null
@@ -161,7 +167,18 @@ function goPrev() {
 function goNext() {
   currentPage.value++
 }
-
+// 폼 바깥 클릭 감지
+function handleClickOutside(e) {
+  if (formRef.value && !formRef.value.contains(e.target)) {
+    showWriteForm.value = false
+  }
+}
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside)
+})
+onUnmounted(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+})
 
 </script>
 
