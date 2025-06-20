@@ -1772,7 +1772,7 @@ body {
 }
 /* ######### Main-Page ##########*/
 .container.mainpage {
-  // 전체 메인 페이지 컨테이너
+  min-width: 1180px;
   .mainpage-nav {
     // 네브바 영역
     .mainnav-inner {
@@ -1781,7 +1781,6 @@ body {
   .mainpage-body {
     // 메인 바디 전체 영역
     .mainbody-inner {
-      // 바디 내부 래퍼
       .mainbody-left {
         // 왼쪽 영역
       }
@@ -2330,7 +2329,6 @@ body {
     }
   }
 }
-
 /* ###### Calendar-Page #######*/
 .calendar-container {
   display: flex;

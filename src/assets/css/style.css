@@ -1659,6 +1659,9 @@ body {
 }
 
 /* ######### Main-Page ##########*/
+.container.mainpage {
+  min-width: 1180px;
+}
 /* ###### Component-Header #######*/
 .mainpage-header {
   width: 100%;
