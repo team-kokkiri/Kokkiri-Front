@@ -90,7 +90,8 @@ const onVerify = async () => {
         email: email,
         code: code.value,
         type: type
-      }
+      },
+      withCredentials: true
     });
 
     if (type === 'signup') {

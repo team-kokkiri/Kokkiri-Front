@@ -39,7 +39,7 @@
 
         <!-- 하단 링크 -->
         <div class="login-link-box">
-          <router-link class="login-join" to="/signup">회원가입</router-link>
+          <router-link class="login-join" to="/teamcode-verify">회원가입</router-link>
           <router-link class="login-find" to="/find-password">비밀번호 찾기</router-link>
         </div>
       </form>
@@ -48,8 +48,12 @@
       <div class="login-divider">
         <span>간편 로그인</span>
         <div class="easy-login-box">
-          <a href="#" class="sns-btn kakao"><img src="../assets/img/카카오로고.svg" alt="카카오" /></a>
-          <a href="#" class="sns-btn google"><img src="../assets/img/구글로고.svg" alt="구글" /></a>
+          <a :href="'http://localhost:9090/oauth2/authorization/kakao'" class="sns-btn kakao">
+            <img src="../assets/img/카카오로고.svg" alt="카카오" />
+          </a>
+          <a :href="'http://localhost:9090/oauth2/authorization/google'" class="sns-btn google">
+            <img src="../assets/img/구글로고.svg" alt="구글" />
+          </a>
         </div>
       </div>
     </div>
