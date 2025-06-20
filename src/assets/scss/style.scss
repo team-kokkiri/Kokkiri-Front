@@ -1776,7 +1776,9 @@ body {
   .mainpage-nav {
     // 네브바 영역
     .mainnav-inner {
-      // 네브바 내부
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
   .mainpage-body {
@@ -1805,6 +1807,8 @@ body {
 .mainpage-header {
   width: 100%;
   height: 80px;
+  min-width: 1180px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   background: #fff; // 필요시 배경색 조절
@@ -2006,6 +2010,7 @@ body {
                 display: flex;
                 align-items: flex-start;
                 justify-content: center;
+                min-height: 60px;
                 height: 60px;
                 border-bottom: 1px solid $dim-gray;
 
@@ -2144,6 +2149,181 @@ body {
         // HOT 게시물 도트 색 변경 (vue에서 active + name으로 구분)
         &.active[data-hot="true"] .menu-dot {
           background: #ed2040; // 빨강
+        }
+      }
+    }
+  }
+}
+/* ###### FreeBoard-Page #######*/
+.board-free-content {
+  display: flex;
+  justify-content: flex-start;
+  width: 1180px;
+  margin: 0 auto; // 중앙 정렬
+
+  .board-free-inner {
+    width: 832px;
+    margin: 0 auto;
+    .board-free-heading {
+      margin-bottom: 24px;
+      h2.board-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #222;
+      }
+    }
+
+    .board-free-question {
+      display: flex;
+      align-items: center;
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      border: 1px solid #ececec;
+
+      .icon-question {
+        width: 24px;
+        height: 24px;
+        margin-right: 14px;
+      }
+      .question-bubble {
+        .question-title {
+          font-size: 16px;
+          color: #555;
+        }
+      }
+    }
+
+    .board-free-write-toggle {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #ececec;
+      border-radius: 10px;
+      height: 54px;
+      padding: 0 18px;
+      margin-bottom: 32px;
+
+      .write-placeholder {
+        flex: 1 1 0;
+        border: none;
+        font-size: 16px;
+        outline: none;
+        background: transparent;
+      }
+      .bi-vector-pen {
+        font-size: 22px;
+        color: #bdbdbd;
+        margin-left: 12px;
+      }
+    }
+
+    .board-free-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 36px;
+
+      .board-free-item {
+        background: #fff;
+        border: 1px solid #ececec;
+        border-radius: 10px;
+        padding: 24px 28px 18px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        box-shadow: none; // 필요시 그림자 추가
+
+        h3.title {
+          font-size: 18px;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 7px;
+        }
+        .preview {
+          font-size: 15px;
+          color: #555;
+          margin-bottom: 2px;
+        }
+        .item-info {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          font-size: 13px;
+          color: #bdbdbd;
+
+          .likes, .comments {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            color: #ed2040; // 좋아요/댓글 강조색 (원하는 색으로)
+            font-weight: 500;
+
+            i.font-icon {
+              font-size: 15px;
+              margin-right: 2px;
+            }
+            em {
+              font-style: normal;
+            }
+          }
+          .datetime, .separator, .writer {
+            color: #bdbdbd;
+          }
+          .separator {
+            margin: 0 4px;
+          }
+        }
+      }
+    }
+
+    .board-free-footer {
+      margin-top: 32px;
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      justify-content: space-between;
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ececec;
+        border-radius: 10px;
+        height: 46px;
+        width: 290px;
+        padding: 0 14px;
+        background: #fff;
+
+        input[type="text"] {
+          flex: 1 1 0;
+          border: none;
+          font-size: 15px;
+          outline: none;
+          background: transparent;
+        }
+        .font-icon.search {
+          font-size: 18px;
+          color: #bdbdbd;
+          margin-left: 7px;
+        }
+      }
+
+      .pagination {
+        button.btn-next {
+          border: 1px solid #ed2040;
+          background: #fff;
+          color: #ed2040;
+          font-size: 15px;
+          font-weight: 500;
+          border-radius: 8px;
+          padding: 0 24px;
+          height: 46px;
+          cursor: pointer;
+          transition: background 0.12s;
+          &:hover {
+            background: #f7e7ea;
+          }
         }
       }
     }

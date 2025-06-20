@@ -1659,10 +1659,17 @@ body {
 }
 
 /* ######### Main-Page ##########*/
+.container.mainpage .mainpage-nav .mainnav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 /* ###### Component-Header #######*/
 .mainpage-header {
   width: 100%;
   height: 80px;
+  min-width: 1180px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   background: #fff;
@@ -1851,6 +1858,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  min-height: 60px;
   height: 60px;
   border-bottom: 1px solid #DDDDDD;
 }
@@ -1979,6 +1987,164 @@ body {
 }
 .mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item.active[data-hot=true] .menu-dot {
   background: #ed2040;
+}
+
+/* ###### FreeBoard-Page #######*/
+.board-free-content {
+  display: flex;
+  justify-content: flex-start;
+  width: 1180px;
+  margin: 0 auto;
+}
+.board-free-content .board-free-inner {
+  width: 832px;
+  margin: 0 auto;
+}
+.board-free-content .board-free-inner .board-free-heading {
+  margin-bottom: 24px;
+}
+.board-free-content .board-free-inner .board-free-heading h2.board-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222;
+}
+.board-free-content .board-free-inner .board-free-question {
+  display: flex;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  border: 1px solid #ececec;
+}
+.board-free-content .board-free-inner .board-free-question .icon-question {
+  width: 24px;
+  height: 24px;
+  margin-right: 14px;
+}
+.board-free-content .board-free-inner .board-free-question .question-bubble .question-title {
+  font-size: 16px;
+  color: #555;
+}
+.board-free-content .board-free-inner .board-free-write-toggle {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  height: 54px;
+  padding: 0 18px;
+  margin-bottom: 32px;
+}
+.board-free-content .board-free-inner .board-free-write-toggle .write-placeholder {
+  flex: 1 1 0;
+  border: none;
+  font-size: 16px;
+  outline: none;
+  background: transparent;
+}
+.board-free-content .board-free-inner .board-free-write-toggle .bi-vector-pen {
+  font-size: 22px;
+  color: #bdbdbd;
+  margin-left: 12px;
+}
+.board-free-content .board-free-inner .board-free-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item {
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  padding: 24px 28px 18px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: none;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item h3.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 7px;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item .preview {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 2px;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item .item-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #bdbdbd;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item .item-info .likes, .board-free-content .board-free-inner .board-free-list .board-free-item .item-info .comments {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: #ed2040;
+  font-weight: 500;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item .item-info .likes i.font-icon, .board-free-content .board-free-inner .board-free-list .board-free-item .item-info .comments i.font-icon {
+  font-size: 15px;
+  margin-right: 2px;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item .item-info .likes em, .board-free-content .board-free-inner .board-free-list .board-free-item .item-info .comments em {
+  font-style: normal;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item .item-info .datetime, .board-free-content .board-free-inner .board-free-list .board-free-item .item-info .separator, .board-free-content .board-free-inner .board-free-list .board-free-item .item-info .writer {
+  color: #bdbdbd;
+}
+.board-free-content .board-free-inner .board-free-list .board-free-item .item-info .separator {
+  margin: 0 4px;
+}
+.board-free-content .board-free-inner .board-free-footer {
+  margin-top: 32px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  justify-content: space-between;
+}
+.board-free-content .board-free-inner .board-free-footer .search-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  height: 46px;
+  width: 290px;
+  padding: 0 14px;
+  background: #fff;
+}
+.board-free-content .board-free-inner .board-free-footer .search-box input[type=text] {
+  flex: 1 1 0;
+  border: none;
+  font-size: 15px;
+  outline: none;
+  background: transparent;
+}
+.board-free-content .board-free-inner .board-free-footer .search-box .font-icon.search {
+  font-size: 18px;
+  color: #bdbdbd;
+  margin-left: 7px;
+}
+.board-free-content .board-free-inner .board-free-footer .pagination button.btn-next {
+  border: 1px solid #ed2040;
+  background: #fff;
+  color: #ed2040;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 0 24px;
+  height: 46px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.board-free-content .board-free-inner .board-free-footer .pagination button.btn-next:hover {
+  background: #f7e7ea;
 }
 
 /* ###### Calendar-Page #######*/
