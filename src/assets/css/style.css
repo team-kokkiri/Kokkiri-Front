@@ -1659,11 +1659,6 @@ body {
 }
 
 /* ######### Main-Page ##########*/
-.container.mainpage .mainpage-nav .mainnav-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 /* ###### Component-Header #######*/
 .mainpage-header {
   width: 100%;
@@ -1931,12 +1926,17 @@ body {
 
 /* ###### Component-Nav #######*/
 .mainpage-nav {
+  display: flex;
   height: 73px;
   background: #EEEEEE;
   border-bottom: 1px solid #BDBDBD;
+  align-items: center;
+  justify-content: center;
 }
 .mainpage-nav .mainnav-inner {
-  height: 100%;
+  width: 1180px;
+  min-width: 1180px;
+  height: 73px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -1944,7 +1944,7 @@ body {
 .mainpage-nav .mainnav-inner .nav-menu-list {
   display: flex;
   gap: 1px;
-  margin-left: 550px;
+  margin-left: 280px;
 }
 .mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item {
   height: 73px;

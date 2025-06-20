@@ -1776,9 +1776,6 @@ body {
   .mainpage-nav {
     // 네브바 영역
     .mainnav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
   }
   .mainpage-body {
@@ -2088,12 +2085,16 @@ body {
 }
 /* ###### Component-Nav #######*/
 .mainpage-nav {
+  display: flex;
   height: 73px;
   background: $silver-gray;
   border-bottom: 1px solid $dark-gray;
-
+  align-items: center;
+  justify-content: center;
   .mainnav-inner {
-    height: 100%;
+    width: 1180px;
+    min-width: 1180px;
+    height: 73px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -2101,7 +2102,7 @@ body {
     .nav-menu-list {
       display: flex;
       gap: 1px; // 메뉴 사이 여백은 상황에 맞게 조정
-      margin-left: 550px;
+      margin-left: 280px;
 
       .nav-menu-item {
         height: 73px;
