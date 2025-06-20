@@ -64,16 +64,15 @@
           <h3 class="title">{{ item.boardTitle }}</h3>
           <p class="preview">{{ item.boardContent }}</p>
           <div class="item-info">
-            <span class="likes">
-              <i class="font-icon icon-like"></i>
+            <span class="likes" v-if="item.likeCount > 0">
+              <i class="bi bi-hand-thumbs-up"></i>
               <em>{{ item.likeCount }}</em>
             </span>
-                  <span class="comments">
-              <i class="font-icon icon-comment"></i>
+            <span class="comments" v-if="item.commentCount > 0">
+              <i class="bi bi-chat"></i>
               <em>{{ item.commentCount }}</em>
             </span>
             <span class="datetime">{{ item.createdAt.slice(0, 10) }}</span>
-            <span class="separator">|</span>
             <span class="writer">{{ item.writer }}</span>
           </div>
         </div>
@@ -81,15 +80,40 @@
 
       <!-- 하단 푸터 -->
       <div class="board-free-footer">
-        <div class="search-box">
+        <div class="search-box" v-if="currentPage === 1">
           <input type="text" placeholder="검색어를 입력하세요"/>
-          <i class="font-icon search"></i>
+          <i class="bi bi-search"></i>
         </div>
-        <div class="pagination">
-          <button type="button" class="btn-next">다음</button>
+        <div class="pagination" :class="{ single: currentPage === 1 }">
+          <div class="pagination-left">
+            <button
+                v-if="currentPage > 2"
+                class="btn-first"
+                @click="goFirst"
+            >
+              <i class="bi bi-chevron-double-left"></i>
+              처음
+            </button>
+            <button
+                v-if="currentPage > 1"
+                type="button"
+                class="btn-prev"
+                @click="goPrev"
+            >
+              <i class="bi bi-chevron-left"></i>
+              이전
+            </button>
+          </div>
+          <button
+              type="button"
+              class="btn-next"
+              @click="goNext"
+          >
+            다음
+            <i class="bi bi-chevron-right"></i>
+          </button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -100,6 +124,9 @@
 // 포스트맨에서 가져온거 data폴더 안에 json파일로 저장해뒀음.
 import boardData from '@/data/boardList.json'
 import {ref} from 'vue'
+
+//현재 페이지 저장하는 변수
+const currentPage = ref(1)
 
 // json 불러온거 보드리스트 변수에다가 담음
 const boardList = boardData.boardListResDtos
@@ -123,6 +150,18 @@ function submitPost() {
   // 게시글 등록 로직
   showWriteForm.value = false
 }
+
+//페이지 이동 (다음버튼 이전버튼 처음버튼)
+function goFirst() {
+  currentPage.value = 1
+}
+function goPrev() {
+  if (currentPage.value > 1) currentPage.value--
+}
+function goNext() {
+  currentPage.value++
+}
+
 
 </script>
 
