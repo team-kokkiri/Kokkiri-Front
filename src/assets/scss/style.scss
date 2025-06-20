@@ -2085,7 +2085,7 @@ body {
 /* ###### Component-Nav #######*/
 .mainpage-nav {
   display: flex;
-  height: 73px;
+  height: 55px;
   background: $silver-gray;
   border-bottom: 1px solid $dark-gray;
   align-items: center;
@@ -2178,7 +2178,6 @@ body {
         color: $dark-black;
       }
     }
-
     .board-free-question {
       max-height: 75px;
       min-height: 75px;
@@ -2214,7 +2213,6 @@ body {
         }
       }
     }
-
     .board-free-write-toggle {
       display: flex;
       align-items: center;
@@ -2234,6 +2232,118 @@ body {
         font-size: 22px;
         color: #777777;
         margin-left: 15px;
+      }
+    }
+    .board-free-form {
+      position: relative;
+      border: 2px solid $dim-gray;
+      background: #fff;
+      box-sizing: border-box;
+
+      .form-title {
+        padding: 15px;
+        border-bottom: 1px solid $dim-gray;
+        background: $cloudy-gray;
+
+        .input-title {
+          width: 100%;
+          border: none;
+          background: transparent;
+          font-size: 16px;
+          font-weight: bold;
+          color: $dim-black;
+          outline: none;
+          letter-spacing: -0.5px;
+
+          &::placeholder {
+            font-size: 16px;
+            color: $silver-black;
+          }
+        }
+      }
+
+      .form-body {
+        background: #fff;
+
+        .input-body {
+          width: 100%;
+          height: 380px;
+          padding: 15px;
+          border: none;
+          background: transparent;
+          resize: vertical;
+          font-size: 14px;
+          line-height: 1.6;
+          letter-spacing: -0.3px;
+          outline: none;
+          margin-bottom: 6px;
+          font-family: inherit;
+        }
+      }
+
+      .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        height: 40px;
+        border-top:  1px solid $dim-gray;
+
+        .form-actions-left {
+          .btn-upload-image {
+            display: flex;
+            align-items: center;
+            height: 40px;
+            width: 40px;
+            border: none;
+            background: none;
+            padding: 10px;
+            .bi-image {
+              font-size: 20px;
+              color: $silver-black;
+            }
+          }
+        }
+
+        .form-actions-right {
+          display: flex;
+          align-items: center;
+
+          .checkbox-wrap {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+
+            input[type="checkbox"] {
+              accent-color: #555;
+              width: 15px;
+              height: 15px;
+              margin-right: 5px;
+              margin-top: 5px;
+            }
+            .label-text {
+              font-size: 12px;
+              color: $silver-black;
+              font-weight: 500;
+            }
+          }
+
+          .btn-submit {
+            width: 40px;
+            height: 40px;
+            background: $main-color;
+            cursor: pointer;
+            border: none;
+            margin-left: 15px;
+            &:hover {
+              opacity: 0.9;
+            }
+            .bi-vector-pen {
+              color: white;
+              font-size: 20px;
+            }
+          }
+        }
       }
     }
 

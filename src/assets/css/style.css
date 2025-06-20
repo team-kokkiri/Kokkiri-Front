@@ -1930,7 +1930,7 @@ body {
 /* ###### Component-Nav #######*/
 .mainpage-nav {
   display: flex;
-  height: 73px;
+  height: 55px;
   background: #EEEEEE;
   border-bottom: 1px solid #BDBDBD;
   align-items: center;
@@ -2065,6 +2065,105 @@ body {
   font-size: 22px;
   color: #777777;
   margin-left: 15px;
+}
+.board-free-content .board-free-inner .board-free-form {
+  position: relative;
+  border: 2px solid #DDDDDD;
+  background: #fff;
+  box-sizing: border-box;
+}
+.board-free-content .board-free-inner .board-free-form .form-title {
+  padding: 15px;
+  border-bottom: 1px solid #DDDDDD;
+  background: #F9F9F9;
+}
+.board-free-content .board-free-inner .board-free-form .form-title .input-title {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: bold;
+  color: #555555;
+  outline: none;
+  letter-spacing: -0.5px;
+}
+.board-free-content .board-free-inner .board-free-form .form-title .input-title::placeholder {
+  font-size: 16px;
+  color: #777777;
+}
+.board-free-content .board-free-inner .board-free-form .form-body {
+  background: #fff;
+}
+.board-free-content .board-free-inner .board-free-form .form-body .input-body {
+  width: 100%;
+  height: 380px;
+  padding: 15px;
+  border: none;
+  background: transparent;
+  resize: vertical;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: -0.3px;
+  outline: none;
+  margin-bottom: 6px;
+  font-family: inherit;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 40px;
+  border-top: 1px solid #DDDDDD;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-left .btn-upload-image {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 40px;
+  border: none;
+  background: none;
+  padding: 10px;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-left .btn-upload-image .bi-image {
+  font-size: 20px;
+  color: #777777;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-right {
+  display: flex;
+  align-items: center;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-right .checkbox-wrap {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-right .checkbox-wrap input[type=checkbox] {
+  accent-color: #555;
+  width: 15px;
+  height: 15px;
+  margin-right: 5px;
+  margin-top: 5px;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-right .checkbox-wrap .label-text {
+  font-size: 12px;
+  color: #777777;
+  font-weight: 500;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-right .btn-submit {
+  width: 40px;
+  height: 40px;
+  background: #2196F3;
+  cursor: pointer;
+  border: none;
+  margin-left: 15px;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-right .btn-submit:hover {
+  opacity: 0.9;
+}
+.board-free-content .board-free-inner .board-free-form .form-footer .form-actions-right .btn-submit .bi-vector-pen {
+  color: white;
+  font-size: 20px;
 }
 .board-free-content .board-free-inner .board-free-list {
   display: flex;
