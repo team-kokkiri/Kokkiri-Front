@@ -1659,7 +1659,7 @@ body {
 }
 
 /* ######### Main-Page ##########*/
-/* ###### MainPage-Header #######*/
+/* ###### Component-Header #######*/
 .mainpage-header {
   width: 100%;
   height: 80px;
@@ -1918,6 +1918,65 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ###### Component-Nav #######*/
+.mainpage-nav {
+  height: 73px;
+  background: #EEEEEE;
+  border-bottom: 1px solid #BDBDBD;
+}
+.mainpage-nav .mainnav-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.mainpage-nav .mainnav-inner .nav-menu-list {
+  display: flex;
+  gap: 1px;
+  margin-left: 550px;
+}
+.mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item {
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #333333;
+  position: relative;
+}
+.mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item .menu-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: #333333;
+  letter-spacing: 1px;
+  font-family: "SpoqaHanSansNeo-Regular";
+}
+.mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item .menu-dot {
+  color: #EEEEEE;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+.mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item.active .menu-text {
+  color: #2196F3;
+  font-weight: bold;
+}
+.mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item.active[data-hot=true] .menu-text {
+  color: #ED2040;
+  font-weight: bold;
+}
+.mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item.active .menu-dot {
+  display: inline-block;
+  background: #2196F3;
+}
+.mainpage-nav .mainnav-inner .nav-menu-list .nav-menu-item.active[data-hot=true] .menu-dot {
+  background: #ed2040;
 }
 
 /* ###### Calendar-Page #######*/
