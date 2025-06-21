@@ -7,9 +7,7 @@
           <router-view />
       </div>
     </div>
-    <div class="mainpage-footer">
-      <div class="footer-inner"></div>
-    </div>
+    <MainFooter />
   </div>
 </template>
 
@@ -17,6 +15,7 @@
 import MainHeader from '@/components/MainHeader.vue'
 import MainNav from "@/components/MainNav.vue";
 import { useRoute } from 'vue-router'
+import MainFooter from "@/components/MainFooter.vue";
 const route = useRoute()
 </script>
 

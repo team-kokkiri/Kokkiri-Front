@@ -32,7 +32,7 @@
     { name: 'HOT 게시물', path: '/hot-board' },
   ]
 
-  const activeMenu = ref('자유게시판')
+  const activeMenu = ref('')
 
   watch(
       () => route.path,

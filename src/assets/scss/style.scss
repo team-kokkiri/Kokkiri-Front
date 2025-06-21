@@ -2154,6 +2154,86 @@ body {
     }
   }
 }
+/* ###### Component-Footer #######*/
+.footer-inner {
+  width: 100%;
+  height: 176px;
+  background: $cloudy-gray;
+  margin-top: 50px;
+  //padding: 38px 0 0 0;
+
+  .footer-info-wrap {
+    width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    min-height: 110px;  // 로고 세로 정렬 여유
+    padding-top: 26px;
+  }
+
+  .footer-info-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 36px;
+
+    .footer-logo {
+      flex-shrink: 0;
+      img {
+        height: 66px;
+        width: 123px;
+        display: block;
+      }
+    }
+
+    .footer-info-text {
+      p {
+        font-size: 15px;
+        color: #777777;
+        line-height: 1.9;
+        margin: 0 0 2px 0;
+
+        &.contact {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  .footer-info-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 15px;
+
+    .contact-title,
+    .fax-title {
+      font-weight: 700;
+      color: #333333;
+      margin-right: 3px;
+    }
+    .contact-num,
+    .fax-num {
+      color: #777777;
+      margin-right: 18px;
+      font-weight: 400;
+    }
+    .fax-title,
+    .fax-num {
+      margin-right: 0;
+    }
+  }
+
+  .footer-copyright {
+    width: 100%;
+    //padding: 25px 0 28px 0;
+    text-align: center;
+    font-size: 15px;
+    color: #DDDDDD;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+}
 /* ###### FreeBoard-Page #######*/
 .board-free-content {
   display: flex;
