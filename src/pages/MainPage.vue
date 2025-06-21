@@ -5,6 +5,7 @@
     <div class="mainpage-body">
       <div class="mainbody-inner">
           <router-view />
+          <MainRight v-if="route.meta.showRight"/>
       </div>
     </div>
     <MainFooter />
@@ -16,6 +17,7 @@ import MainHeader from '@/components/MainHeader.vue'
 import MainNav from "@/components/MainNav.vue";
 import { useRoute } from 'vue-router'
 import MainFooter from "@/components/MainFooter.vue";
+import MainRight from "@/components/MainRight.vue";
 const route = useRoute()
 </script>
 

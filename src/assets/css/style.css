@@ -24,6 +24,14 @@ a {
   color: inherit;
 }
 
+ul,
+ol,
+li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: 500;
@@ -1658,9 +1666,22 @@ body {
   opacity: 0.85;
 }
 
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /* ######### Main-Page ##########*/
 .container.mainpage {
   min-width: 1180px;
+}
+.container.mainpage .mainpage-body {
+  display: flex;
+  justify-content: center;
+  margin-top: 26px;
+}
+.container.mainpage .mainpage-body .mainbody-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 1180px;
+  justify-content: space-between;
 }
 /* ###### Component-Header #######*/
 .mainpage-header {
@@ -2061,6 +2082,137 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* ###### Component-Right #######*/
+.mainbody-right {
+  width: 323px;
+  background: none;
+  margin-top: 0;
+}
+.mainbody-right .mainbody-right-inner {
+  width: 100%;
+  height: auto;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.mainbody-right .board-search-box {
+  width: 323px;
+  height: 40px;
+  border: 2px solid #dddddd;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+.mainbody-right .board-search-box .search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #777777;
+  outline: none;
+}
+.mainbody-right .board-search-box .search-input::placeholder {
+  color: #777777;
+  font-size: 14px;
+  font-family: "Noto Sans KR", sans-serif;
+}
+.mainbody-right .board-search-box i {
+  font-size: 16px;
+  color: #777777;
+  margin-left: 6px;
+}
+.mainbody-right .board-search-box .search-btn {
+  border: none;
+  background: none;
+}
+.mainbody-right .right-board-section {
+  width: 100%;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+}
+.mainbody-right .right-board-section .right-board-list {
+  margin-top: 0;
+  width: 323px;
+  background: #f5f5f5;
+  border: 1px solid #dddddd;
+  border-radius: 0;
+  padding: 0;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid #dddddd;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-title-row .right-board-title {
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fd5631;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-title-row .right-board-title.notice {
+  color: #fd5631;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-title-row .right-board-title.best {
+  color: #fd5631;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-title-row .right-board-more {
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #999999;
+  text-decoration: none;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 38px;
+  padding: 0 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #dddddd;
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 16px;
+  color: #333333;
+  cursor: pointer;
+  transition: background 0.12s;
+  margin: 0;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-item:hover {
+  background: #dddddd;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-item:last-child {
+  border-bottom: none;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-item.empty {
+  cursor: default;
+  background: #f5f5f5;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-item .right-board-text {
+  font-size: 12px;
+  color: #333333;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+.mainbody-right .right-board-section .right-board-list .right-board-item .right-board-meta {
+  font-size: 11px;
+  color: #999999;
+  min-width: 62px;
+  text-align: right;
+}
+
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /* ###### FreeBoard-Page #######*/
 .board-free-content {
   display: flex;
@@ -2070,7 +2222,6 @@ body {
 }
 .board-free-content .board-free-inner {
   width: 832px;
-  margin-top: 26px;
   display: flex;
   flex-direction: column;
   gap: 5px;
