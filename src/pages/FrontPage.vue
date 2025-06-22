@@ -210,7 +210,7 @@ import { companyList } from '@/data/companyList'
 // 소개 아이템들 리스트 불러오기
 import platformFeatureList from '@/data/platformFeatureList'
 // 로고 애니메이션.
-import {ref, onMounted, nextTick} from 'vue';
+import {ref, onMounted, onUnmounted, nextTick} from 'vue';
 
 const isVisible = ref(false);
 const mascotRef = ref(null);
@@ -256,26 +256,42 @@ function setupPopupAnimations() {
     }
   }, { threshold: 0.1 });
 
-  if (boardWrapRef.value) wrapperObserver.observe(boardWrapRef.value);
-  if (popupMainRef.value) popupMainObserver.observe(popupMainRef.value);
-  if (popupCommentRef.value) popupCommentObserver.observe(popupCommentRef.value);
+  // 관찰자들 등록 및 저장
+  if (boardWrapRef.value) {
+    wrapperObserver.observe(boardWrapRef.value);
+    observers.value.push(wrapperObserver);
+  }
+  if (popupMainRef.value) {
+    popupMainObserver.observe(popupMainRef.value);
+    observers.value.push(popupMainObserver);
+  }
+  if (popupCommentRef.value) {
+    popupCommentObserver.observe(popupCommentRef.value);
+    observers.value.push(popupCommentObserver);
+  }
 }
 
 onMounted(() => {
-  const observer = new IntersectionObserver(([entry]) => {
+  const mascotObserver = new IntersectionObserver(([entry]) => {
     if (entry.isIntersecting) {
       isVisible.value = true;
     } else {
       isVisible.value = false; // 화면에서 사라질 때 .show 제거
     }
   });
-  if (mascotRef.value) observer.observe(mascotRef.value);
+  if (mascotRef.value) {
+    mascotObserver.observe(mascotRef.value);
+    observers.value.push(mascotObserver); // 배열에 저장
+  }
 });
 
 // 숫자 카운트 애니메이션
 const displayNumbers = ref(platformFeatureList.map(() => 0))
 const itemRefs = ref([])
 const timers = []
+
+// Observer들을 저장할 배열 (메모리 누수 방지)
+const observers = ref([])
 
 function setItemRefs(el, idx) {
   if (el) {
@@ -303,7 +319,7 @@ onMounted(async () => {
   await nextTick()
 
   itemRefs.value.forEach((el, idx) => {
-    const observer = new IntersectionObserver(([entry]) => {
+    const countObserver = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         animateNumber(idx, platformFeatureList[idx].value)
       } else {
@@ -311,11 +327,29 @@ onMounted(async () => {
         clearInterval(timers[idx])
       }
     }, { threshold: 0.5 })
-    if (el) observer.observe(el)
+    if (el) {
+      countObserver.observe(el)
+      observers.value.push(countObserver) // 배열에 저장
+    }
   })
 
   // 팝업 애니메이션 처리
   setupPopupAnimations()
+})
+
+// 메모리 누수 방지: 컴포넌트 언마운트 시 모든 리소스 정리
+onUnmounted(() => {
+  // 모든 IntersectionObserver 정리
+  observers.value.forEach(observer => {
+    observer.disconnect()
+  })
+  observers.value = []
+
+  // 모든 타이머 정리
+  timers.forEach(timer => {
+    clearInterval(timer)
+  })
+  timers.length = 0
 })
 
 </script>
