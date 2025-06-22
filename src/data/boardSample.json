@@ -1,0 +1,109 @@
+[
+  {
+    "id": 1,
+    "boardTitle": "첫 번째 자유게시판 샘플",
+    "boardContent": "여기는 샘플 게시글 1번입니다. 다양한 테스트를 위한 본문입니다.",
+    "writer": "고라니",
+    "likeCount": 5,
+    "commentCount": 1,
+    "boardCreatedAt": "2025-06-20T09:00:00",
+    "fileUrls": [
+    ],
+    "comments": [
+      {
+        "id": 101,
+        "writer": "고릴라",
+        "content": "반가워요.",
+        "likeCount": 2,
+        "createdAt": "2025-06-20T09:15:00",
+        "replies": [
+          {
+            "id": 1011,
+            "writer": "고라니",
+            "content": "첫 번째로 답변해봅니다.",
+            "likeCount": 1,
+            "createdAt": "2025-06-20T09:16:00"
+          },
+          {
+            "id": 1012,
+            "writer": "기린",
+            "content": "저도 반가워요.",
+            "likeCount": 0,
+            "createdAt": "2025-06-20T09:17:00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "boardTitle": "두 번째 샘플 게시글",
+    "boardContent": "첨부파일과 함께 올라온 두 번째 샘플 글입니다.",
+    "writer": "기린",
+    "likeCount": 3,
+    "commentCount": 1,
+    "boardCreatedAt": "2025-06-21T10:30:00",
+    "fileUrls": [
+    ],
+    "comments": [
+      {
+        "id": 201,
+        "writer": "코끼리",
+        "content": "두 번째 글도 잘 봤어요.",
+        "likeCount": 0,
+        "createdAt": "2025-06-21T10:40:00",
+        "replies": [
+          {
+            "id": 2011,
+            "writer": "기린",
+            "content": "감사합니다~",
+            "likeCount": 0,
+            "createdAt": "2025-06-21T10:41:00"
+          },
+          {
+            "id": 2012,
+            "writer": "고릴라",
+            "content": "첨부파일 궁금하네요.",
+            "likeCount": 1,
+            "createdAt": "2025-06-21T10:42:00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "boardTitle": "세 번째 게시글 테스트",
+    "boardContent": "이건 테스트용 샘플 3번입니다. 파일 첨부 없이 댓글만 있습니다.",
+    "writer": "코끼리",
+    "likeCount": 0,
+    "commentCount": 1,
+    "boardCreatedAt": "2025-06-22T14:10:00",
+    "fileUrls": [],
+    "comments": [
+      {
+        "id": 301,
+        "writer": "고릴라",
+        "content": "세 번째도 테스트 성공!",
+        "likeCount": 3,
+        "createdAt": "2025-06-22T14:20:00",
+        "replies": [
+          {
+            "id": 3011,
+            "writer": "코끼리",
+            "content": "감사합니다. 댓글 달아주셔서 힘나요!",
+            "likeCount": 2,
+            "createdAt": "2025-06-22T14:21:00"
+          },
+          {
+            "id": 3012,
+            "writer": "고라니",
+            "content": "테스트에는 댓글이 필수죠!",
+            "likeCount": 0,
+            "createdAt": "2025-06-22T14:22:00"
+          }
+        ]
+      }
+    ]
+  }
+]

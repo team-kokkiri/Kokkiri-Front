@@ -50,6 +50,11 @@ const routes = [
         component: () => import('@/pages/FreeBoard.vue')
       },
       {
+        path: 'free-board/:id',
+        component: () => import('@/pages/FreeBoardDetail.vue'),
+        props: true,
+      },
+      {
         path: 'hot-board',
         component: () => import('@/pages/HotBoard.vue')
       },

@@ -4,7 +4,7 @@
       <!-- 왼쪽: 로고 + 정보 -->
       <div class="footer-info-left">
         <div class="footer-logo">
-          <img src="@/assets/img/footer_logo.png" alt="KOSA 로고" />
+          <img src="../../assets/img/footer_logo.png" alt="KOSA 로고" />
         </div>
         <div class="footer-info-text">
           <p class="address">(우) 05717 서울시 송파구 중대로 135, 서관 12층(가락동)</p>

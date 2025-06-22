@@ -13,11 +13,11 @@
 </template>
 
 <script setup>
-import MainHeader from '@/components/MainHeader.vue'
-import MainNav from "@/components/MainNav.vue";
+import MainHeader from '@/components/common/MainHeader.vue'
+import MainNav from "@/components/common/MainNav.vue";
 import { useRoute } from 'vue-router'
-import MainFooter from "@/components/MainFooter.vue";
-import MainRight from "@/components/MainRight.vue";
+import MainFooter from "@/components/common/MainFooter.vue";
+import MainRight from "@/components/common/MainRight.vue";
 const route = useRoute()
 </script>
 

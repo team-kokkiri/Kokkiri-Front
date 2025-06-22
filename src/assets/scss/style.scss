@@ -50,6 +50,58 @@ body {
               width: 202px;
               height: 92px;
             }
+
+      // 대댓글 입력창
+      .reply-input-form {
+        margin: 15px 0 15px 36px;
+        background-color: #f5f5f5;
+        border: 1px solid #dddddd;
+        border-radius: 5px;
+
+        .reply-form {
+          display: flex;
+          width: 100%;
+          height: 40px;
+
+          .input-reply {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            background: transparent;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 13px;
+            font-weight: 350;
+            color: #686868;
+            outline: none;
+            line-height: 1.2;
+
+            &::placeholder {
+              color: #686868;
+            }
+          }
+
+          .btn-reply-submit {
+            width: 40px;
+            height: 40px;
+            background-color: #2196f3;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0 5px 5px 0;
+
+            i {
+              color: #ffffff;
+              font-size: 16px;
+            }
+
+            &:hover {
+              background-color: #1976d2;
+            }
+          }
+        }
+      }
           }
 
           .side-login-box {
@@ -2391,345 +2443,6 @@ body {
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
-/* ###### FreeBoard-Page #######*/
-.board-free-content {
-  display: flex;
-  justify-content: flex-start;
-  width: 1180px;
-  margin: 0 auto; // 중앙 정렬
-
-  .board-free-inner {
-    width: 832px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-
-    .board-free-heading {
-      border: 1px solid $dim-gray;
-      padding: 14px 17px;
-
-      h2.board-title {
-        font-size: 22px;
-        font-weight: 500;
-        color: $dark-black;
-      }
-    }
-    .board-free-question {
-      max-height: 75px;
-      min-height: 75px;
-      display: flex;
-      align-items: center;
-      padding: 19px 24px;
-      border: 1px solid $dim-gray;
-      gap: 8px;
-
-      .icon-question {
-        width: 24px;
-        height: 24px;
-      }
-
-      .question-bubble {
-        display: block;
-        background: rgba(0, 210, 211, 0.1);
-        border-radius: 15px;
-        padding: 12px;
-        min-height: 44px;
-        max-height: 44px;
-        max-width: 100%;           // 필요시 원하는 최대 너비
-        box-sizing: border-box;
-
-        /* 한 줄 처리 */
-        white-space: nowrap;           // 한 줄만!
-        overflow: hidden;              // 넘치는 건 숨김
-        text-overflow: ellipsis;       // ... 처리
-
-        .question-title {
-          font-size: 12px;
-          color: #686868;
-        }
-      }
-    }
-    .board-free-write-toggle {
-      display: flex;
-      align-items: center;
-      border: 2px solid $dim-gray;
-      height: 60px;
-      padding: 0 10px;
-      background: $cloudy-gray;
-
-      .write-placeholder {
-        flex: 1 1 0;
-        border: none;
-        font-size: 14px;
-        background: $cloudy-gray;
-        font-weight: 400;
-      }
-      .bi-vector-pen {
-        font-size: 22px;
-        color: #777777;
-        margin-left: 15px;
-      }
-    }
-    .board-free-form {
-      position: relative;
-      border: 2px solid $dim-gray;
-      background: #fff;
-      box-sizing: border-box;
-
-      .form-title {
-        padding: 15px;
-        border-bottom: 1px solid $dim-gray;
-        background: $cloudy-gray;
-
-        .input-title {
-          width: 100%;
-          border: none;
-          background: transparent;
-          font-size: 16px;
-          font-weight: bold;
-          color: $dim-black;
-          outline: none;
-          letter-spacing: -0.5px;
-
-          &::placeholder {
-            font-size: 16px;
-            color: $silver-black;
-          }
-        }
-      }
-
-      .form-body {
-        background: #fff;
-
-        .input-body {
-          width: 100%;
-          height: 380px;
-          padding: 15px;
-          border: none;
-          background: transparent;
-          resize: vertical;
-          font-size: 14px;
-          line-height: 1.6;
-          letter-spacing: -0.3px;
-          outline: none;
-          margin-bottom: 6px;
-          font-family: inherit;
-        }
-      }
-
-      .form-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        height: 40px;
-        border-top:  1px solid $dim-gray;
-
-        .form-actions-left {
-          .btn-upload-image {
-            display: flex;
-            align-items: center;
-            height: 40px;
-            width: 40px;
-            border: none;
-            background: none;
-            padding: 10px;
-            .bi-image {
-              font-size: 20px;
-              color: $silver-black;
-            }
-          }
-        }
-
-        .form-actions-right {
-          display: flex;
-          align-items: center;
-
-          .checkbox-wrap {
-            height: 40px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-
-            input[type="checkbox"] {
-              accent-color: #555;
-              width: 15px;
-              height: 15px;
-              margin-right: 5px;
-              margin-top: 5px;
-            }
-            .label-text {
-              font-size: 12px;
-              color: $silver-black;
-              font-weight: 500;
-            }
-          }
-
-          .btn-submit {
-            width: 40px;
-            height: 40px;
-            background: $main-color;
-            cursor: pointer;
-            border: none;
-            margin-left: 15px;
-            &:hover {
-              opacity: 0.9;
-            }
-            .bi-vector-pen {
-              color: white;
-              font-size: 20px;
-            }
-          }
-        }
-      }
-    }
-
-    .board-free-list {
-      display: flex;
-      flex-direction: column;
-
-      .board-free-item {
-        min-height: 92px;
-        max-height: 114px;
-        border: 1px solid $dim-gray;
-        padding: 19px 24px;
-        display: flex;
-        flex-direction: column;
-        h3.title {
-          font-weight: bold;
-          color: #292929;
-          margin: 0 0 0 1px;
-          line-height: 20px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          font-size: 14px;
-        }
-        .preview {
-          font-size: 14px;
-          display: -webkit-box;
-          -webkit-box-orient: vertical;
-          -webkit-line-clamp: 2;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          word-break: break-word;
-          margin: 0;
-          max-height: 100px;
-          line-height: 20px;
-          white-space: normal;
-          color: #444444;
-          font-weight: normal;
-        }
-        .item-info {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          font-size: 12px;
-          color: #bdbdbd;
-          margin: 0;
-
-          .likes {
-            margin-right: 8px;
-            height: 18px;
-            color: #a6a6a6;
-            font-size: 12px;
-            cursor: pointer;
-            .bi {
-              color: #F91F15;
-              margin-right: 6px;
-            }
-            em {
-              color: #F91F15;
-            }
-          }
-
-          .comments {
-            margin-right: 8px;
-            height: 18px;
-            color: #a6a6a6;
-            font-size: 12px;
-            cursor: pointer;
-            gap: 6px;
-            .bi {
-              color: #05BCBC;
-              margin-right: 6px;
-            }
-            em {
-              color: #05BCBC;
-            }
-          }
-          .datetime {
-            margin-right: 8px;
-          }
-          .datetime, .writer {
-            color: #a6a6a6;
-          }
-        }
-      }
-    }
-    .board-free-footer {
-      display: flex;
-      justify-content: space-between;
-      .search-box {
-        display: flex;
-        align-items: center;
-        border: 2px solid $dim-gray;
-        border-radius: 5px;
-        height: 35px;
-        width: 246px;
-        padding: 0 14px;
-
-        input[type="text"] {
-          flex: 1 1 0;
-          border: none;
-          font-size: 14px;
-          outline: none;
-          background: transparent;
-          &::placeholder {
-            font-size: 14px;
-            color: #777777;
-          }
-        }
-        .font-icon.search {
-          font-size: 18px;
-          color: #777777;
-          margin-left: 7px;
-        }
-      }
-
-      .pagination {
-        display: flex;
-        justify-content: space-between;
-        width: 832px;
-
-        &.single {
-          justify-content: flex-end;
-        }
-
-        button {
-          border: 1px solid $crimson;
-          background: white;
-          color: #ed2040;
-          font-size: 14px;
-          font-weight: 500;
-          border-radius: 5px;
-          height: 35px;
-          cursor: pointer;
-          transition: background 0.12s;
-          padding: 0 12px;
-          &:hover {
-            opacity: 0.9;
-          }
-          .bi {
-            color: #ed2040;
-          }
-        }
-        .btn-first {
-          margin-right: 5px;
-        }
-      }
-    }
-  }
-}
 /* ###### Calendar-Page #######*/
 .calendar-container {
   display: flex;
