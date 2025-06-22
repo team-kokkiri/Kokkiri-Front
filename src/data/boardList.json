@@ -1,208 +1,35 @@
 {
   "boardListResDtos": [
     {
-      "id": 23,
-      "boardTitle": "두 번째 게시글",
-      "boardContent": "이것은 두 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 25,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:17.297074"
-    },
-    {
-      "id": 18,
-      "boardTitle": "두 번째 게시글",
-      "boardContent": "이것은 두 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 0,
-      "commentCount": 2,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.595261"
-    },
-    {
-      "id": 13,
-      "boardTitle": "두 번째 게시글",
-      "boardContent": "이것은 두 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 10,
-      "commentCount": 5,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.023107"
-    },
-    {
-      "id": 8,
-      "boardTitle": "두 번째 게시글",
-      "boardContent": "이것은 두 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 0,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:06.777403"
+      "id": 1,
+      "boardTitle": "첫 번째 자유게시판 샘플",
+      "boardContent": "여기는 샘플 게시글 1번입니다. 다양한 테스트를 위한 본문입니다.",
+      "writer": "고라니",
+      "likeCount": 5,
+      "commentCount": 1,
+      "createdAt": "2025-06-20T09:00:00"
     },
     {
       "id": 2,
-      "boardTitle": "두 번째 게시글",
-      "boardContent": "이것은 두 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 25,
+      "boardTitle": "두 번째 샘플 게시글",
+      "boardContent": "첨부파일과 함께 올라온 두 번째 샘플 글입니다.",
+      "writer": "기린",
+      "likeCount": 3,
       "commentCount": 1,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-18T15:11:44.94226"
-    },
-    {
-      "id": 26,
-      "boardTitle": "다섯 번째 게시글",
-      "boardContent": "이것은 다섯 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 13,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:17.297074"
-    },
-    {
-      "id": 21,
-      "boardTitle": "다섯 번째 게시글",
-      "boardContent": "이것은 다섯 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 13,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.595261"
-    },
-    {
-      "id": 16,
-      "boardTitle": "다섯 번째 게시글",
-      "boardContent": "이것은 다섯 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 13,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.023107"
-    },
-    {
-      "id": 11,
-      "boardTitle": "다섯 번째 게시글",
-      "boardContent": "이것은 다섯 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 13,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:06.777403"
-    },
-    {
-      "id": 5,
-      "boardTitle": "다섯 번째 게시글",
-      "boardContent": "이것은 다섯 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 13,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-18T15:11:44.94226"
-    },
-    {
-      "id": 22,
-      "boardTitle": "첫 번째 게시글",
-      "boardContent": "이것은 첫 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 10,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:17.297074"
-    },
-    {
-      "id": 17,
-      "boardTitle": "첫 번째 게시글",
-      "boardContent": "이것은 첫 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 10,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.595261"
-    },
-    {
-      "id": 12,
-      "boardTitle": "첫 번째 게시글",
-      "boardContent": "이것은 첫 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 10,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.023107"
-    },
-    {
-      "id": 7,
-      "boardTitle": "첫 번째 게시글",
-      "boardContent": "이것은 첫 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 10,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:06.777403"
-    },
-    {
-      "id": 1,
-      "boardTitle": "첫 번째 게시글",
-      "boardContent": "이것은 첫 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 10,
-      "commentCount": 1,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-18T15:11:44.94226"
-    },
-    {
-      "id": 24,
-      "boardTitle": "세 번째 게시글",
-      "boardContent": "이것은 세 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 5,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:17.297074"
-    },
-    {
-      "id": 19,
-      "boardTitle": "세 번째 게시글",
-      "boardContent": "이것은 세 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 5,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.595261"
-    },
-    {
-      "id": 14,
-      "boardTitle": "세 번째 게시글",
-      "boardContent": "이것은 세 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 5,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:16.023107"
-    },
-    {
-      "id": 9,
-      "boardTitle": "세 번째 게시글",
-      "boardContent": "이것은 세 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 5,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-19T11:29:06.777403"
+      "createdAt": "2025-06-21T10:30:00"
     },
     {
       "id": 3,
-      "boardTitle": "세 번째 게시글",
-      "boardContent": "이것은 세 번째 게시글입니다.",
-      "writer": "admin",
-      "likeCount": 5,
-      "commentCount": 0,
-      "boardTypes": "BEST 게시판",
-      "createdAt": "2025-06-18T15:11:44.94226"
+      "boardTitle": "세 번째 게시글 테스트",
+      "boardContent": "이건 테스트용 샘플 3번입니다. 파일 첨부 없이 댓글만 있습니다.",
+      "writer": "코끼리",
+      "likeCount": 0,
+      "commentCount": 1,
+      "createdAt": "2025-06-22T14:10:00"
     }
   ],
-  "currentPage": 0,
-  "totalPages": 2,
-  "totalElements": 25,
-  "last": false
+  "currentPage": 1,
+  "totalPages": 1,
+  "totalElements": 3,
+  "last": true
 }

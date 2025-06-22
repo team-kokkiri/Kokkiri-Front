@@ -5,18 +5,19 @@
     <div class="mainpage-body">
       <div class="mainbody-inner">
           <router-view />
+          <MainRight v-if="route.meta.showRight"/>
       </div>
     </div>
-    <div class="mainpage-footer">
-      <div class="footer-inner"></div>
-    </div>
+    <MainFooter />
   </div>
 </template>
 
 <script setup>
-import MainHeader from '@/components/MainHeader.vue'
-import MainNav from "@/components/MainNav.vue";
+import MainHeader from '@/components/common/MainHeader.vue'
+import MainNav from "@/components/common/MainNav.vue";
 import { useRoute } from 'vue-router'
+import MainFooter from "@/components/common/MainFooter.vue";
+import MainRight from "@/components/common/MainRight.vue";
 const route = useRoute()
 </script>
 
