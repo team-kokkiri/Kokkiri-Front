@@ -44,16 +44,34 @@ const handleSubmit = () => {
   replyText.value = ''
 }
 
-// 외부 클릭 시 닫기
+// 외부 클릭 시 닫기 - 개선된 버전
 const handleClickOutside = (event) => {
-  if (replyFormRef.value &&
+  console.log('Click detected, checking if outside...') // 디버깅용
+  
+  if (replyFormRef.value && 
       replyFormRef.value instanceof HTMLElement &&
       !replyFormRef.value.contains(event.target)) {
+    
+    // 대댓글 버튼 클릭인지 확인 (대댓글 버튼 클릭 시에는 닫지 않음)
+    const isReplyButton = event.target.closest('.btn-reply')
+    if (!isReplyButton) {
+      console.log('Emitting close event...') // 디버깅용
+      emit('close')
+    }
+  }
+}
+
+// ESC 키로도 닫기 가능하도록 추가
+const handleKeyDown = (event) => {
+  if (event.key === 'Escape') {
+    console.log('ESC key pressed, closing...') // 디버깅용
     emit('close')
   }
 }
 
 onMounted(() => {
+  console.log('ReplyForm mounted') // 디버깅용
+  
   // 입력창에 포커스
   nextTick(() => {
     if (replyInputRef.value) {
@@ -61,21 +79,27 @@ onMounted(() => {
     }
   })
 
-  // 외부 클릭 이벤트 등록
-  document.addEventListener('click', handleClickOutside)
+  // 외부 클릭 이벤트 등록 - 약간의 지연을 둬서 현재 클릭과 겹치지 않도록
+  setTimeout(() => {
+    console.log('Adding click event listener') // 디버깅용
+    document.addEventListener('click', handleClickOutside, true) // capture phase 사용
+    document.addEventListener('keydown', handleKeyDown)
+  }, 100)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+  console.log('ReplyForm unmounted') // 디버깅용
+  document.removeEventListener('click', handleClickOutside, true)
+  document.removeEventListener('keydown', handleKeyDown)
 })
+
 </script>
 
 <style lang="scss" scoped>
 .reply-input-form {
-  margin: 15px 0 15px 36px;
+  margin: 5px 0 0 36px;
   background-color: #f5f5f5;
   border: 1px solid #dddddd;
-  border-radius: 5px;
 
   .reply-form {
     display: flex;
@@ -108,7 +132,6 @@ onUnmounted(() => {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 0 5px 5px 0;
 
       i {
         color: #ffffff;

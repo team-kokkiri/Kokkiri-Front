@@ -69,7 +69,7 @@ onMounted(() => {
   post.value = boardSample.find(item => Number(item.id) === postId) || null
 })
 
-// 댓글 등록
+// 댓글 등록 (백엔드 처리 해야함)
 const onSubmitComment = (commentData) => {
   if (!post.value) return
   if (!post.value.comments) post.value.comments = []
@@ -86,7 +86,7 @@ const onSubmitComment = (commentData) => {
   post.value.commentCount = (post.value.commentCount || 0) + 1
 }
 
-// 대댓글 등록
+// 대댓글 등록 (백엔드 처리 해야함)
 const onSubmitReply = (replyData) => {
   if (!post.value) return
 

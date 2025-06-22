@@ -3,7 +3,7 @@
     <div class="signup-inner">
       <div class="signup-header-box">
         <div class="signup-logo">
-          <img src="../assets/img/마스코트잔디.png" alt="로고"/>
+          <img src="../../assets/img/마스코트잔디.png" alt="로고"/>
         </div>
         <h2 class="signup-title">회원가입</h2>
         <div class="rolling-banner-wrap">
@@ -87,10 +87,10 @@
         </div>
         <div class="signup-sns-list">
           <a :href="`http://localhost:9090/oauth2/authorization/kakao?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn kakao">
-            <img src="../assets/img/카카오로고.svg" alt="">
+            <img src="../../assets/img/카카오로고.svg" alt="">
           </a>
           <a :href="`http://localhost:9090/oauth2/authorization/google?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn google">
-            <img src="../assets/img/구글로고.svg" alt="">
+            <img src="../../assets/img/구글로고.svg" alt="">
           </a>
         </div>
       </div>

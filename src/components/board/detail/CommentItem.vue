@@ -42,6 +42,7 @@
         v-if="replyInputVisible === comment.id"
         :comment-id="comment.id"
         @submit="$emit('submit-reply', $event)"
+        @close="handleCloseReply"
     />
   </div>
 </template>
@@ -63,7 +64,14 @@ defineProps({
   }
 })
 
-defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply'])
+// close-reply 이벤트 추가
+const emit = defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply', 'close-reply'])
+
+// 대댓글 창 닫기 핸들러
+const handleCloseReply = () => {
+  console.log('ReplyForm close event received') // 디버깅용
+  emit('close-reply')
+}
 
 // 날짜 포맷터
 function formatDate(str) {

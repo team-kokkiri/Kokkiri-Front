@@ -10,6 +10,7 @@
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
         @submit-reply="handleSubmitReply"
+        @close-reply="handleCloseReply"
     />
   </div>
 </template>
@@ -45,6 +46,12 @@ const handleSubmitReply = (data) => {
   // 대댓글 등록 후 입력창 닫기
   replyInputVisible.value = null
   emit('submit-reply', data)
+}
+
+// 대댓글 창 닫기 핸들러 추가
+const handleCloseReply = () => {
+  console.log('Closing reply form...') // 디버깅용
+  replyInputVisible.value = null
 }
 </script>
 

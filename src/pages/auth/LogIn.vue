@@ -3,7 +3,7 @@
     <div class="login-inner">
       <!-- 상단 로고+서비스명 -->
       <div class="login-header-box">
-        <img class="login-logo" src="../assets/img/로그인로고.png" alt="로고" />
+        <img class="login-logo" src="../../assets/img/로그인로고.png" alt="로고" />
       </div>
 
       <!-- 본문 영역 -->
@@ -49,10 +49,10 @@
         <span>간편 로그인</span>
         <div class="easy-login-box">
           <a :href="'http://localhost:9090/oauth2/authorization/kakao'" class="sns-btn kakao">
-            <img src="../assets/img/카카오로고.svg" alt="카카오" />
+            <img src="../../assets/img/카카오로고.svg" alt="카카오" />
           </a>
           <a :href="'http://localhost:9090/oauth2/authorization/google'" class="sns-btn google">
-            <img src="../assets/img/구글로고.svg" alt="구글" />
+            <img src="../../assets/img/구글로고.svg" alt="구글" />
           </a>
         </div>
       </div>

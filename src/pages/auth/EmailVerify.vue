@@ -2,13 +2,13 @@
   <div class="email-verification-container">
     <div class="email-verification-inner">
       <div class="email-emoji-box">
-        <img src="../assets/img/마스코트잔디.png" alt="코끼리 이모지" />
+        <img src="../../assets/img/마스코트잔디.png" alt="코끼리 이모지" />
       </div>
       <div class="email-title">
         <span>인증 메일을 보내드렸어요.</span>
       </div>
       <div class="email-image-box">
-        <img src="../assets/img/love-letter.png" alt="메일 일러스트" />
+        <img src="../../assets/img/love-letter.png" alt="메일 일러스트" />
       </div>
       <div class="email-desc-box">
         <div class="email-desc-main">

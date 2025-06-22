@@ -3,7 +3,7 @@
     <div class="classcode-inner">
       <!-- 로고 박스 -->
       <div class="classcode-logo-box">
-        <img src="../assets/img/마스코트잔디.png" alt="코끼리 로고" />
+        <img src="../../assets/img/마스코트잔디.png" alt="코끼리 로고" />
       </div>
 
       <!-- 타이틀/설명 -->
