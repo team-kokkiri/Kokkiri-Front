@@ -25,16 +25,16 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
                 <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
               </svg>
-              <em>99</em>
+              <em>{{ totalUnreadNotifications }}</em>
             </button>
             <!-- 알림 팝업 드롭다운 -->
             <div v-if="showNotification" class="notification-dropdown" ref="notificationRef">
               <div class="notification-header">
                 <h3 class="title">알림</h3>
-                <em class="badge-count">8</em>
+                <em class="badge-count">{{totalUnreadNotifications}}</em>
                 <button type="button" class="btn-read-all">모두 읽음</button>
               </div>
-              <div class="notification-list">
+              <div class="notification-list" ref="notificationListRef">
                 <div
                     class="notification-item"
                     v-for="item in notifications"
@@ -46,7 +46,7 @@
                   ></div>
                   <div class="item-content">
                     <p class="message">{{ item.message }}</p>
-                    <span class="datetime">{{ item.datetime }}</span>
+                    <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
                   </div>
                   <div class="btn-action-wrap">
                     <template v-if="item.type === 'invite'">
@@ -58,6 +58,10 @@
                     </template>
                   </div>
                 </div>
+                <div v-if="isLoading" class="loading-indicator">알림을 불러오는 중...</div>
+               
+                <div v-if="notifications.length === 0 && !isLoading" class="no-data">새로운 알림이 없습니다.</div>
+  
               </div>
             </div>
           </div>
@@ -89,14 +93,27 @@
 
 </style>
 <script setup>
-  import { ref, watch } from 'vue'
+  import { ref, watch, nextTick } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { onMounted, onBeforeUnmount } from 'vue'
+  import { EventSourcePolyfill } from 'event-source-polyfill';
+  import  axios  from 'axios'
+
 
   const router = useRouter()
   const route = useRoute()
+  const isLogin = ref(false)
   const showNotification = ref(false)
   const notificationRef = ref(null)
+  const notifications = ref([])
+  const lastNotificationId = ref(null); // 다음 페이지를 가져올 때 사용할 마지막 알림 ID
+  const isLoading = ref(false); // 데이터 로딩 중인지 여부
+  const hasMore = ref(true); // 더 가져올 데이터가 있는지 여부 (마지막 페이지인지)
+  const totalUnreadNotifications = ref(0);
+  // 스크롤 이벤트 리스너를 위한 참조
+  const notificationListRef = ref(null);
+  let eventSource = null
+  let reconnectTimeout = null
 
   // 메뉴 리스트
   const menuList = [
@@ -105,51 +122,6 @@
     { name: '파티찾기', path: '/party' },
     { name: '공지사항', path: '/notice' },
     { name: '관리자페이지', path: '/admin' }
-  ]
-  // 알림 리스트 << 실제로는 백엔드에서 데이터 가져와야함!!
-  const notifications = [
-    {
-      id: 1,
-      type: 'invite',
-      message: "고라니 님의 채팅방에 초대되었습니다.",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 2,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 3,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 4,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 5,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 6,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 7,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
   ]
 
   // activeMenu: URL에 따라 자동 동기화(설명은 아래에!)
@@ -185,13 +157,194 @@
       showNotification.value = false
     }
   }
-  onMounted(() => {
-    document.addEventListener('mousedown', handleClickOutside)
+
+  // SSE 연결
+function connectSSE() {
+  const token = localStorage.getItem('accessToken')
+  
+  eventSource = new EventSourcePolyfill(`${process.env.VUE_APP_API_BASE_URL}/api/notification/connect`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   })
+
+  eventSource.onopen = () => {
+    console.log('✅ SSE 연결됨')
+    if (reconnectTimeout) {
+      clearTimeout(reconnectTimeout)
+      reconnectTimeout = null
+    }
+  }
+
+  // onmessage 대신 addEventListener 사용
+  eventSource.addEventListener('sse', (event) => { // 'notification'은 서버와 약속된 이벤트 이름으로 변경해야 합니다.
+    console.log("✅ 'sse' 이벤트 수신 성공!");
+    try {
+      // 서버가 보낸 데이터가 JSON 문자열 형태가 아닐 수도 있습니다.
+      // 만약 'Last-Event-ID'와 같은 메타 데이터만 온다면 event.data가 비어있을 수 있습니다.
+      if (!event.data || event.data.trim() === '') {
+          console.log('📝 데이터가 없는 이벤트 수신 (e.g., keep-alive ping)');
+          return;
+      }
+
+      const data = JSON.parse(event.data);
+      console.log('🔥 [notification 이벤트]:', data);
+      notifications.value.unshift({
+        id: `sse-${Date.now()}`,
+        type: data.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
+        message: data.content,
+        datetime: data.actionCreatedAt,
+        isRead: data.isRead
+      });
+    } catch (e) {
+      console.error('❌ 알림 파싱 실패:', e);
+      console.error('📋 수신된 원본 데이터:', event.data); // 파싱 실패 시 원본 데이터를 확인하는 것이 중요합니다.
+    }
+  });
+
+  eventSource.onmessage = (event) => {
+    console.log("onmessage 진입");
+    console.log("기본 message 이벤트 수신:", event.data);
+  }
+
+  eventSource.onerror = (err) => {
+    console.error('❌ SSE 에러:', err)
+    eventSource.close()
+    if (!reconnectTimeout) {
+      reconnectTimeout = setTimeout(() => {
+        console.log('♻️ SSE 재연결 시도')
+        connectSSE()
+      }, 3000)
+    }
+  }}
+
+  // 기존 알림 가져오기
+  async function fetchNotifications() {
+    if (isLoading.value || !hasMore.value) { // 이미 로딩 중이거나 더 이상 데이터가 없으면 요청하지 않음
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        isLoading.value = false;
+        return;
+      }
+
+      const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/notification/list`, {
+        params: {
+          lastId: lastNotificationId.value, // 처음 로딩 시 빈 값
+          size: 10
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      // ✅ 백엔드 응답이 NotificationPageResponse 객체이므로, data.notifications에 접근
+      const fetchedData = response.data.notifications;
+      const hasNextPage = response.data.hasNext; // ✅ 백엔드에서 받은 hasNext 값
+      
+      console.log(response.data);
+
+      const newNotifications = fetchedData.map(item => ({
+        id: item.id,
+        type: item.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
+        message: item.content,
+        datetime: item.actionCreatedAt,
+        isRead: item.isRead === 'Y'
+      }));
+
+      totalUnreadNotifications.value = response.data.totalUnreadCount;
+      console.log("totalUnreadNotifications.value: " + totalUnreadNotifications.value);
+
+       // 새로운 알림을 기존 알림 배열에 추가 (무한 스크롤)
+      notifications.value.push(...newNotifications);
+      hasMore.value = hasNextPage;
+
+      if (newNotifications.length > 0) { 
+        lastNotificationId.value = newNotifications[newNotifications.length - 1].id;
+      } 
+
+    } catch (error) {
+      console.error('📛 알림 리스트 불러오기 실패:', error)
+      // 에러 발생 시 hasMore를 false로 설정하거나 사용자에게 알림
+      hasMore.value = false; // 에러 시 더 이상 로드하지 않도록
+    } finally {
+      isLoading.value = false; // 로딩 상태 해제
+    }
+  }
+
+  // 스크롤 이벤트 핸들러
+  function handleScroll() {
+    const element = notificationListRef.value;
+    if (!element) return;
+
+    // 스크롤이 거의 끝에 도달했을 때 (예: 하단 100px 이내)
+    const isNearBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 100;
+
+    if (isNearBottom && !isLoading.value && hasMore.value) {
+      fetchNotifications();
+    }
+  }
+
+
+  onMounted(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      isLogin.value = true;
+      fetchNotifications(); // 초기 알림 로드
+      connectSSE();
+    }
+
+    // 알림 드롭다운이 열렸을 때만 스크롤 이벤트 리스너 추가
+    watch(showNotification, (newValue) => {
+      if (newValue) {
+        // 드롭다운이 열리면 리스트 요소에 스크롤 이벤트 리스너 추가
+        // nextTick을 사용하여 DOM이 업데이트된 후 접근
+        nextTick(() => {
+          if (notificationListRef.value) {
+            notificationListRef.value.addEventListener('scroll', handleScroll);
+          }
+        });
+      } else {
+        // 드롭다운이 닫히면 리스너 제거 (불필요한 이벤트 방지)
+        if (notificationListRef.value) {
+          notificationListRef.value.removeEventListener('scroll', handleScroll);
+        }
+      }
+    });
+  });
 
   onBeforeUnmount(() => {
     document.removeEventListener('mousedown', handleClickOutside)
+    
+    // showNotification watch 내부에서 관리되므로 이 부분은 필요 없을 수도 있음
+    if (notificationListRef.value) {
+      notificationListRef.value.removeEventListener('scroll', handleScroll);
+    }
+    if (eventSource) {
+      eventSource.close()
+    }
+    if (reconnectTimeout) {
+      clearTimeout(reconnectTimeout)
+    }
   })
+
+  function formatLocalDateTime(dateTimeStr) {
+      if (!dateTimeStr) return '';
+      const date = new Date(dateTimeStr);
+      if (isNaN(date)) return '';
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const h = String(date.getHours()).padStart(2, '0');
+      const min = String(date.getMinutes()).padStart(2, '0');
+      return `${y}-${m}-${d} ${h}:${min}`;
+    }
   ///////////////////////////////////////////////////////////////////
 
   // 채팅, 마이페이지 이동
