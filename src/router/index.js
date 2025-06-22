@@ -42,7 +42,7 @@ const routes = [
       },
       {
         path: 'chat',
-        component: () => import('@/pages/main/ChatPage.vue'),
+        component: () => import('@/pages/chat/ChatPage.vue'),
         meta: { showNav: false, showRight: false },
       },
       {

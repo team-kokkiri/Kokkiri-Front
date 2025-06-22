@@ -85,8 +85,290 @@
 
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/assets/scss/style';
 
+/* ###### Component-Header #######*/
+.mainpage-header {
+  width: 100%;
+  height: 80px;
+  min-width: 1180px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  background: #fff; // 필요시 배경색 조절
+  border-bottom: 1px solid $dim-gray;
+  .header-inner {
+    width: 1180px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    //border: 1px solid black;
+
+    .header-row {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        img {
+          width: 246px;
+          height: 80px; // 로고 이미지 크기 조절
+          margin-bottom: 1.5px;
+        }
+      }
+
+      .header-center {
+        display: flex;
+        gap: 42px;
+        margin-right: 90px;
+
+        .gnb-menu-item {
+          position: relative;
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          height: 80px;
+
+          .menu-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: $dark-black;
+            transition: color 0.2s;
+          }
+
+          &.active {
+            border-bottom: 5px solid $main-color;
+            padding-top: 10px;
+          }
+          &:hover .menu-text {
+            color: $main-color;
+          }
+          &.active .menu-text {
+            color: $main-color // 활성화된 메뉴 글씨 색상
+          }
+        }
+      }
+
+      .header-right {
+        display: flex;
+        gap: 24px;
+        .util-icon-item {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid $light-black;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          // 헤더 우측 버튼3개
+          .icon-btn {
+            display: flex;
+            align-items: center;
+            position: relative;
+            font-size: 24px;
+            background: white;
+            border: none;
+            i {
+              font-size: 24px;
+              transition: color 0.2s;
+            }
+            .bi.bi-bell-fill {
+              width: 20px;
+              height: 20px;
+              fill: white;
+              stroke: $dark-black;
+              stroke-width: 1.5px;
+            }
+            .bi.bi-chat-dots-fill {
+              width: 20px;
+              height: 20px;
+              fill: $dim-black;
+            }
+            .bi.bi-person-fill {
+              width: 24px;
+              height: 24px;
+              fill: $dim-black;
+            }
+
+            em {
+              width: 20px;
+              height: 20px;
+              position: absolute;
+              top: -15px;
+              right: -10px;
+              background: $orangered;
+              color: white;
+              font-size: 12px;
+              font-weight: normal;
+              border-radius: 30px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+          }
+          // 알림창 눌렀을때 드롭다운창
+          .notification-dropdown {
+            position: absolute;
+            top: 48px;
+            right: 0;
+            width: 458px;
+            height: 380px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px 0 rgba(80, 86, 127, 0.15);
+            border: 2px solid $dim-gray;
+            z-index: 100;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.18s;
+
+            // 헤더
+            .notification-header {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-bottom: 1px solid $dim-gray;
+              padding: 34px 27px;
+              height: 80px;
+
+              h3.title {
+                font-size: 24px;
+                font-weight: normal;
+                color: $dark-black;
+                margin: 0 10px 0 0;
+              }
+
+              em.badge-count {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 24px;
+                height: 24px;
+                font-size: 16px;
+                font-weight: 400;
+                background: $orangered;
+                color: #fff;
+                border-radius: 7px;
+                margin-left: 4px;
+                margin-top: 3px;
+                font-family: SpoqaHanSansNeo-Regular, serif;
+                font-style: normal;
+              }
+
+              .btn-read-all {
+                margin-left: auto;
+                background: none;
+                border: none;
+                color: $orangered;
+                font-size: 16px;
+                font-weight: 430;
+                cursor: pointer;
+                padding: 0;
+              }
+            }
+
+            // 알림 리스트 (최대 5개, 스크롤)
+            .notification-list {
+              flex: 1 1 0%;
+              max-height: 300px;        // 60px * 5
+              overflow-y: auto;
+
+              &::-webkit-scrollbar {
+                width: 8px;
+              }
+              &::-webkit-scrollbar-thumb {
+                background: #d9d9d9;
+                border-radius: 8px;
+              }
+
+              .notification-item {
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                min-height: 60px;
+                height: 60px;
+                border-bottom: 1px solid $dim-gray;
+
+                &:last-child {
+                  border-bottom: none;
+                }
+
+                .item-mark {
+                  width: 15px;
+                  height: 58px;
+                  background: white;
+                  flex-shrink: 0;
+                  border: none;
+                  margin-top: 1px;
+                  &.invite {
+                    background: $orangered;
+                  }
+                }
+
+                .item-content {
+                  flex: 1 1 0%;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  margin-top: 12px;
+                  margin-left: 22px;
+                  p.message {
+                    font-size: 16px;
+                    font-weight: 500;
+                    color: $dark-black;
+                    margin: 0;
+                    line-height: 1.2;
+                    font-family: $secondary-kr;
+                    letter-spacing: 1px;
+                  }
+                  span.datetime {
+                    font-size: 12px;
+                    color: $dim-black;
+                    margin-top: 2px;
+                    font-weight: normal;
+                  }
+                }
+                .btn-action-wrap {
+                  display: flex;
+                  align-items: center;
+                  height: 100%;
+                  margin-top: 15px;
+                  margin-right: 6px;
+                  .btn-delete,
+                  .btn-accept,
+                  .btn-reject {
+                    background: none;
+                    border: none;
+                    font-size: 12px;
+                    font-weight: 430;
+                    color: $dim-black;
+                    margin-left: 12px;
+                    cursor: pointer;
+                    padding: 0;
+                  }
+                }
+              }
+            }
+          }
+
+          @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-10px);}
+            100% { opacity: 1; transform: translateY(0);}
+          }
+        }
+      }
+    }
+  }
+}
 </style>
 <script setup>
   import { ref, watch } from 'vue'

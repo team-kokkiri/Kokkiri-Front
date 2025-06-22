@@ -52,12 +52,6 @@ function formatDate(dateString) {
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    border-color: #2196f3;
-    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
-  }
 
   h3.title {
     font-weight: bold;

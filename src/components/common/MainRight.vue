@@ -100,6 +100,151 @@
   }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/assets/scss/style';
 
+/* ###### Component-Right #######*/
+.mainbody-right {
+  width: 323px;
+  background: none;
+  margin-top: 0;
+
+  .mainbody-right-inner {
+    width: 100%;
+    height: auto;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .board-search-box {
+    width: 323px;
+    height: 40px;
+    border: 2px solid #dddddd;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    margin-bottom: 6px;
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      color: #777777;
+      outline: none;
+
+      &::placeholder {
+        color: #777777;
+        font-size: 14px;
+        font-family: 'Noto Sans KR', sans-serif;
+      }
+    }
+
+    i {
+      font-size: 16px;
+      color: #777777;
+      margin-left: 6px;
+    }
+    .search-btn {
+      border: none;
+      background: none;
+    }
+  }
+
+  .right-board-section {
+    width: 100%;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 6px;
+
+    .right-board-list {
+      margin-top: 0;
+      width: 323px;
+      background: #f5f5f5;
+      border: 1px solid #dddddd;
+      border-radius: 0;
+      padding: 0;
+
+      .right-board-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 40px;
+        padding: 0 16px;
+        border-bottom: 1px solid #dddddd;
+
+        .right-board-title {
+          font-family: 'Noto Sans KR', sans-serif;
+          font-size: 14px;
+          font-weight: bold;
+          color: #fd5631;
+
+          &.notice {
+            color: #fd5631;
+          }
+          &.best {
+            color: #fd5631;
+          }
+        }
+
+        .right-board-more {
+          font-family: 'Noto Sans KR', sans-serif;
+          font-size: 11px;
+          font-weight: 400;
+          color: #999999;
+          text-decoration: none;
+        }
+      }
+
+      .right-board-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 38px;
+        padding: 0 16px;
+        background: #f5f5f5;
+        border-bottom: 1px solid #dddddd;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 16px;
+        color: #333333;
+        cursor: pointer;
+        transition: background 0.12s;
+        margin: 0;
+        &:hover {
+          background: #dddddd;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &.empty {
+          cursor: default;
+          background: #f5f5f5;
+        }
+
+        .right-board-text {
+          font-size: 12px;
+          color: #333333;
+          font-weight: 400;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 60%;
+        }
+
+        .right-board-meta {
+          font-size: 11px;
+          color: #999999;
+          min-width: 62px;
+          text-align: right;
+        }
+      }
+    }
+  }
+}
 </style>
