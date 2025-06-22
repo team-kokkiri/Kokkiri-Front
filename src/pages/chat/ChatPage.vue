@@ -1,3 +1,4 @@
+
 <template>
   <section class="chat-room">
     <div class="chat-room-inner">
@@ -8,8 +9,20 @@
           @select="selectRoom"
       />
 
-      <!-- 우측: 채팅 메인 -->
-      <div class="chat-main">
+      <!-- 우측: 채팅 메인 OR 초대 화면 -->
+      <!-- 초대 모드일 때 (SSOT 원칙 적용) -->
+      <InviteView
+          v-if="showInviteView"
+          :users="availableUsers"
+          :invitedUserIds="invitedUserIds"
+          :searchQuery="searchQuery"
+          @back="closeInviteView"
+          @invite="handleUserInvite"
+          @search="handleInviteSearch"
+      />
+
+      <!-- 일반 채팅 모드일 때 -->
+      <div class="chat-main" v-else>
         <!-- 상단 헤더 -->
         <div class="chat-header">
           <div class="chat-room-name">
@@ -27,8 +40,9 @@
             </div>
           </div>
         </div>
+
         <!-- 채팅 메시지 목록 -->
-        <div class="chat-content">
+        <div class="chat-content" ref="chatContentRef">
           <div
               class="chat-message"
               v-for="msg in currentRoom.messages"
@@ -44,6 +58,7 @@
             </div>
           </div>
         </div>
+
         <!-- 채팅 입력창 -->
         <div class="chat-input-wrap">
           <input
@@ -64,10 +79,12 @@
 
 <script setup>
 import ChatSidebar from '@/components/chat/ChatSidebar.vue'
+import InviteView from '@/components/chat/InviteView.vue'
 import Avatar from '@/assets/img/0.png'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { mockUsers } from '@/data/mockUsers.js'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 
-// 더미 채팅방 데이터 예시
+// ===== 채팅방 관련 데이터 (기존) =====
 const chatRooms = ref([
   {
     id: 1,
@@ -78,7 +95,6 @@ const chatRooms = ref([
     unread: 9,
     messages: [
       { id: 1, avatar: Avatar, nickname: '고라니', time: '오전 9:53', text: 'ㄷㄷㄷㄷㄷㄷㄷ' },
-      // ... 추가 메시지
     ]
   },
   {
@@ -92,20 +108,31 @@ const chatRooms = ref([
       { id: 1, avatar: Avatar, nickname: 'ddd', time: '오전 8:15', text: 'ㅋㅋㅋㅋ' }
     ]
   }
-  // ...추가 채팅방
 ])
-const activeRoomId = ref(chatRooms.value[0].id)
 
+const activeRoomId = ref(chatRooms.value[0].id)
 const input = ref('')
 const menuOpen = ref(false)
 const menuContainer = ref(null)
 const menuDropdown = ref(null)
+const chatContentRef = ref(null) // 채팅 컨텐츠 영역 ref 추가
 
+// ===== 초대 관련 데이터 (SSOT 원칙 적용) =====
+const showInviteView = ref(false)
+const searchQuery = ref('')
+const invitedUserIds = ref([]) // 초대된 사용자 ID 관리
+
+// 사용자 목록 (테스트용 더미 데이터)
+const availableUsers = ref(mockUsers)
+
+// ===== Computed =====
 const currentRoom = computed(() =>
     chatRooms.value.find(room => room.id === activeRoomId.value) || chatRooms.value[0]
 )
 
-// 프론트 테스트용
+// ===== 기존 채팅 관련 함수들 =====
+
+// 메시지 전송
 function sendMessage() {
   if (input.value.trim() !== '') {
     currentRoom.value.messages.push({
@@ -116,47 +143,110 @@ function sendMessage() {
       text: input.value
     })
     input.value = ''
+    
+    // 메시지 추가 후 스크롤을 맨 아래로
+    scrollToBottom()
   }
 }
 
-// 외부 클릭 감지 함수 (모달창 닫는용입니다)
+// 메뉴 외부 클릭 감지
 function handleClickOutside(event) {
   if (menuOpen.value && menuContainer.value && !menuContainer.value.contains(event.target)) {
     menuOpen.value = false
   }
 }
 
-// ESC 키 감지 함수
+// ESC 키 처리
 function handleEscapeKey(event) {
-  if (event.key === 'Escape' && menuOpen.value) {
-    menuOpen.value = false
+  if (event.key === 'Escape') {
+    if (showInviteView.value) {
+      closeInviteView()
+    } else if (menuOpen.value) {
+      menuOpen.value = false
+    }
   }
 }
 
+// 채팅방 선택
 function selectRoom(id) {
   activeRoomId.value = id
+  showInviteView.value = false // 방 선택시 초대 화면 닫기
+  searchQuery.value = '' // 검색어 초기화
+  
+  // 채팅방 변경 후 스크롤을 맨 아래로
+  nextTick(() => {
+    scrollToBottom()
+  })
 }
 
+// 스크롤을 맨 아래로 이동
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatContentRef.value) {
+      chatContentRef.value.scrollTop = chatContentRef.value.scrollHeight
+    }
+  })
+}
+
+// 메뉴 토글
 function toggleMenu() {
   menuOpen.value = !menuOpen.value
 }
 
-function openInvite() {
-  menuOpen.value = false
-  // 초대 모달 오픈 등
-}
-
+// 채팅방 나가기
 function leaveRoom() {
   menuOpen.value = false
-  // 채팅방 나가기 등
+  // 채팅방 나가기 로직
 }
 
+// ===== 초대 관련 함수들 =====
+
+// 초대 화면 열기
+function openInvite() {
+  menuOpen.value = false
+  showInviteView.value = true
+}
+
+// 초대 화면 닫기
+function closeInviteView() {
+  showInviteView.value = false
+  searchQuery.value = '' // 검색어 초기화
+}
+
+// 사용자 검색
+function handleInviteSearch(query) {
+  searchQuery.value = query
+  // TODO: 추후 실제 검색 API 연동시 구현
+}
+
+// 사용자 초대 처리
+function handleUserInvite(user) {
+  // 임시 처리: 초대된 사용자 목록에 추가
+  invitedUserIds.value.push(user.id)
+  console.log(`${user.nickname}님을 초대했습니다.`)
+
+  // TODO: 추후 실제 API 연동시 구현
+}
+
+// ===== 라이프사이클 훅 =====
 
 // 컴포넌트 마운트시 이벤트 리스너 등록
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('keydown', handleEscapeKey)
+  
+  // 초기 스크롤을 맨 아래로
+  scrollToBottom()
 })
+
+// 현재 채팅방의 메시지가 변경될 때 스크롤 자동 이동
+watch(
+  () => currentRoom.value.messages,
+  () => {
+    scrollToBottom()
+  },
+  { deep: true }
+)
 
 // 컴포넌트 언마운트시 이벤트 리스너 제거 (메모리 누수 방지)
 onUnmounted(() => {
