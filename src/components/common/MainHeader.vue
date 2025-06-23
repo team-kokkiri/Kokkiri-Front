@@ -108,7 +108,8 @@ const props = defineProps({
   hasMore: {
     type: Boolean,
     default: true
-  }
+  },
+  formatLocalDateTime: { type: Function, required: true }
 })
 
 // Emits 정의 - 부모 컴포넌트로 이벤트 전달
@@ -260,6 +261,20 @@ onMounted(() => {
     }
   })
 })
+// onMounted(() => {
+//   document.addEventListener('mousedown', handleClickOutside)
+  
+//   const listEl = notificationListRef.value
+//   if (listEl) {
+//     listEl.addEventListener('scroll', () => {
+//       if (listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 10) {
+//         if (props.hasMore && !props.isLoading) {
+//           emit('fetchMoreNotifications')
+//         }
+//       }
+//     })
+//   }
+// })
 
 onBeforeUnmount(() => {
   document.removeEventListener('mousedown', handleClickOutside)
