@@ -1,9 +1,8 @@
 <template>
-
   <div class="mainpage-header">
     <div class="header-inner">
       <div class="header-row">
-        <div class="header-left" @click="goMain">
+        <div class="header-left">
           <img src="../../assets/img/메인페이지로고.png" alt="로고" />
         </div>
         <div class="header-center">
@@ -25,16 +24,16 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
                 <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
               </svg>
-              <em>99</em>
+              <em>{{ totalUnreadNotifications }}</em>
             </button>
             <!-- 알림 팝업 드롭다운 -->
             <div v-if="showNotification" class="notification-dropdown" ref="notificationRef">
               <div class="notification-header">
                 <h3 class="title">알림</h3>
-                <em class="badge-count">8</em>
-                <button type="button" class="btn-read-all">모두 읽음</button>
+                <em class="badge-count">{{ totalUnreadNotifications }}</em>
+                <button type="button" class="btn-read-all" @click="handleMarkAllAsRead">모두 읽음</button>
               </div>
-              <div class="notification-list">
+              <div class="notification-list" ref="notificationListRef">
                 <div
                     class="notification-item"
                     v-for="item in notifications"
@@ -46,18 +45,20 @@
                   ></div>
                   <div class="item-content">
                     <p class="message">{{ item.message }}</p>
-                    <span class="datetime">{{ item.datetime }}</span>
+                    <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
                   </div>
                   <div class="btn-action-wrap">
                     <template v-if="item.type === 'invite'">
-                      <button class="btn-accept">수락</button>
-                      <button class="btn-reject">거절</button>
+                      <button class="btn-accept" @click="handleAcceptInvitation(item.id)">수락</button>
+                      <button class="btn-reject" @click="handleRejectInvitation(item.id)">거절</button>
                     </template>
                     <template v-else>
-                      <button class="btn-delete">삭제</button>
+                      <button class="btn-delete" @click="handleDeleteNotification(item.id)">삭제</button>
                     </template>
                   </div>
                 </div>
+                <div v-if="isLoading" class="loading-indicator">알림을 불러오는 중...</div>
+                <div v-if="notifications.length === 0 && !isLoading" class="no-data">새로운 알림이 없습니다.</div>
               </div>
             </div>
           </div>
@@ -82,8 +83,192 @@
       </div>
     </div>
   </div>
-
 </template>
+
+
+<script setup>
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, defineProps, defineEmits } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useNotifications } from '@/composables/useNotifications'
+
+// Props 정의 - 부모 컴포넌트로부터 알림 데이터를 받음
+const props = defineProps({
+  notifications: {
+    type: Array,
+    default: () => []
+  },
+  totalUnreadNotifications: {
+    type: Number,
+    default: 0
+  },
+  isLoading: {
+    type: Boolean,
+    default: false
+  },
+  hasMore: {
+    type: Boolean,
+    default: true
+  }
+})
+
+// Emits 정의 - 부모 컴포넌트로 이벤트 전달
+const emit = defineEmits([
+  'deleteNotification',
+  'markAllAsRead',
+  'acceptInvitation',
+  'rejectInvitation',
+  'fetchMoreNotifications'
+])
+
+const router = useRouter()
+const route = useRoute()
+const showNotification = ref(false)
+const notificationRef = ref(null)
+const notificationListRef = ref(null)
+
+// 날짜 포맷팅을 위해 composable에서 가져오기
+const { formatLocalDateTime} = useNotifications()
+
+// 메뉴 리스트
+const menuList = [
+  { name: '게시판', path: '' },
+  { name: '캘린더', path: '/calendar' },
+  { name: '파티찾기', path: '/party' },
+  { name: '공지사항', path: '/notice' },
+  { name: '관리자페이지', path: '/admin' }
+]
+
+// activeMenu: URL에 따라 자동 동기화
+const activeMenu = ref('게시판')
+watch(
+    () => route.path,
+    (newPath) => {
+      const found = menuList.find(menu => `/main-page${menu.path}` === newPath)
+      if (found) activeMenu.value = found.name
+    },
+    { immediate: true }
+)
+
+/**
+ * 메뉴 클릭 핸들러
+ * @param {object} menu - 선택된 메뉴 객체
+ */
+function handleMenuClick(menu) {
+  activeMenu.value = menu.name
+  router.push(`/main-page${menu.path}`)
+}
+
+/**
+ * 알림 팝업 토글
+ */
+function toggleNotification() {
+  showNotification.value = !showNotification.value
+}
+
+/**
+ * 알림 삭제 핸들러 - 부모 컴포넌트로 이벤트 전달
+ * @param {string|number} notificationId - 삭제할 알림 ID
+ */
+function handleDeleteNotification(notificationId) {
+  emit('deleteNotification', notificationId)
+}
+
+/**
+ * 모든 알림 읽음 처리 핸들러 - 부모 컴포넌트로 이벤트 전달
+ */
+function handleMarkAllAsRead() {
+  emit('markAllAsRead')
+}
+
+/**
+ * 초대 수락 핸들러 - 부모 컴포넌트로 이벤트 전달
+ * @param {string|number} notificationId - 수락할 초대 알림 ID
+ */
+function handleAcceptInvitation(notificationId) {
+  emit('acceptInvitation', notificationId)
+}
+
+/**
+ * 초대 거절 핸들러 - 부모 컴포넌트로 이벤트 전달
+ * @param {string|number} notificationId - 거절할 초대 알림 ID
+ */
+function handleRejectInvitation(notificationId) {
+  emit('rejectInvitation', notificationId)
+}
+
+/**
+ * 화면 바깥 클릭 시 알림창 닫기
+ * @param {Event} event - 클릭 이벤트
+ */
+function handleClickOutside(event) {
+  if (
+      showNotification.value &&
+      notificationRef.value &&
+      !notificationRef.value.contains(event.target)
+  ) {
+    showNotification.value = false
+  }
+}
+
+/**
+ * 채팅 페이지로 이동
+ */
+function goChat() {
+  router.push('/main-page/chat')
+}
+
+/**
+ * 마이페이지로 이동
+ */
+function goMypage() {
+  router.push('/main-page/mypage')
+}
+
+// 스크롤 이벤트 핸들러 (무한 스크롤용)
+let scrollHandler = null
+
+// 생명주기 훅
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside)
+
+  // 알림 드롭다운이 열렸을 때만 스크롤 이벤트 리스너 추가
+  watch(showNotification, (newValue) => {
+    if (newValue) {
+      // 드롭다운이 열리면 리스트 요소에 스크롤 이벤트 리스너 추가
+      nextTick(() => {
+        if (notificationListRef.value) {
+          // 스크롤 핸들러를 생성하여 부모로 이벤트 전달
+          scrollHandler = function() {
+            const element = notificationListRef.value
+            if (!element) return
+
+            const isNearBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 100
+
+            if (isNearBottom && !props.isLoading && props.hasMore) {
+              emit('fetchMoreNotifications')
+            }
+          }
+          notificationListRef.value.addEventListener('scroll', scrollHandler)
+        }
+      })
+    } else {
+      // 드롭다운이 닫히면 리스너 제거
+      if (notificationListRef.value && scrollHandler) {
+        notificationListRef.value.removeEventListener('scroll', scrollHandler)
+        scrollHandler = null
+      }
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+
+  if (notificationListRef.value && scrollHandler) {
+    notificationListRef.value.removeEventListener('scroll', scrollHandler)
+  }
+})
+</script>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/style';
@@ -370,120 +555,3 @@
   }
 }
 </style>
-<script setup>
-  import { ref, watch } from 'vue'
-  import { useRouter, useRoute } from 'vue-router'
-  import { onMounted, onBeforeUnmount } from 'vue'
-
-  const router = useRouter()
-  const route = useRoute()
-  const showNotification = ref(false)
-  const notificationRef = ref(null)
-
-  // 메뉴 리스트
-  const menuList = [
-    { name: '게시판', path: '' },
-    { name: '캘린더', path: '/calendar' },
-    { name: '파티찾기', path: '/party' },
-    { name: '공지사항', path: '/notice' },
-    { name: '관리자페이지', path: '/admin' }
-  ]
-  // 알림 리스트 << 실제로는 백엔드에서 데이터 가져와야함!!
-  const notifications = [
-    {
-      id: 1,
-      type: 'invite',
-      message: "고라니 님의 채팅방에 초대되었습니다.",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 2,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 3,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 4,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 5,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 6,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-    {
-      id: 7,
-      type: 'comment',
-      message: "내 게시글에 댓글이 등록되었습니다",
-      datetime: "2025.06.16 08:48"
-    },
-  ]
-
-  // activeMenu: URL에 따라 자동 동기화(설명은 아래에!)
-  const activeMenu = ref('게시판')
-  watch(
-      () => route.path,
-      (newPath) => {
-        const found = menuList.find(menu => `/main-page${menu.path}` === newPath)
-        if (found) activeMenu.value = found.name
-      },
-      { immediate: true }
-  )
-
-  // 메뉴 클릭 핸들러
-  function handleMenuClick(menu) {
-    activeMenu.value = menu.name
-    router.push(`/main-page${menu.path}`)
-  }
-
-  // 알림 팝업
-  function toggleNotification() {
-    showNotification.value = !showNotification.value
-  }
-
-  // 화면 바깥 클릭 시 알림창 닫히게
-  ///////////////////////////////////////////////////////////////////
-  function handleClickOutside(event) {
-    if (
-        showNotification.value &&
-        notificationRef.value &&
-        !notificationRef.value.contains(event.target)
-    ) {
-      showNotification.value = false
-    }
-  }
-  onMounted(() => {
-    document.addEventListener('mousedown', handleClickOutside)
-  })
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('mousedown', handleClickOutside)
-  })
-  ///////////////////////////////////////////////////////////////////
-
-  // 채팅, 마이페이지 이동
-  function goChat() {
-    router.push('/main-page/chat')
-  }
-  function goMypage() {
-    router.push('/main-page/mypage')
-  }
-  function goMain() {
-    router.push('/main-page')
-  }
-</script>
