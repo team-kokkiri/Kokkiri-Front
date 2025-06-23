@@ -7,6 +7,7 @@
         <span class="nickname">{{ comment.writer }}</span>
       </div>
       <div class="comment-actions">
+        <button class="btn-edit" @click="$emit('edit', comment)">수정</button>
         <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
         <button class="btn-like" @click="$emit('like', comment)">공감</button>
         <button class="btn-chat" @click="$emit('chat', comment)">채팅</button>
@@ -44,6 +45,14 @@
         @submit="$emit('submit-reply', $event)"
         @close="handleCloseReply"
     />
+    <!-- 수정 입력창 -->
+    <EditForm
+        v-if="editInputVisible === comment.id"
+        :item="comment"
+        item-type="comment"
+        @submit="$emit('submit-edit', $event)"
+        @close="handleCloseEdit"
+    />
   </div>
 </template>
 
@@ -52,6 +61,7 @@ import { defineProps, defineEmits } from 'vue'
 import ReplyList from './ReplyList.vue'
 import ReplyForm from './ReplyForm.vue'
 import defaultAvatar from '@/assets/img/0.png'
+import EditForm from './EditForm.vue'
 
 defineProps({
   comment: {
@@ -61,18 +71,26 @@ defineProps({
   replyInputVisible: {
     type: [Number, String, null],
     default: null
+  },
+  editInputVisible: {
+    type: [Number, String, null],
+    default: null
   }
 })
 
 // close-reply 이벤트 추가
-const emit = defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply', 'close-reply'])
+const emit = defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply', 'close-reply', 'edit', 'submit-edit', 'close-edit'])
 
 // 대댓글 창 닫기 핸들러
 const handleCloseReply = () => {
   console.log('ReplyForm close event received') // 디버깅용
   emit('close-reply')
 }
-
+// 수정 창 닫기 핸들러
+const handleCloseEdit = () => {
+  console.log('EditForm close event received') // 디버깅용
+  emit('close-edit')
+}
 // 날짜 포맷터
 function formatDate(str) {
   if (!str) return ''
@@ -116,6 +134,7 @@ function formatDate(str) {
       display: flex;
       gap: 1px;
 
+      .btn-edit,
       .btn-reply,
       .btn-like,
       .btn-chat,
