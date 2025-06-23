@@ -27,15 +27,15 @@
         <span class="like-count">{{ reply.likeCount }}</span>
       </span>
     </div>
-    <!-- 수정 입력창 -->
-    <EditForm
-        v-if="editInputVisible === reply.id"
-        :item="reply"
-        item-type="reply"
-        @submit="$emit('submit-edit', $event)"
-        @close="handleCloseEdit"
-    />
   </div>
+  <!-- 수정 입력창 -->
+  <EditForm
+      v-if="editInputVisible === reply.id"
+      :item="reply"
+      item-type="reply"
+      @submit="$emit('submit-edit', $event)"
+      @close="handleCloseEdit"
+  />
 </template>
 
 <script setup>
@@ -76,6 +76,7 @@ const handleCloseEdit = () => {
   padding: 10px;
   background-color: #f5f5f5;
   border: 1px solid #dddddd;
+  margin-left: 36px;
 
   .comment-profile {
     display: flex;

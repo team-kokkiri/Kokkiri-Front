@@ -28,7 +28,14 @@
         <span class="like-count">{{ comment.likeCount }}</span>
       </span>
     </div>
-
+    <!-- 수정 입력창 -->
+    <EditForm
+        v-if="editInputVisible === comment.id"
+        :item="comment"
+        item-type="comment"
+        @submit="$emit('submit-edit', $event)"
+        @close="handleCloseEdit"
+    />
     <!-- 대댓글 리스트 -->
     <ReplyList
         v-if="comment.replies && comment.replies.length"
@@ -44,14 +51,6 @@
         :comment-id="comment.id"
         @submit="$emit('submit-reply', $event)"
         @close="handleCloseReply"
-    />
-    <!-- 수정 입력창 -->
-    <EditForm
-        v-if="editInputVisible === comment.id"
-        :item="comment"
-        item-type="comment"
-        @submit="$emit('submit-edit', $event)"
-        @close="handleCloseEdit"
     />
   </div>
 </template>

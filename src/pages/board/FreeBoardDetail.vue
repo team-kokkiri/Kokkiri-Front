@@ -12,22 +12,13 @@
           @chat="onChat"
           @report="onReport"
           @edit="onEdit"
+          @delete="onDelete"
       />
       <PostContent :post="post" />
       <PostReactionBar :post="post" />
       <PostActionBar
           @like="onLike"
           @scrap="onScrap"
-      />
-
-      <!-- 본문 수정 입력창 -->
-      <EditForm
-          v-if="postEditVisible"
-          :item="post"
-          item-type="post"
-          class="post-edit"
-          @submit="onSubmitEdit"
-          @close="handleClosePostEdit"
       />
     </div>
 
@@ -68,7 +59,7 @@ import PostReactionBar from '@/components/board/common/PostReactionBar.vue'
 import PostActionBar from '@/components/board/common/PostActionBar.vue'
 import CommentList from '@/components/board/detail/CommentList.vue'
 import CommentForm from '@/components/board/detail/CommentForm.vue'
-import EditForm from '@/components/board/detail/EditForm.vue'
+//import EditForm from '@/components/board/detail/EditForm.vue'
 import boardSample from '@/data/boardSample.json'
 
 const route = useRoute()
@@ -176,17 +167,23 @@ const onReply = (comment) => {
 
 // 수정 기능
 const onEdit = (item) => {
-  // 본문 수정인 경우
+  // 본문 수정 버튼인지 검증하고, 열려있으면 닫고 닫혀있으면 여는 기능
   if (item === post.value) {
     postEditVisible.value = !postEditVisible.value
   }
-  console.log('수정 버튼 클릭:', item)
+
 }
 
-// 본문 수정창 닫기 핸들러
-const handleClosePostEdit = () => {
-  postEditVisible.value = false
+// 삭제 기능
+const onDelete = (item) => {
+  console.log('삭제 버튼 클릭:', item)
 }
+
+
+// 본문 수정창 닫기 핸들러
+// const handleClosePostEdit = () => {
+//   postEditVisible.value = false
+// }
 
 // 채팅 기능
 const onChat = (item) => {

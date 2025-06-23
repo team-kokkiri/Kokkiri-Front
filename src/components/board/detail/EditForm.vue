@@ -36,11 +36,6 @@ const editText = ref('')
 const editFormRef = ref(null)
 const editInputRef = ref(null)
 
-// 수정할 내용으로 초기값 설정
-onMounted(() => {
-  editText.value = props.item.content || props.item.title || ''
-})
-
 const handleSubmit = () => {
   if (!editText.value.trim()) return
 
@@ -98,16 +93,18 @@ onMounted(() => {
   }, 100)
 })
 
+// 메모리 최적화
 onUnmounted(() => {
   console.log('EditForm unmounted') // 디버깅용
   document.removeEventListener('click', handleClickOutside, true)
   document.removeEventListener('keydown', handleKeyDown)
 })
+
 </script>
 
 <style lang="scss" scoped>
 .edit-input-form {
-  margin: 5px 0 0 36px;
+  margin: 5px 0 5px 36px;
   background-color: #f5f5f5;
   border: 1px solid #dddddd;
 
@@ -151,28 +148,6 @@ onUnmounted(() => {
       &:hover {
         background-color: #1976d2;
       }
-    }
-  }
-}
-
-/* 본문 수정시에는 다른 스타일 적용 */
-.edit-input-form.post-edit {
-  margin: 15px 0 0 0;
-  background-color: #ffffff;
-  border: 2px solid #2196f3;
-  border-radius: 5px;
-
-  .edit-form {
-    height: 60px;
-
-    .input-edit {
-      font-size: 14px;
-      padding: 20px 15px;
-    }
-
-    .btn-edit-submit {
-      height: 60px;
-      width: 60px;
     }
   }
 }

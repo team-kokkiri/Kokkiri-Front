@@ -9,7 +9,7 @@ defineProps({
   }
 })
 
-defineEmits(['chat', 'report', 'edit'])
+defineEmits(['chat', 'report', 'edit', 'delete'])
 
 // 날짜 포맷터
 function formatDate(str) {
@@ -30,6 +30,7 @@ function formatDate(str) {
     </div>
     <div class="header-actions">
       <button class="btn-edit" @click="$emit('edit', post)">수정</button>
+      <button class="btn-delete" @click="$emit('delete', post)">삭제</button>
       <button class="btn-chat" @click="$emit('chat', post)">채팅</button>
       <button class="btn-report" @click="$emit('report', post)">신고</button>
     </div>
@@ -78,6 +79,7 @@ function formatDate(str) {
     display: flex;
     gap: 10px;
 
+    .btn-delete,
     .btn-edit,
     .btn-chat,
     .btn-report {

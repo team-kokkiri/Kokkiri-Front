@@ -59,6 +59,7 @@ const handleCloseEdit = () => {
 
 <style lang="scss" scoped>
 .replies-wrapper {
+  margin-top: 5px;
   .reply-item {
     margin-left: 36px;
     &:first-child {
