@@ -4,6 +4,7 @@ import router from './router'
 import './assets/scss/style.scss'
 import Vue3Toastify from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import store from './store';
 
 createApp(App)
     .use(router)
@@ -12,4 +13,5 @@ createApp(App)
         autoClose: 2000,
         icon: false,
     })
+    .use(store)
     .mount('#app')
