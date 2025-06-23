@@ -3,7 +3,7 @@
     <div class="signup-inner">
       <div class="signup-header-box">
         <div class="signup-logo">
-          <img src="../assets/img/마스코트잔디.png" alt="로고"/>
+          <img src="../../assets/img/마스코트잔디.png" alt="로고"/>
         </div>
         <h2 class="signup-title">회원가입</h2>
         <div class="rolling-banner-wrap">
@@ -86,11 +86,11 @@
           <span>간편 회원가입</span>
         </div>
         <div class="signup-sns-list">
-          <a href="#" class="sns-btn kakao">
-            <img src="../assets/img/카카오로고.svg" alt="">
+          <a :href="`http://localhost:9090/oauth2/authorization/kakao?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn kakao">
+            <img src="../../assets/img/카카오로고.svg" alt="">
           </a>
-          <a href="#" class="sns-btn google">
-            <img src="../assets/img/구글로고.svg" alt="">
+          <a :href="`http://localhost:9090/oauth2/authorization/google?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn google">
+            <img src="../../assets/img/구글로고.svg" alt="">
           </a>
         </div>
       </div>
@@ -103,7 +103,7 @@
 /*####### 임포트 #######*/
 import {ref, onMounted, onUnmounted, computed} from 'vue';
 import axios from 'axios';
-import {useRouter,useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 
 
 /*####### 변수들 #######*/
@@ -121,11 +121,33 @@ const passwordCheckError = ref('');
 
 import { watch } from 'vue';
 
-onMounted(() => {
-  teamCode.value = route.query.teamCode || '';
-  if (!teamCode.value) {
-    // 팀 코드 없으면 첫 페이지로
-    router.push('/classcode');
+onMounted(async () => {
+  const code = route.query.teamCode;
+
+  // teamCode가 쿼리로 넘어왔으면 세션에 저장 시도
+  if (code) {
+    try {
+      await axios.post('http://localhost:9090/api/team/session', {
+        teamCode: code
+      }, {
+        withCredentials: true
+      });
+      console.log('쿼리로 받은 teamCode를 세션에 저장:', code);
+    } catch (e) {
+      console.error('쿼리 teamCode 세션 저장 실패:', e);
+    }
+  }
+
+  // 세션에서 teamCode 꺼내기
+  try {
+    const res = await axios.get('http://localhost:9090/api/team/session', {
+      withCredentials: true
+    });
+    teamCode.value = res.data.teamCode;
+    console.log('세션에서 teamCode 가져옴:', teamCode.value);
+  } catch (err) {
+    console.error('세션에서 팀 코드 가져오기 실패:', err);
+    router.push('/teamcode-verify'); // 못 가져오면 다시 인증하게
   }
 });
 
@@ -203,8 +225,9 @@ const onSignup = async () => {
     await axios.post('http://localhost:9090/api/members/signup', {
       email: email.value,
       password: password.value,
-      teamCode: teamCode.value,
       nickname: nickname.value,
+    },{
+      withCredentials: true,
     });
 
     // 2) 이메일 인증 코드 발송
@@ -281,11 +304,264 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/assets/scss/style';
+
+/* ######### SignUp-Page ##########*/
+.signup-container {
+  width: 100% !important;
+  height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #fff; /* 디버깅용 */
+  
+  .signup-inner {
+    width: 360px !important;
+    height: auto; /* height를 auto로 변경 */
+    min-height: 800px;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 20px;
+    border-radius: 10px;
+    
+    .signup-header-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+      
+      .signup-logo {
+        margin-bottom: 14px;
+        img {
+          width: 56px;
+          height: 56px;
+          object-fit: contain;
+        }
+      }
+      .signup-title {
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: $dark-black;
+      }
+    }
+    
+    .signup-form-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        
+        .email-code-error {
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          margin-left: 4px;
+          margin-top: 4px;
+          font-weight: 430;
+          
+          .bi {
+            font-size: 14px;
+            margin-right: 5px;
+            color: $crimson;
+          }
+          span {
+            line-height: 1.5;
+            color: $crimson;
+          }
+        }
+
+        label {
+          font-size: 16px;
+          font-weight: 500;
+          color: $dark-black;
+          margin-bottom: 4px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+          width: 100% !important;
+          height: 50px !important;
+          padding: 0 14px !important;
+          border: 1px solid $dark-gray !important;
+          border-radius: 10px !important;
+          font-size: 18px !important;
+          transition: border-color 0.2s;
+          outline: none;
+          box-sizing: border-box !important;
+          background: white;
+          
+          &:focus {
+            border: 2px solid $main-color !important;
+            background: white;
+          }
+          &:focus::placeholder {
+            color: white;
+          }
+          &::placeholder {
+            color: $light-black;
+            font-size: 16px;
+          }
+          &.error {
+            border: 1px solid $crimson !important;
+            color: $crimson;
+          }
+          &.error::placeholder {
+            color: $crimson;
+          }
+          &.error:focus {
+            border: 2px solid $crimson !important;
+          }
+          &.error:focus::placeholder {
+            color: white;
+          }
+        }
+
+        .input-msg-list {
+          min-height: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+
+          .input-msg {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-left: 2px;
+            font-weight: 430;
+
+            .bi {
+              font-size: 14px;
+              margin-right: 5px;
+              color: $dark-gray;
+            }
+            .bi.bi-x-lg {
+              color: $crimson;
+            }
+            span {
+              line-height: 1.5;
+              color: $dark-gray;
+            }
+            .password-check-error {
+              line-height: 1.5;
+              color: $crimson;
+            }
+            .bi.active,
+            span.active {
+              color: $forestgreen;
+            }
+          }
+        }
+      }
+    }
+
+    .btn-signup {
+      width: 100% !important;
+      height: 50px !important;
+      border-radius: 15px;
+      background: $main-color !important;
+      color: white !important;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 20px;
+      
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    .signup-sns-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+
+      .signup-sns-divider {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+
+        span {
+          color: #999999;
+          font-size: 14px;
+          font-weight: 400;
+          margin: 0 14px;
+          white-space: nowrap;
+        }
+
+        // 좌우 라인
+        &::before,
+        &::after {
+          content: "";
+          flex: 1 0 0;
+          height: 1px;
+          background: #e5e5e5;
+          border-radius: 1px;
+        }
+      }
+
+      .signup-sns-list {
+        display: flex;
+        gap: 16px;
+
+        .sns-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+          transition: box-shadow 0.1s, transform 0.1s;
+
+          img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+          }
+
+          &:hover {
+            box-shadow: 0 4px 8px rgba(34, 153, 248, 0.12);
+            transform: translateY(-2px) scale(1.06);
+          }
+
+          &:active {
+            transform: translateY(2px);
+          }
+        }
+        
+        // 개별 배경색
+        .kakao {
+          background: #ffd43b;
+        }
+        .google {
+          background: #eeeeee;
+        }
+      }
+    }
+  }
+}
+
+/* 롤링 배너 스타일 */
 .rolling-banner-wrap {
-  width: 360px;
+  width: 100%;
+  max-width: 360px;
   overflow: hidden;
   height: 28px;
+  margin-bottom: 20px;
 }
 
 .rolling-banner {
