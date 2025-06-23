@@ -50,8 +50,8 @@
                   </div>
                   <div class="btn-action-wrap">
                     <template v-if="item.type === 'invite'">
-                      <button class="btn-accept">수락</button>
-                      <button class="btn-reject">거절</button>
+                      <button class="btn-accept" @click="acceptInvitation(item.id, item.url)">수락</button>
+                      <button class="btn-reject" @click="rejectInvitation(item.id)">거절</button>
                     </template>
                     <template v-else>
                       <button class="btn-delete">삭제</button>
@@ -65,15 +65,17 @@
               </div>
             </div>
           </div>
+
           <!-- 채팅 아이콘: 페이지 이동 -->
           <div class="util-icon-item">
             <button type="button" class="icon-btn" @click="goChat">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-dots-fill" viewBox="0 0 16 16">
                 <path d="M16 8c0 3.866-3.582 7-8 7a9 9 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354-.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7M5 8a1 1 0 1 0-2 0 1 1 0 0 0 2 0m4 0a1 1 0 1 0-2 0 1 1 0 0 0 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
               </svg>
-              <em>99</em>
+              <em v-if="hasUnreadChat"></em>
             </button>
           </div>
+
           <!-- 마이페이지 아이콘: 페이지 이동 -->
           <div class="util-icon-item">
             <button type="button" class="icon-btn" @click="goMypage">
@@ -110,10 +112,13 @@
   const isLoading = ref(false); // 데이터 로딩 중인지 여부
   const hasMore = ref(true); // 더 가져올 데이터가 있는지 여부 (마지막 페이지인지)
   const totalUnreadNotifications = ref(0);
+  const hasUnreadChat = ref(false); // 읽지 않은 채팅 알림이 있는지 여부
+
   // 스크롤 이벤트 리스너를 위한 참조
   const notificationListRef = ref(null);
   let eventSource = null
   let reconnectTimeout = null
+  
 
   // 메뉴 리스트
   const menuList = [
@@ -189,13 +194,21 @@ function connectSSE() {
 
       const data = JSON.parse(event.data);
       console.log('🔥 [notification 이벤트]:', data);
-      notifications.value.unshift({
-        id: `sse-${Date.now()}`,
-        type: data.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
-        message: data.content,
-        datetime: data.actionCreatedAt,
-        isRead: data.isRead
-      });
+
+       // ✅ 채팅 알림 여부 업데이트
+      if (data.notificationType?.toUpperCase() === 'CHAT') {
+        hasUnreadChat.value = true;
+      } else {
+        notifications.value.unshift({
+          id: data.id,
+          type: data.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
+          message: data.content,
+          datetime: data.actionCreatedAt,
+          isRead: data.isRead
+        });
+        totalUnreadNotifications.value++;
+      }
+      
     } catch (e) {
       console.error('❌ 알림 파싱 실패:', e);
       console.error('📋 수신된 원본 데이터:', event.data); // 파싱 실패 시 원본 데이터를 확인하는 것이 중요합니다.
@@ -258,7 +271,8 @@ function connectSSE() {
       }));
 
       totalUnreadNotifications.value = response.data.totalUnreadCount;
-      console.log("totalUnreadNotifications.value: " + totalUnreadNotifications.value);
+      hasUnreadChat.value = response.data.notifications.some(item => item.notificationType?.toUpperCase() === 'CHAT' && item.isRead === 'N');
+
 
        // 새로운 알림을 기존 알림 배열에 추가 (무한 스크롤)
       notifications.value.push(...newNotifications);
@@ -334,6 +348,71 @@ function connectSSE() {
     }
   })
 
+  // 초대 수락 처리
+  async function acceptInvitation(notificationId, chatRoomIdFromUrl) {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      // 초대 수락 API 호출
+      await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notificationId}/accept`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // 알림 목록에서 해당 알림 제거
+      notifications.value = notifications.value.filter(item => item.id !== notificationId);
+      totalUnreadNotifications.value--; // 알림 개수 감소
+
+      alert('채팅방 초대를 수락했습니다.');
+
+      // 채팅방으로 이동 (알림 URL에서 roomId 추출)
+      // 백엔드에서 url 필드에 roomId를 포함시켜 내려준다고 가정
+      if (chatRoomIdFromUrl) {
+        // URL에서 chatRoomId를 파싱합니다. URL 형식이 '/main-page/chat/{roomId}'라고 가정
+        const roomIdMatch = chatRoomIdFromUrl.match(/\/chatPage\/(\d+)/);
+        if (roomIdMatch && roomIdMatch[1]) {
+          const roomId = roomIdMatch[1];
+           router.push(`/chatPage/${roomId}`);
+          showNotification.value = false; // 알림 팝업 닫기
+        } else {
+          console.warn('채팅방 ID를 URL에서 파싱할 수 없습니다:', chatRoomIdFromUrl);
+          router.push('/main-page/chat'); // 유효한 roomId가 없으면 기본 채팅 페이지로 이동
+          showNotification.value = false; // 알림 팝업 닫기
+        }
+      } else {
+         router.push(`/my/chat/page`); // URL이 없으면 기본 채팅 페이지로 이동
+        showNotification.value = false; // 알림 팝업 닫기
+      }
+
+    } catch (error) {
+      console.error('📛 초대 수락 실패:', error);
+      alert('초대 수락에 실패했습니다.');
+    }
+  }
+
+  // 초대 거절 처리
+  async function rejectInvitation(notificationId) {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return;
+
+      // 초대 거절 API 호출
+      await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notificationId}/reject`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // 알림 목록에서 해당 알림 제거
+      notifications.value = notifications.value.filter(item => item.id !== notificationId);
+      totalUnreadNotifications.value--; // 알림 개수 감소
+
+      alert('채팅방 초대를 거절했습니다.');
+
+    } catch (error) {
+      console.error('📛 초대 거절 실패:', error);
+      alert('초대 거절에 실패했습니다.');
+    }
+  }
+
   function formatLocalDateTime(dateTimeStr) {
       if (!dateTimeStr) return '';
       const date = new Date(dateTimeStr);
@@ -350,6 +429,7 @@ function connectSSE() {
   // 채팅, 마이페이지 이동
   function goChat() {
     router.push('/main-page/chat')
+    hasUnreadChat.value = false; // 채팅 페이지로 이동하면 빨간 점 숨기기
   }
   function goMypage() {
     router.push('/main-page/mypage')
