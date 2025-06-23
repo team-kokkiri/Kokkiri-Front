@@ -1,6 +1,6 @@
 <template>
   <div class="board-free-list">
-    <FreeBoardItem
+    <ListItem
         v-for="item in items"
         :key="item.id"
         :item="item"
@@ -16,7 +16,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
-import FreeBoardItem from './FreeBoardItem.vue'
+import ListItem from './ListItem.vue'
 
 // Props
 defineProps({
