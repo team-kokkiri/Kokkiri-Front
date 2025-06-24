@@ -15,6 +15,11 @@
     <div class="mainpage-body">
       <div class="mainbody-inner">
         <router-view />
+        <MainLeft
+            @profile-info="handleProfileInfo"
+            @logout="handleLogout"
+            @activity-navigate="handleActivityNavigate"
+        />
         <MainRight v-if="route.meta.showRight"/>
       </div>
     </div>
@@ -24,14 +29,16 @@
 
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import MainHeader from '@/components/common/MainHeader.vue'
 import MainNav from "@/components/common/MainNav.vue"
 import MainFooter from "@/components/common/MainFooter.vue"
 import MainRight from "@/components/common/MainRight.vue"
 import { useNotifications } from '@/composables/useNotifications'
+import MainLeft from "@/components/main/MainLeft.vue";
 
 const route = useRoute()
+const router = useRouter()
 
 // 알림 데이터 중앙 관리
 const {
@@ -86,6 +93,26 @@ function handleFetchMoreNotifications() {
   fetchNotifications()
 }
 
+// Event Handlers
+const handleProfileInfo = () => {
+  console.log('프로필 정보 클릭')
+  // 프로필 정보 페이지로 이동 또는 모달 열기
+}
+
+const handleLogout = () => {
+  console.log('로그아웃 클릭')
+  // 로그아웃 로직 실행
+  // 예: 토큰 제거, 사용자 상태 초기화, 로그인 페이지로 리다이렉트
+}
+
+const handleActivityNavigate = (item) => {
+  console.log('활동 메뉴 클릭:', item)
+  // 라우터를 이용한 페이지 이동
+  router.push(item.route)
+}
+
+
+
 // 컴포넌트 마운트 시 알림 시스템 초기화
 onMounted(() => {
   initializeNotifications()
@@ -97,6 +124,6 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 </style>
