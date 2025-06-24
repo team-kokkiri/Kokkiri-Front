@@ -7,6 +7,8 @@
         <span class="nickname">{{ reply.writer }}</span>
       </div>
       <div class="comment-actions">
+        <button class="btn-edit" @click="$emit('edit', reply)">수정</button>
+        <button class="btn-delete" @click="$emit('delete', reply)">삭제</button>
         <button class="btn-like" @click="$emit('like', reply)">공감</button>
         <button class="btn-chat" @click="$emit('chat', reply)">채팅</button>
         <button class="btn-report" @click="$emit('report', reply)">신고</button>
@@ -27,20 +29,44 @@
       </span>
     </div>
   </div>
+  <!-- 수정 입력창 -->
+  <EditForm
+      v-if="editInputVisible === reply.id"
+      :item="reply"
+      item-type="reply"
+      @submit="$emit('submit-edit', $event)"
+      @close="handleCloseEdit"
+  />
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import defaultAvatar from '@/assets/img/0.png'
+import EditForm from './EditForm.vue'
 
 defineProps({
   reply: {
     type: Object,
     required: true
+  },
+  editInputVisible: {
+    type: [Number, String, null],
+    default: null
   }
 })
 
-defineEmits(['like', 'chat', 'report'])
+const emit = defineEmits([
+  'edit',
+  'delete',
+  'reply',
+  'like',
+  'chat',
+  'report',
+  'submit-edit',
+  'close-edit',
+  'submit-reply',
+  'close-reply'
+])
 
 // 날짜 포맷터
 function formatDate(str) {
@@ -48,6 +74,13 @@ function formatDate(str) {
   const d = new Date(str)
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
+
+// 수정 창 닫기 핸들러
+const handleCloseEdit = () => {
+  console.log('EditForm close event received') // 디버깅용
+  emit('close-edit')
+}
+
 </script>
 
 <style lang="scss" scoped>
@@ -55,6 +88,7 @@ function formatDate(str) {
   padding: 10px;
   background-color: #f5f5f5;
   border: 1px solid #dddddd;
+  margin-left: 36px;
 
   .comment-profile {
     display: flex;
@@ -86,23 +120,6 @@ function formatDate(str) {
     .comment-actions {
       display: flex;
       gap: 1px;
-
-      .btn-like,
-      .btn-chat,
-      .btn-report {
-        font-family: 'Spoqa Han Sans Neo', sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        color: #999999;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        line-height: 1.252;
-
-        &:hover {
-          color: #333333;
-        }
-      }
     }
   }
 

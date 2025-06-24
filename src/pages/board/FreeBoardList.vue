@@ -2,16 +2,16 @@
   <div class="board-free-content">
     <div class="board-free-inner">
       <!-- 헤더 컴포넌트 -->
-      <FreeBoardHeader />
+      <ListHeader />
 
       <!-- 글쓰기 폼 컴포넌트 -->
-      <FreeBoardWriteForm 
+      <ListWriteForm
           @submit="handleSubmitPost"
           @imageUpload="handleImageUpload"
       />
 
       <!-- 게시글 리스트 컴포넌트 -->
-      <FreeBoardList 
+      <BoardList
           :items="boardList"
           @itemClick="goToDetail"
       />
@@ -19,14 +19,14 @@
       <!-- 하단 푸터 -->
       <div class="board-free-footer">
         <!-- 검색 컴포넌트 -->
-        <FreeBoardSearch 
+        <ListSearch
             :visible="currentPage === 1"
             @search="handleSearch"
             @input="handleSearchInput"
         />
         
         <!-- 페이지네이션 컴포넌트 -->
-        <FreeBoardPagination 
+        <ListPagination
             :currentPage="currentPage"
             :hasNext="hasNextPage"
             @first="goFirst"
@@ -45,11 +45,11 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 // 컴포넌트 import
-import FreeBoardHeader from '@/components/board/freeboard/FreeBoardHeader.vue'
-import FreeBoardWriteForm from '@/components/board/freeboard/FreeBoardWriteForm.vue'
-import FreeBoardList from '@/components/board/freeboard/FreeBoardList.vue'
-import FreeBoardSearch from '@/components/board/freeboard/FreeBoardSearch.vue'
-import FreeBoardPagination from '@/components/board/freeboard/FreeBoardPagination.vue'
+import ListHeader from '@/components/board/list/ListHeader.vue'
+import ListWriteForm from '@/components/board/list/ListWriteForm.vue'
+import BoardList from '@/components/board/list/BoardList.vue'
+import ListSearch from '@/components/board/list/ListSearch.vue'
+import ListPagination from '@/components/board/list/ListPagination.vue'
 
 // 게시글 리스트 샘플 데이터 import
 import boardData from '@/data/boardList.json'
