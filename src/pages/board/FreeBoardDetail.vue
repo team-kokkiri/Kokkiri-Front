@@ -11,6 +11,8 @@
           :post="post"
           @chat="onChat"
           @report="onReport"
+          @edit="onEdit"
+          @delete="onDelete"
       />
       <PostContent :post="post" />
       <PostReactionBar :post="post" />
@@ -29,6 +31,9 @@
           @chat="onChat"
           @report="onReport"
           @submit-reply="onSubmitReply"
+          @edit="onEdit"
+          @submit-edit="onSubmitEdit"
+          @delete = "onDelete"
       />
       <CommentForm @submit="onSubmitComment" />
     </div>
@@ -55,6 +60,7 @@ import PostReactionBar from '@/components/board/common/PostReactionBar.vue'
 import PostActionBar from '@/components/board/common/PostActionBar.vue'
 import CommentList from '@/components/board/detail/CommentList.vue'
 import CommentForm from '@/components/board/detail/CommentForm.vue'
+//import EditForm from '@/components/board/detail/EditForm.vue'
 import boardSample from '@/data/boardSample.json'
 
 const route = useRoute()
@@ -62,6 +68,9 @@ const router = useRouter()
 
 // 현재 상세 게시글 데이터
 const post = ref(null)
+
+// 본문 수정 입력창 상태 관리
+const postEditVisible = ref(false)
 
 // 페이지 진입시 라우터 params.id로 게시글 찾아오기
 onMounted(() => {
@@ -104,6 +113,40 @@ const onSubmitReply = (replyData) => {
   })
 }
 
+// 수정 등록 핸들러 (백엔드 처리 해야함)
+const onSubmitEdit = (editData) => {
+  if (!post.value) return
+
+  if (editData.itemType === 'post') {
+    // 본문 수정
+    post.value.content = editData.content
+    post.value.updatedAt = editData.updatedAt
+    postEditVisible.value = false
+    console.log('본문 수정 완료:', editData)
+  } else if (editData.itemType === 'comment') {
+    // 댓글 수정
+    const targetComment = post.value.comments.find(c => c.id === editData.id)
+    if (targetComment) {
+      targetComment.content = editData.content
+      targetComment.updatedAt = editData.updatedAt
+      console.log('댓글 수정 완료:', editData)
+    }
+  } else if (editData.itemType === 'reply') {
+    // 대댓글 수정
+    for (const comment of post.value.comments) {
+      if (comment.replies) {
+        const targetReply = comment.replies.find(r => r.id === editData.id)
+        if (targetReply) {
+          targetReply.content = editData.content
+          targetReply.updatedAt = editData.updatedAt
+          console.log('대댓글 수정 완료:', editData)
+          break
+        }
+      }
+    }
+  }
+}
+
 // 게시글 좋아요 (공감) 증가
 const onLike = (item = null) => {
   if (item) {
@@ -121,6 +164,21 @@ const onScrap = () => {
 // 대댓글 기능 (CommentList에서 처리)
 const onReply = (comment) => {
   console.log('대댓글 버튼 클릭:', comment)
+}
+
+// 수정 기능
+const onEdit = (item) => {
+  // 본문 수정 버튼인지 검증하고, 열려있으면 닫고 닫혀있으면 여는 기능
+  if (item === post.value) {
+    postEditVisible.value = !postEditVisible.value
+  }
+
+}
+
+// 삭제 기능 // 본문 댓글 대댓글 전부 이 메소드로 합쳤는데 필요하면 나눠드림
+// 타입으로 구분해서 처리하면 될 듯 합니다
+const onDelete = (item) => {
+  console.log('삭제 버튼 클릭:', item)
 }
 
 // 채팅 기능
@@ -165,7 +223,7 @@ const goToList = () => {
 
   .detail-post {
     width: 832px;
-    height: 232px;
+    min-height: 232px; /* height를 min-height로 변경 */
     background-color: #ffffff;
     border: 1px solid #dddddd;
     padding: 15px;
@@ -213,6 +271,28 @@ const goToList = () => {
         i, .text {
           color: #ffffff;
         }
+      }
+    }
+  }
+
+  /* 본문 수정창 스타일 */
+  .post-edit {
+    margin: 15px 0 0 0 !important;
+    background-color: #ffffff !important;
+    border: 2px solid #2196f3 !important;
+    border-radius: 5px !important;
+
+    .edit-form {
+      height: 60px !important;
+
+      .input-edit {
+        font-size: 14px !important;
+        padding: 20px 15px !important;
+      }
+
+      .btn-edit-submit {
+        height: 60px !important;
+        width: 60px !important;
       }
     }
   }

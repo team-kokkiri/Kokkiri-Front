@@ -3,7 +3,7 @@
     <div class="header-inner">
       <div class="header-row">
         <div class="header-left">
-          <img src="../../assets/img/메인페이지로고.png" alt="로고" />
+          <img src="../../assets/img/메인페이지로고.png" alt="로고" @click = "goMain"/>
         </div>
         <div class="header-center">
           <div
@@ -223,6 +223,11 @@ function goChat() {
  */
 function goMypage() {
   router.push('/main-page/mypage')
+}
+
+// 메인페이지 이동
+function goMain() {
+  router.push('/main-page')
 }
 
 // 스크롤 이벤트 핸들러 (무한 스크롤용)
