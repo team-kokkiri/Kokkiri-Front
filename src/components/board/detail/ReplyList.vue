@@ -1,10 +1,9 @@
 <template>
   <div class="replies-wrapper">
     <ReplyItem
-        v-for="reply in replies"
+        v-for="reply in replies.filter(r => r.parentId === parentId)"
         :key="reply.id"
         :reply="reply"
-        :edit-input-visible="editInputVisible"
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
@@ -12,12 +11,7 @@
         @submit-edit="handleSubmitEdit"
         @close-edit="handleCloseEdit"
         @delete="$emit('delete', $event)"
-      v-for="reply in replies.filter(r => r.parentId === parentId)"
-      :key="reply.id"
-      :reply="reply"
-      @like="$emit('like', $event)"
-      @chat="$emit('chat', $event)"
-      @report="$emit('report', $event)"
+
     />
   </div>
 </template>
