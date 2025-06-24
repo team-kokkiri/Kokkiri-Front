@@ -16,10 +16,12 @@
       <div class="mainbody-inner">
         <router-view />
         <MainLeft
+            v-if="route.meta.showLeft"
             @profile-info="handleProfileInfo"
             @logout="handleLogout"
             @activity-navigate="handleActivityNavigate"
         />
+        <MainBodyCenter />
         <MainRight v-if="route.meta.showRight"/>
       </div>
     </div>
@@ -36,6 +38,7 @@ import MainFooter from "@/components/common/MainFooter.vue"
 import MainRight from "@/components/common/MainRight.vue"
 import { useNotifications } from '@/composables/useNotifications'
 import MainLeft from "@/components/main/MainLeft.vue";
+import MainBodyCenter from "@/components/main/MainBodyCenter.vue";
 
 const route = useRoute()
 const router = useRouter()

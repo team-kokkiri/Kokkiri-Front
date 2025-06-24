@@ -44,7 +44,7 @@ defineEmits(['activity-click'])
     border-top: 0;
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 15px;
     padding-left: 20px;
     color: #333333;
     cursor: pointer;
@@ -85,7 +85,7 @@ defineEmits(['activity-click'])
 
     .text {
       font-family: 'SpoqaHanSansNeo-Regular', sans-serif;
-      font-weight: 300;
+      font-weight: normal;
       font-size: 14px;
       line-height: 1.143;
       color: #333333;
