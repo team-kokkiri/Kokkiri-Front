@@ -272,25 +272,31 @@ onBeforeRouteLeave((to, from, next) => {
 async function selectRoom(roomId) {
   // 이미 선택된 방을 다시 누르면 아무것도 하지 않음
   if (activeRoomId.value === roomId) return;
-  
-  // 다른 방을 선택하기 전에, 이전에 열려있던 방이 있었다면 읽음 처리 API를 먼저 호출
-  if (activeRoomId.value) {
-    sendReadStatus(activeRoomId.value);
-  }
 
-  // 새로운 방을 활성화
   activeRoomId.value = roomId;
   showInviteView.value = false;
   searchQuery.value = '';
 
-  const room = currentRoom.value;
-  if(room) {
-    // 메시지 내역이 없다면 불러오기
+  // activeRoomId가 변경된 후, chatRooms 배열에서 새로운 방을 찾습니다.
+  const room = chatRooms.value.find(r => r.id === roomId);
+
+  if (room) {
+    // 만약 선택한 방에 안 읽은 메시지(unread > 0)가 있다면,
+    if (room.unread > 0) {
+      // 1. UI에서 즉시 안 읽은 개수를 0으로 만들어 사용자에게 반영합니다.
+      room.unread = 0;
+      
+      // 2. 서버에도 이 방을 읽었다고 알립니다. 
+      sendReadStatus(roomId);
+    }
+
+    // 메시지 내역이 아직 로드되지 않았다면 불러옵니다.
     if (room.messages.length === 0) {
       await fetchMessageHistory(roomId);
     }
   }
-  // 스크롤을 맨 아래로
+
+  // 스크롤을 맨 아래로 이동
   scrollToBottom();
 }
 
