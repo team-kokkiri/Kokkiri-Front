@@ -130,9 +130,9 @@ const nextSlide = () => {
     .slider-wrapper {
       position: absolute;
       top: 40px;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      left: 31px;
+      width: 591px;
+      height: 143px;
       overflow: hidden;
     }
 
@@ -141,7 +141,7 @@ const nextSlide = () => {
       gap: 0;
       transition: transform 0.3s ease;
       height: 100%;
-      padding: 3px 31px;
+      padding: 3px 0;
     }
 
     .project-card {
@@ -200,13 +200,18 @@ const nextSlide = () => {
           margin: 0;
           white-space: pre-line;
           flex: 1;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
         }
       }
     }
 
     .slider-controls {
       position: absolute;
-      bottom: 3px;
+      top: 50%;
+      transform: translateY(-50%);
       left: 0;
       right: 0;
       display: flex;
@@ -242,11 +247,11 @@ const nextSlide = () => {
       }
 
       .prev-btn {
-        transform: rotate(180deg);
+        left: 5px;
       }
 
       .next-btn {
-        // 기본 상태
+        right: 5px;
       }
     }
   }

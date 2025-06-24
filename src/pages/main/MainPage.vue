@@ -21,7 +21,7 @@
             @logout="handleLogout"
             @activity-navigate="handleActivityNavigate"
         />
-        <MainBodyCenter />
+        <MainBodyCenter v-if="route.meta.showCenter"/>
         <MainRight v-if="route.meta.showRight"/>
       </div>
     </div>
@@ -32,6 +32,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'  // ← 추가!
 import MainHeader from '@/components/common/MainHeader.vue'
 import MainNav from "@/components/common/MainNav.vue"
 import MainFooter from "@/components/common/MainFooter.vue"
@@ -42,6 +43,7 @@ import MainBodyCenter from "@/components/main/MainBodyCenter.vue";
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()  // ← 추가!
 
 // 알림 데이터 중앙 관리
 const {
@@ -99,26 +101,46 @@ function handleFetchMoreNotifications() {
 // Event Handlers
 const handleProfileInfo = () => {
   console.log('프로필 정보 클릭')
-  // 프로필 정보 페이지로 이동 또는 모달 열기
+  router.push('/main-page/mypage')  // ← 마이페이지로 이동
 }
 
-const handleLogout = () => {
-  console.log('로그아웃 클릭')
-  // 로그아웃 로직 실행
-  // 예: 토큰 제거, 사용자 상태 초기화, 로그인 페이지로 리다이렉트
+// 로그아웃
+const handleLogout = async () => {  // ← 수정!
+  try {
+    await userStore.logout()
+    router.push('/login')
+  } catch (error) {
+    console.error('로그아웃 중 오류:', error)
+    // 에러가 있어도 로그인 페이지로 이동
+    router.push('/login')
+  }
 }
 
 const handleActivityNavigate = (item) => {
   console.log('활동 메뉴 클릭:', item)
-  // 라우터를 이용한 페이지 이동
   router.push(item.route)
 }
 
-
+// 인증 체크  ← 추가!
+const checkAuth = () => {
+  if (!userStore.isLoggedIn && !localStorage.getItem('accessToken')) {
+    router.push('/login')
+    return false
+  }
+  return true
+}
 
 // 컴포넌트 마운트 시 알림 시스템 초기화
-onMounted(() => {
-  initializeNotifications()
+onMounted(async () => {
+  // 먼저 토큰 복원 시도
+  if (localStorage.getItem('accessToken') && !userStore.isLoggedIn) {
+    await userStore.restoreUser()
+  }
+  
+  // 인증 체크
+  if (checkAuth()) {
+    initializeNotifications()
+  }
 })
 
 // 컴포넌트 언마운트 시 정리

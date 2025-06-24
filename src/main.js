@@ -5,7 +5,7 @@ import './assets/scss/style.scss'
 import Vue3Toastify from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import pinia from './stores';
-import { useUserStore } from '@/stores';
+import { useUserStore } from '@/stores/user';  // ← 수정!
 
 // 앱 생성
 const app = createApp(App)
