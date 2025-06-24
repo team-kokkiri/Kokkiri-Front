@@ -13,54 +13,58 @@ const routes = [
   {
     path: '/main-page',
     component: MainPage,
-    meta: { showNav: true, showRight: true },
+    meta: { showNav: true, showRight: true, showLeft: true },
     children: [
       {
         path: 'calendar',
         component: CalendarPage,
-        meta: { showNav: false, showRight: false },
+        meta: { showNav: false, showRight: false, showLeft: false },
       },
       {
         path: 'party',
         component: () => import('@/pages/main/PartyPage.vue'),
-        meta: { showNav: false, showRight: false },
+        meta: { showNav: false, showRight: false, showLeft: false },
       },
       {
         path: 'notice',
         component: () => import('@/pages/board/NoticePage.vue'),
-        meta: { showNav: false },
+        meta: { showNav: false, showLeft: false },
       },
       {
         path: 'admin',
         component: () => import('@/pages/admin/AdminPage.vue'),
-        meta: { showNav: false, showRight: false },
+        meta: { showNav: false, showRight: false, showLeft: false },
       },
       {
         path: 'mypage',
         component: () => import('@/pages/user/MyPage.vue'),
-        meta: { showNav: false, showRight: false },
+        meta: { showNav: false, showRight: false, showLeft: false },
       },
       {
         path: 'chat',
         component: () => import('@/pages/chat/ChatPage.vue'),
-        meta: { showNav: false, showRight: false },
+        meta: { showNav: false, showRight: false, showLeft: false },
       },
       {
         path: 'free-board',
-        component: () => import('@/pages/board/FreeBoardList.vue')
+        component: () => import('@/pages/board/FreeBoardList.vue'),
+        meta: { showLeft: false },
       },
       {
         path: 'free-board/:id',
         component: () => import('@/pages/board/FreeBoardDetail.vue'),
+        meta: { showLeft: false },
         props: true,
       },
       {
         path: 'hot-board',
-        component: () => import('@/pages/board/HotBoard.vue')
+        component: () => import('@/pages/board/HotBoard.vue'),
+        meta: { showLeft: false },
       },
       {
         path: 'share-board',
-        component: () => import('@/pages/board/ShareBoard.vue')
+        component: () => import('@/pages/board/ShareBoard.vue'),
+        meta: { showLeft: false },
       },
     ]
   },

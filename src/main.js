@@ -4,7 +4,8 @@ import router from './router'
 import './assets/scss/style.scss'
 import Vue3Toastify from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
-import store from './store';
+import pinia from './stores';
+import { useUserStore } from '@/stores';
 
 // 앱 생성
 const app = createApp(App)
@@ -15,10 +16,11 @@ app.use(router)
        autoClose: 2000,
        icon: false,
    })
-   .use(store)
+   .use(pinia)
 
-// 앱 마운트 후 토큰 복원
+// 앱 마운트
 app.mount('#app')
 
-// localStorage에서 토큰 복원
-store.dispatch('user/restoreUser')
+// localStorage에서 토큰 복원 (Pinia 사용)
+const userStore = useUserStore()
+userStore.restoreUser()

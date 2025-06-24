@@ -65,6 +65,7 @@
 import { ref } from 'vue';
 import axios from '../../utils/axios';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user'
 
 
 /*####### 변수들 #######*/
@@ -72,6 +73,7 @@ const email = ref('');
 const password = ref('');
 const errorMessage = ref('');
 const router = useRouter();
+const userStore = useUserStore()
 
 /*####### 로그인 데이터 전송 #######*/
 const handleLogin = async () => {
@@ -84,9 +86,12 @@ const handleLogin = async () => {
 
     // 리프래시토큰만 쿠키로 저장
     const { accessToken, email: userEmail, role } = response.data;
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('email', userEmail);
-    localStorage.setItem('role', role);
+
+    // 피니아 로그인 메소드 사용
+    await userStore.login({
+      tokenData: { email: userEmail, role, avatar: null },
+      token: accessToken
+    })
 
     await router.push('/main-page');
   } catch (error) {

@@ -3,8 +3,8 @@
     <div class="profile-wrap">
       <div class="profile-img-wrap">
         <img
-            :src="currentUser.avatar || defaultProfileImage"
-            :alt="`${currentUser.email} 프로필 이미지`"
+            :src="userStore.avatar || defaultProfileImage"
+            :alt="`${userStore.email} 프로필 이미지`"
             class="profile-img"
             @error="handleImageError"
         />
@@ -32,12 +32,10 @@
 
 <script setup>
 import { computed, defineEmits } from 'vue'
-import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/user'
 import defaultProfileImage from '@/assets/img/0.png'
 
-// Vuex store 사용
-const store = useStore()
-const currentUser = computed(() => store.getters['user/currentUser'])
+const userStore = useUserStore()
 
 // Emits
 defineEmits(['profile-info', 'logout'])
@@ -47,9 +45,7 @@ const handleImageError = (event) => {
 }
 
 const userId = computed(() => {
-  // currentUser.value.email이 존재하면, @ 전까지 추출
-  if (!currentUser.value || !currentUser.value.email) return ''
-  return currentUser.value.email.split('@')[0]
+  return userStore.displayName || ''
 })
 
 </script>
@@ -71,11 +67,11 @@ const userId = computed(() => {
     flex-direction: column;
     align-items: center;
     margin-top: 15px;
+    gap: 10px;
 
     .profile-img-wrap {
       width: 60px;
       height: 60px;
-      border-radius: 50%;
       overflow: hidden;
       background-color: #e0e0e0;
 
