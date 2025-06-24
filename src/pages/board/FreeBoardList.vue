@@ -13,10 +13,10 @@
 
       <!-- 게시글 리스트 컴포넌트 -->
       <BoardList
-          :items="boardList"
-          @itemClick="goToDetail"
+        :items="boardList"
+        @itemClick="goToDetail"
       />
-      <FreeBoardList :items="boardList" @itemClick="goToDetail" />
+      
 
       <!-- 하단 푸터 -->
       <div class="board-free-footer">
@@ -55,6 +55,7 @@ import ListWriteForm from '@/components/board/list/ListWriteForm.vue'
 import BoardList from '@/components/board/list/BoardList.vue'
 import ListSearch from '@/components/board/list/ListSearch.vue'
 import ListPagination from '@/components/board/list/ListPagination.vue'
+// import FreeBoardItem from './FreeBoardItem.vue'
 
 // 라우터 인스턴스 생성
 const router = useRouter()

@@ -4,6 +4,8 @@
         v-for="reply in replies.filter(r => r.parentId === parentId)"
         :key="reply.id"
         :reply="reply"
+        :replies="replies"
+        :parent-id="reply.id"
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
@@ -11,7 +13,6 @@
         @submit-edit="handleSubmitEdit"
         @close-edit="handleCloseEdit"
         @delete="$emit('delete', $event)"
-
     />
   </div>
 </template>
