@@ -12,6 +12,12 @@
         @submit-edit="handleSubmitEdit"
         @close-edit="handleCloseEdit"
         @delete="$emit('delete', $event)"
+      v-for="reply in replies.filter(r => r.parentId === parentId)"
+      :key="reply.id"
+      :reply="reply"
+      @like="$emit('like', $event)"
+      @chat="$emit('chat', $event)"
+      @report="$emit('report', $event)"
     />
   </div>
 </template>
@@ -21,10 +27,8 @@ import { ref, defineProps, defineEmits } from 'vue'
 import ReplyItem from './ReplyItem.vue'
 
 defineProps({
-  replies: {
-    type: Array,
-    default: () => []
-  }
+  replies: Array,
+  parentId: [Number, String]  // 부모 댓글의 ID
 })
 
 const emit = defineEmits([
