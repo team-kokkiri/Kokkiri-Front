@@ -64,6 +64,11 @@ const routes = [
       },
     ]
   },
+    //oauth2 토큰저장페이지
+  {
+    path: '/oauth2-redirect',
+    component: () => import('@/pages/auth/Oauth2Redirect.vue'),
+  },
   // 로그인/회원가입 등은 계속 루트에
   { path: '/', component: FrontPage },
   { path: '/signup', component: SignUp },

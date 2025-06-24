@@ -102,7 +102,7 @@
 <script setup>
 /*####### 임포트 #######*/
 import {ref, onMounted, onUnmounted, computed} from 'vue';
-import axios from 'axios';
+import axios from '../../utils/axios';
 import {useRoute, useRouter} from 'vue-router';
 
 
@@ -120,6 +120,7 @@ const emailError = ref('');
 const passwordCheckError = ref('');
 
 import { watch } from 'vue';
+import {toast} from "vue3-toastify";
 
 onMounted(async () => {
   const code = route.query.teamCode;
@@ -127,7 +128,7 @@ onMounted(async () => {
   // teamCode가 쿼리로 넘어왔으면 세션에 저장 시도
   if (code) {
     try {
-      await axios.post('http://localhost:9090/api/team/session', {
+      await axios.post('/api/team/session', {
         teamCode: code
       }, {
         withCredentials: true
@@ -140,7 +141,7 @@ onMounted(async () => {
 
   // 세션에서 teamCode 꺼내기
   try {
-    const res = await axios.get('http://localhost:9090/api/team/session', {
+    const res = await axios.get('/api/team/session', {
       withCredentials: true
     });
     teamCode.value = res.data.teamCode;
@@ -222,7 +223,7 @@ const onSignup = async () => {
 
   try {
     // 1) 회원가입 정보 임시 저장
-    await axios.post('http://localhost:9090/api/members/signup', {
+    await axios.post('/api/members/signup', {
       email: email.value,
       password: password.value,
       nickname: nickname.value,
@@ -230,8 +231,13 @@ const onSignup = async () => {
       withCredentials: true,
     });
 
+    toast.success('인증이 완료되었습니다.');
+    setTimeout(() => {
+      router.push('/signup'); // teamCode는 세션에서 가져오게 됨
+    }, 1500);
+
     // 2) 이메일 인증 코드 발송
-    await axios.post('http://localhost:9090/api/email/send', null, {
+    await axios.post('/api/email/send', null, {
       params: { email: email.value, type: 'signup' },
     });
 

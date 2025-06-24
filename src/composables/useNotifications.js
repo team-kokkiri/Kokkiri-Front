@@ -1,30 +1,36 @@
-// src/composables/useNotifications.js
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
+
+// SSE EventSource 인스턴스를 앱 전체에서 하나만 유지하도록 외부에 선언
+let eventSource = null
+
+// 컴포저블 외부에서 상태를 선언하여 싱글턴처럼 동작하게 만듭니다.
+const notifications = ref([])
+const hasNewChatMessage = ref(false)
+const isLoading = ref(false)
+const hasMore = ref(true)
+const isLogin = ref(false)
+const notificationVersion = ref(0)
+
+const totalUnreadNotifications = computed(() => {
+  return notifications.value.filter(n => !n.isRead).length
+})
 
 /**
  * 알림 데이터 중앙 관리 composable
  * SSE 실시간 알림, 무한 스크롤, 백엔드 API 연동 포함
  */
 export function useNotifications() {
-    // 알림 상태
-    const notifications = ref([])
-    const totalUnreadNotifications = ref(0)
+    const router = useRouter()
     const lastNotificationId = ref(null)
-    const isLoading = ref(false)
-    const hasMore = ref(true)
-    const isLogin = ref(false)
-
-    // SSE 관련
-    let eventSource = null
     let reconnectTimeout = null
 
-    /**
-     * 날짜 포맷팅 함수
-     * @param {string} dateTimeStr - 날짜 문자열
-     * @returns {string} 포맷된 날짜 문자열
-     */
+    function forceUpdate() {
+        notificationVersion.value += 1;
+    }
+
     function formatLocalDateTime(dateTimeStr) {
         if (!dateTimeStr) return ''
         const date = new Date(dateTimeStr)
@@ -37,275 +43,166 @@ export function useNotifications() {
         return `${y}-${m}-${d} ${h}:${min}`
     }
 
-    /**
-     * SSE 연결 설정
-     */
     function connectSSE() {
         const token = localStorage.getItem('accessToken')
+        if (!token) return
 
+        if (eventSource) eventSource.close()
+        
         eventSource = new EventSourcePolyfill(`${process.env.VUE_APP_API_BASE_URL}/api/notification/connect`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+            headers: { Authorization: `Bearer ${token}` }
         })
 
-        eventSource.onopen = () => {
-            console.log('✅ SSE 연결됨')
-            if (reconnectTimeout) {
-                clearTimeout(reconnectTimeout)
-                reconnectTimeout = null
-            }
-        }
+        eventSource.onopen = () => console.log('✅ SSE 연결됨')
 
-        // SSE 이벤트 수신
         eventSource.addEventListener('sse', (event) => {
-            console.log("✅ 'sse' 이벤트 수신 성공!")
             try {
-                if (!event.data || event.data.trim() === '') {
-                    console.log('📝 데이터가 없는 이벤트 수신 (e.g., keep-alive ping)')
-                    return
-                }
-
+                if (!event.data || event.data.trim().includes('EventStream Created')) return
                 const data = JSON.parse(event.data)
-                console.log('🔥 [notification 이벤트]:', data)
+                const type = data.notificationType?.toUpperCase();
 
-                // 새 알림을 배열 맨 앞에 추가
+                console.log(data);
+                if (type === 'CHAT') {
+                    if (!hasNewChatMessage.value) {
+                        hasNewChatMessage.value = true;
+                        forceUpdate(); // 상태 변경 후 강제 업데이트 신호
+                    }
+                    return; 
+                }
+                
                 notifications.value.unshift({
-                    id: `sse-${Date.now()}`,
-                    type: data.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
+                    id: data.id,
+                    type: type === 'INVITATION' ? 'invite' : 'etc',
                     message: data.content,
                     datetime: data.actionCreatedAt,
-                    isRead: data.isRead
+                    invitationId: data.invitationId,
+                    isRead: data.isRead === 'Y'
                 })
-
-                // 읽지 않은 알림 수 업데이트
-                if (!data.isRead) {
+                if (data.isRead === 'N') {
                     totalUnreadNotifications.value += 1
+                    forceUpdate();
                 }
             } catch (e) {
-                console.error('❌ 알림 파싱 실패:', e)
-                console.error('📋 수신된 원본 데이터:', event.data)
+                console.error('❌ 알림 파싱 실패:', e, '원본 데이터:', event.data)
             }
         })
-
-        eventSource.onmessage = (event) => {
-            console.log("onmessage 진입")
-            console.log("기본 message 이벤트 수신:", event.data)
-        }
-
-        eventSource.onerror = (err) => {
-            console.error('❌ SSE 에러:', err)
-            eventSource.close()
-            if (!reconnectTimeout) {
-                reconnectTimeout = setTimeout(() => {
-                    console.log('♻️ SSE 재연결 시도')
-                    connectSSE()
-                }, 3000)
-            }
-        }
+        eventSource.onerror = (err) => console.error('❌ SSE 에러:', err)
     }
 
-    /**
-     * 기존 알림 목록 가져오기 (무한 스크롤 지원)
-     */
-    async function fetchNotifications() {
-        if (isLoading.value || !hasMore.value) {
-            return
-        }
-
+    async function fetchNotifications(isInitial = false) {
+        if (isLoading.value || (!isInitial && !hasMore.value)) return
         isLoading.value = true
-
         try {
             const token = localStorage.getItem('accessToken')
-            if (!token) {
-                isLoading.value = false
-                return
-            }
-
+            if (!token) { isLoading.value = false; return; }
+            
             const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/notification/list`, {
-                params: {
-                    lastId: lastNotificationId.value,
-                    size: 10
-                },
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                params: { lastId: isInitial ? null : lastNotificationId.value, size: 10 },
+                headers: { Authorization: `Bearer ${token}` }
             })
 
-            const fetchedData = response.data.notifications
-            const hasNextPage = response.data.hasNext
-
-            console.log(response.data)
-
-            const newNotifications = fetchedData.map(item => ({
-                id: item.id,
-                type: item.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
-                message: item.content,
-                datetime: item.actionCreatedAt,
-                isRead: item.isRead === 'Y'
+            const { notifications: fetchedData, hasNext, totalUnreadCount } = response.data
+            const hasUnreadChat = fetchedData.some(item => item.notificationType?.toUpperCase() === 'CHAT' && item.isRead === 'N');
+            if (hasUnreadChat) hasNewChatMessage.value = true;
+            
+            const nonChatNotifications = fetchedData.filter(item => item.notificationType?.toUpperCase() !== 'CHAT');
+            const newNotifications = nonChatNotifications.map(item => ({
+                id: item.id, type: item.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
+                message: item.content, datetime: item.actionCreatedAt, invitationId: item.invitationId, isRead: item.isRead === 'Y'
             }))
-
-            totalUnreadNotifications.value = response.data.totalUnreadCount
-            console.log("totalUnreadNotifications.value: " + totalUnreadNotifications.value)
-
-            // 새로운 알림을 기존 알림 배열에 추가 (무한 스크롤)
-            notifications.value.push(...newNotifications)
-            hasMore.value = hasNextPage
-
-            if (newNotifications.length > 0) {
-                lastNotificationId.value = newNotifications[newNotifications.length - 1].id
+            
+            if (isInitial) {
+                notifications.value = newNotifications
+                const unreadChatCountInPage = fetchedData.filter(item => item.notificationType?.toUpperCase() === 'CHAT' && item.isRead === 'N').length;
+                totalUnreadNotifications.value = Math.max(0, totalUnreadCount - unreadChatCountInPage);
+            } else {
+                notifications.value.push(...newNotifications)
             }
-
+            hasMore.value = hasNext
+            if (nonChatNotifications.length > 0) {
+                lastNotificationId.value = nonChatNotifications[nonChatNotifications.length - 1].id
+            }
+            forceUpdate();
         } catch (error) {
             console.error('📛 알림 리스트 불러오기 실패:', error)
-            hasMore.value = false
         } finally {
             isLoading.value = false
         }
     }
-
-    /**
-     * 스크롤 이벤트 핸들러 생성
-     * @param {HTMLElement} element - 스크롤을 감지할 요소
-     * @returns {Function} 스크롤 이벤트 핸들러
-     */
-    function createScrollHandler(element) {
-        return function handleScroll() {
-            if (!element) return
-
-            // 스크롤이 거의 끝에 도달했을 때 (예: 하단 100px 이내)
-            const isNearBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 100
-
-            if (isNearBottom && !isLoading.value && hasMore.value) {
-                fetchNotifications()
-            }
-        }
-    }
-
-    /**
-     * 알림 시스템 초기화
-     */
+    
     function initializeNotifications() {
         const token = localStorage.getItem('accessToken')
         if (token) {
             isLogin.value = true
-            fetchNotifications()
+            fetchNotifications(true)
             connectSSE()
         }
     }
 
-    /**
-     * 모든 알림을 읽음 처리
-     */
-    async function markAllAsRead() {
-        try {
-            const token = localStorage.getItem('accessToken')
-            if (!token) return
+    function markChatAsRead() {
+        if (!hasNewChatMessage.value) return;
 
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read-all`, {}, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+        // 먼저 UI에서 즉시 빨간 점을 끕니다.
+        hasNewChatMessage.value = false;
 
-            // 로컬 상태 업데이트
-            notifications.value.forEach(notification => {
-                notification.isRead = true
-            })
-            totalUnreadNotifications.value = 0
-
-            console.log('✅ 모든 알림 읽음 처리 완료')
-        } catch (error) {
-            console.error('❌ 모든 알림 읽음 처리 실패:', error)
-        }
+        // 새로 만든 '채팅 알림 모두 읽음' API를 호출합니다.
+        axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read/chat`, {}, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+        })
+        .then(() => {
+            console.log('✅ 서버의 채팅 알림들이 성공적으로 읽음 처리되었습니다.');
+        })
+        .catch(error => {
+            console.error('❌ 채팅 알림 읽음 처리 API 호출에 실패했습니다:', error);
+            // 실패 시 다시 빨간 점을 켤 수도 있습니다.
+            hasNewChatMessage.value = true;
+        });
     }
 
-    /**
-     * 특정 알림 삭제
-     * @param {string|number} notificationId - 삭제할 알림 ID
-     */
+    async function markAllAsRead() {
+       try {
+            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read-all`, {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+            })
+            // 성공적으로 API가 호출되면, 모든 알림의 isRead 상태를 true로 변경
+            notifications.value.forEach(n => n.isRead = true)
+        } catch (error) { console.error('❌ 모든 알림 읽음 처리 실패:', error) }
+    }
+
+    function _removeNotificationFromState(notificationId) {
+        notifications.value = notifications.value.filter(item => item.id !== notificationId)
+    }
+
     async function deleteNotification(notificationId) {
         try {
-            const token = localStorage.getItem('accessToken')
-            if (!token) return
-
             await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/api/notification/${notificationId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             })
-
-            // 로컬 상태에서 제거
-            const index = notifications.value.findIndex(item => item.id === notificationId)
-            if (index !== -1) {
-                const deletedNotification = notifications.value[index]
-                notifications.value.splice(index, 1)
-
-                // 읽지 않은 알림이었다면 카운트 감소
-                if (!deletedNotification.isRead) {
-                    totalUnreadNotifications.value = Math.max(0, totalUnreadNotifications.value - 1)
-                }
+            _removeNotificationFromState(notificationId)
+        } catch (error) { console.error('❌ 알림 삭제 실패:', error) }
+    }
+    
+    async function acceptInvitation(notification) {
+        try {
+            const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notification.invitationId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+            })
+            _removeNotificationFromState(notification.id)
+            if (response.data && response.data.roomId) {
+              router.push(`/main-page/chat?roomId=${response.data.roomId}`)
             }
-
-            console.log('✅ 알림 삭제 완료')
-        } catch (error) {
-            console.error('❌ 알림 삭제 실패:', error)
-        }
+        } catch (error) { console.error('❌ 초대 수락 실패:', error) }
     }
 
-    /**
-     * 초대 수락 처리
-     * @param {string|number} notificationId - 수락할 초대 알림 ID
-     */
-    async function acceptInvitation(notificationId) {
+    async function rejectInvitation(notification) {
         try {
-            const token = localStorage.getItem('accessToken')
-            if (!token) return
-
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/invitation/accept`, {
-                notificationId
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notification.invitationId}/reject`, {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             })
-
-            console.log('✅ 초대 수락 완료')
-            // 수락 후 해당 알림 삭제
-            deleteNotification(notificationId)
-        } catch (error) {
-            console.error('❌ 초대 수락 실패:', error)
-        }
+            _removeNotificationFromState(notification.id)
+        } catch (error) { console.error('❌ 초대 거절 실패:', error) }
     }
 
-    /**
-     * 초대 거절 처리
-     * @param {string|number} notificationId - 거절할 초대 알림 ID
-     */
-    async function rejectInvitation(notificationId) {
-        try {
-            const token = localStorage.getItem('accessToken')
-            if (!token) return
-
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/invitation/reject`, {
-                notificationId
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-
-            console.log('✅ 초대 거절 완료')
-            // 거절 후 해당 알림 삭제
-            deleteNotification(notificationId)
-        } catch (error) {
-            console.error('❌ 초대 거절 실패:', error)
-        }
-    }
-
-    /**
-     * 알림 시스템 정리 (컴포넌트 언마운트 시 호출)
-     */
     function cleanup() {
         if (eventSource) {
             eventSource.close()
@@ -313,15 +210,13 @@ export function useNotifications() {
         }
         if (reconnectTimeout) {
             clearTimeout(reconnectTimeout)
-            reconnectTimeout = null
+            reconnectTimeout = null 
         }
     }
 
-    /**
-     * 알림 데이터 초기화 (로그아웃 시 등)
-     */
     function resetNotifications() {
         notifications.value = []
+        hasNewChatMessage.value = false
         totalUnreadNotifications.value = 0
         lastNotificationId.value = null
         isLoading.value = false
@@ -331,19 +226,18 @@ export function useNotifications() {
     }
 
     return {
-        // 상태
         notifications,
+        hasNewChatMessage,
         totalUnreadNotifications,
         isLoading,
         hasMore,
         isLogin,
-
-        // 메서드
+        notificationVersion,
         formatLocalDateTime,
         initializeNotifications,
         fetchNotifications,
-        createScrollHandler,
         markAllAsRead,
+        markChatAsRead,
         deleteNotification,
         acceptInvitation,
         rejectInvitation,

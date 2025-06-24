@@ -46,7 +46,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
 import { toast } from 'vue3-toastify';
-import axios from "axios";
+import axios from '../../utils/axios';
 
 const email = ref('');
 const emailError = ref('');
@@ -69,7 +69,7 @@ const onFindPassword = async () => {
 
     if (emailError.value) return;
   try {
-    await axios.post('http://localhost:9090/api/email/send', null, {
+    await axios.post('/api/email/send', null, {
       params: {
         email: email.value,
         type: 'reset'

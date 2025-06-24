@@ -41,7 +41,7 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify';
-import axios from 'axios';
+import axios from '../../utils/axios';
 
 const classcode = ref('');
 const classcodeError = ref('');
@@ -63,7 +63,7 @@ const onVerifyClasscode = async () => {
   try {
     // 1. 백엔드에서 코드 유효성 검사
     const verifyRes = await axios.get(
-        `http://localhost:9090/api/team/verify?code=${encodeURIComponent(classcode.value.trim())}`,
+        `/api/team/verify?code=${encodeURIComponent(classcode.value.trim())}`,
         { withCredentials: true }
     );
 
@@ -73,7 +73,7 @@ const onVerifyClasscode = async () => {
     }
 
     // 2. 유효하면 teamCode를 세션에 저장 요청
-    await axios.post('http://localhost:9090/api/team/session', {
+    await axios.post('/api/team/session', {
       teamCode: classcode.value.trim(),
     }, { withCredentials: true });
 
