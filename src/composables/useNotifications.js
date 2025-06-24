@@ -3,6 +3,7 @@
 import { ref } from 'vue'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import axios from 'axios'
+import { useRouter } from 'vue-router'; 
 
 // SSE EventSource 인스턴스를 앱 전체에서 하나만 유지하도록 외부에 선언
 let eventSource = null
@@ -19,6 +20,7 @@ const isLogin = ref(false)
  * SSE 실시간 알림, 무한 스크롤, 백엔드 API 연동 포함
  */
 export function useNotifications() {
+    const router = useRouter();
     const lastNotificationId = ref(null)
     let reconnectTimeout = null
 
@@ -129,6 +131,7 @@ export function useNotifications() {
                 type: item.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
                 message: item.content,
                 datetime: item.actionCreatedAt,
+                invitationId: item.invitationId,
                 isRead: item.isRead === 'Y'
             }))
             
@@ -217,12 +220,17 @@ export function useNotifications() {
     async function acceptInvitation(invitationId) {
         try {
             // 새로운 API 엔드포인트 사용 (경로 변수로 ID 전달)
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${invitationId}/accept`, {}, {
+            const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${invitationId}/accept`, {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             });
             console.log('✅ 초대 수락 완료');
             // API 성공 시 로컬 상태에서도 제거
             _removeNotificationFromState(invitationId);
+
+            // Navigate to the chat room
+            if (response.data && response.data.roomId) {
+              router.push(`/main-page/chat?roomId=${response.data.roomId}`);
+            }
         } catch (error) {
             console.error('❌ 초대 수락 실패:', error);
         }
