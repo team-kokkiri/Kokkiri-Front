@@ -78,24 +78,6 @@ function formatDate(str) {
   .header-actions {
     display: flex;
     gap: 10px;
-
-    .btn-delete,
-    .btn-edit,
-    .btn-chat,
-    .btn-report {
-      font-family: 'Spoqa Han Sans Neo', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      color: #999999;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      line-height: 1.252;
-
-      &:hover {
-        color: #333333;
-      }
-    }
   }
 }
 </style>

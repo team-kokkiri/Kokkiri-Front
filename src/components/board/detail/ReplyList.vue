@@ -11,6 +11,7 @@
         @edit="handleEdit"
         @submit-edit="handleSubmitEdit"
         @close-edit="handleCloseEdit"
+        @delete="$emit('delete', $event)"
     />
   </div>
 </template>
@@ -26,7 +27,18 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['like', 'chat', 'report', 'edit', 'submit-edit'])
+const emit = defineEmits([
+  'edit',
+  'delete',
+  'reply',
+  'like',
+  'chat',
+  'report',
+  'submit-edit',
+  'close-edit',
+  'submit-reply',
+  'close-reply'
+])
 
 // 수정 입력창 상태 관리
 const editInputVisible = ref(null)

@@ -8,6 +8,7 @@
       </div>
       <div class="comment-actions">
         <button class="btn-edit" @click="$emit('edit', comment)">수정</button>
+        <button class="btn-delete" @click="$emit('delete', comment)">삭제</button>
         <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
         <button class="btn-like" @click="$emit('like', comment)">공감</button>
         <button class="btn-chat" @click="$emit('chat', comment)">채팅</button>
@@ -34,7 +35,7 @@
         :item="comment"
         item-type="comment"
         @submit="$emit('submit-edit', $event)"
-        @close="handleCloseEdit"
+        @close="$emit('close-edit', $event)"
     />
     <!-- 대댓글 리스트 -->
     <ReplyList
@@ -43,6 +44,7 @@
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
+        @delete="$emit('delete', $event)"
     />
 
     <!-- 대댓글 입력창 -->
@@ -50,7 +52,7 @@
         v-if="replyInputVisible === comment.id"
         :comment-id="comment.id"
         @submit="$emit('submit-reply', $event)"
-        @close="handleCloseReply"
+        @close="$emit('close-reply', $event)"
     />
   </div>
 </template>
@@ -77,25 +79,26 @@ defineProps({
   }
 })
 
-// close-reply 이벤트 추가
-const emit = defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply', 'close-reply', 'edit', 'submit-edit', 'close-edit'])
+defineEmits([
+  'edit',
+  'delete',
+  'reply',
+  'like',
+  'chat',
+  'report',
+  'submit-edit',
+  'close-edit',
+  'submit-reply',
+  'close-reply'
+])
 
-// 대댓글 창 닫기 핸들러
-const handleCloseReply = () => {
-  console.log('ReplyForm close event received') // 디버깅용
-  emit('close-reply')
-}
-// 수정 창 닫기 핸들러
-const handleCloseEdit = () => {
-  console.log('EditForm close event received') // 디버깅용
-  emit('close-edit')
-}
 // 날짜 포맷터
 function formatDate(str) {
   if (!str) return ''
   const d = new Date(str)
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -133,24 +136,6 @@ function formatDate(str) {
       display: flex;
       gap: 1px;
 
-      .btn-edit,
-      .btn-reply,
-      .btn-like,
-      .btn-chat,
-      .btn-report {
-        font-family: 'Spoqa Han Sans Neo', sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        color: #999999;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        line-height: 1.252;
-
-        &:hover {
-          color: #333333;
-        }
-      }
     }
   }
 

@@ -33,6 +33,7 @@
           @submit-reply="onSubmitReply"
           @edit="onEdit"
           @submit-edit="onSubmitEdit"
+          @delete = "onDelete"
       />
       <CommentForm @submit="onSubmitComment" />
     </div>
@@ -174,16 +175,11 @@ const onEdit = (item) => {
 
 }
 
-// 삭제 기능
+// 삭제 기능 // 본문 댓글 대댓글 전부 이 메소드로 합쳤는데 필요하면 나눠드림
+// 타입으로 구분해서 처리하면 될 듯 합니다
 const onDelete = (item) => {
   console.log('삭제 버튼 클릭:', item)
 }
-
-
-// 본문 수정창 닫기 핸들러
-// const handleClosePostEdit = () => {
-//   postEditVisible.value = false
-// }
 
 // 채팅 기능
 const onChat = (item) => {

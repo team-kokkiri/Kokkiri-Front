@@ -15,6 +15,7 @@
         @edit="handleEdit"
         @submit-edit="handleSubmitEdit"
         @close-edit="handleCloseEdit"
+        @delete="$emit('delete', $event)"
     />
   </div>
 </template>
@@ -30,7 +31,18 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply', 'edit', 'submit-edit'])
+const emit = defineEmits([
+  'edit',
+  'delete',
+  'reply',
+  'like',
+  'chat',
+  'report',
+  'submit-edit',
+  'close-edit',
+  'submit-reply',
+  'close-reply'
+])
 
 // 대댓글 입력창 상태 관리
 const replyInputVisible = ref(null)

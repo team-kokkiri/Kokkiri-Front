@@ -8,6 +8,7 @@
       </div>
       <div class="comment-actions">
         <button class="btn-edit" @click="$emit('edit', reply)">수정</button>
+        <button class="btn-delete" @click="$emit('delete', reply)">삭제</button>
         <button class="btn-like" @click="$emit('like', reply)">공감</button>
         <button class="btn-chat" @click="$emit('chat', reply)">채팅</button>
         <button class="btn-report" @click="$emit('report', reply)">신고</button>
@@ -54,7 +55,18 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['like', 'chat', 'report','edit', 'submit-edit', 'close-edit'])
+const emit = defineEmits([
+  'edit',
+  'delete',
+  'reply',
+  'like',
+  'chat',
+  'report',
+  'submit-edit',
+  'close-edit',
+  'submit-reply',
+  'close-reply'
+])
 
 // 날짜 포맷터
 function formatDate(str) {
@@ -108,24 +120,6 @@ const handleCloseEdit = () => {
     .comment-actions {
       display: flex;
       gap: 1px;
-
-      .btn-edit,
-      .btn-like,
-      .btn-chat,
-      .btn-report {
-        font-family: 'Spoqa Han Sans Neo', sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        color: #999999;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        line-height: 1.252;
-
-        &:hover {
-          color: #333333;
-        }
-      }
     }
   }
 
