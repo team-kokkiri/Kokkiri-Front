@@ -13,58 +13,58 @@ const routes = [
   {
     path: '/main-page',
     component: MainPage,
-    meta: { showNav: true, showRight: true, showLeft: true },
+    meta: { showNav: true, showRight: true, showLeft: true, showCenter: true },
     children: [
       {
         path: 'calendar',
         component: CalendarPage,
-        meta: { showNav: false, showRight: false, showLeft: false },
+        meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
         path: 'party',
         component: () => import('@/pages/main/PartyPage.vue'),
-        meta: { showNav: false, showRight: false, showLeft: false },
+        meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
         path: 'notice',
         component: () => import('@/pages/board/NoticePage.vue'),
-        meta: { showNav: false, showLeft: false },
+        meta: { showNav: false, showLeft: false, showCenter: false },
       },
       {
         path: 'admin',
         component: () => import('@/pages/admin/AdminPage.vue'),
-        meta: { showNav: false, showRight: false, showLeft: false },
+        meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
         path: 'mypage',
         component: () => import('@/pages/user/MyPage.vue'),
-        meta: { showNav: false, showRight: false, showLeft: false },
+        meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
         path: 'chat',
         component: () => import('@/pages/chat/ChatPage.vue'),
-        meta: { showNav: false, showRight: false, showLeft: false },
+        meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
         path: 'free-board',
         component: () => import('@/pages/board/FreeBoardList.vue'),
-        meta: { showLeft: false },
+        meta: { showLeft: false, showCenter: false },
       },
       {
         path: 'free-board/:id',
         component: () => import('@/pages/board/FreeBoardDetail.vue'),
-        meta: { showLeft: false },
+        meta: { showLeft: false, showCenter: false },
         props: true,
       },
       {
         path: 'hot-board',
         component: () => import('@/pages/board/HotBoard.vue'),
-        meta: { showLeft: false },
+        meta: { showLeft: false, showCenter: false },
       },
       {
         path: 'share-board',
         component: () => import('@/pages/board/ShareBoard.vue'),
-        meta: { showLeft: false },
+        meta: { showLeft: false, showCenter: false },
       },
     ]
   },

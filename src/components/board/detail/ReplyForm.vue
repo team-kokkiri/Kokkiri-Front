@@ -36,7 +36,7 @@ const handleSubmit = () => {
 
   emit('submit', {
     commentId: props.commentId,
-    content: replyText.value,
+    comment: replyText.value,
     createdAt: new Date().toISOString()
   })
 

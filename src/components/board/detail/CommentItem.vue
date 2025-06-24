@@ -4,7 +4,7 @@
     <div class="comment-profile">
       <div class="profile-info">
         <img class="avatar" :src="comment.avatar || defaultAvatar" alt="아바타" />
-        <span class="nickname">{{ comment.writer }}</span>
+        <span class="nickname">{{ comment.memberNickname }}</span>
       </div>
       <div class="comment-actions">
         <button class="btn-edit" @click="$emit('edit', comment)">수정</button>
@@ -18,14 +18,16 @@
 
     <!-- 댓글 본문 -->
     <div class="comment-body">
-      <p class="comment-text">{{ comment.content }}</p>
+      <p class="comment-text">{{ comment.comment }}</p>
     </div>
 
     <!-- 댓글 메타 정보 -->
     <div class="comment-meta">
-      <span class="date">{{ formatDate(comment.createdAt) }}</span>
-      <span class="comment-likes" v-if="comment.likeCount > 0">
-        <i class="bi bi-hand-thumbs-up"></i>
+      <span class="date">{{ formatDate(comment.commentCreatedAt) }}</span>
+        <span class="comment-likes" v-if="comment.likeCount > 0">
+          <i
+            :class="comment.liked ? 'bi bi-hand-thumbs-up-fill' : 'bi bi-hand-thumbs-up'"
+          ></i>
         <span class="like-count">{{ comment.likeCount }}</span>
       </span>
     </div>
@@ -39,8 +41,9 @@
     />
     <!-- 대댓글 리스트 -->
     <ReplyList
-        v-if="comment.replies && comment.replies.length"
-        :replies="comment.replies"
+        v-if="allReplies.some(r => r.parentId === comment.id)"
+        :replies="allReplies"
+        :parent-id="comment.id"
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
@@ -65,19 +68,15 @@ import defaultAvatar from '@/assets/img/0.png'
 import EditForm from './EditForm.vue'
 
 defineProps({
-  comment: {
-    type: Object,
-    required: true
-  },
-  replyInputVisible: {
-    type: [Number, String, null],
-    default: null
-  },
-  editInputVisible: {
-    type: [Number, String, null],
-    default: null
+  comment: Object,
+  replyInputVisible: [Number, String, null],
+  allReplies: {
+    type: Array,
+    default: () => []
   }
 })
+
+console.log('allReplies')
 
 defineEmits([
   'edit',
@@ -98,7 +97,6 @@ function formatDate(str) {
   const d = new Date(str)
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
-
 </script>
 
 <style lang="scss" scoped>
@@ -136,6 +134,23 @@ function formatDate(str) {
       display: flex;
       gap: 1px;
 
+      .btn-reply,
+      .btn-like,
+      .btn-chat,
+      .btn-report {
+        font-family: 'Spoqa Han Sans Neo', sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        color: #999999;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        line-height: 1.252;
+
+        &:hover {
+          color: #333333;
+        }
+      }
     }
   }
 

@@ -1,10 +1,9 @@
 <template>
   <div class="replies-wrapper">
     <ReplyItem
-        v-for="reply in replies"
+        v-for="reply in replies.filter(r => r.parentId === parentId)"
         :key="reply.id"
         :reply="reply"
-        :edit-input-visible="editInputVisible"
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
@@ -12,6 +11,7 @@
         @submit-edit="handleSubmitEdit"
         @close-edit="handleCloseEdit"
         @delete="$emit('delete', $event)"
+
     />
   </div>
 </template>
@@ -21,10 +21,8 @@ import { ref, defineProps, defineEmits } from 'vue'
 import ReplyItem from './ReplyItem.vue'
 
 defineProps({
-  replies: {
-    type: Array,
-    default: () => []
-  }
+  replies: Array,
+  parentId: [Number, String]  // 부모 댓글의 ID
 })
 
 const emit = defineEmits([
