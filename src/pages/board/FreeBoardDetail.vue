@@ -60,115 +60,96 @@ import CommentForm from '@/components/board/detail/CommentForm.vue'
 
 const route = useRoute()
 const router = useRouter()
+const token = localStorage.getItem('accessToken');
 
 // 현재 상세 게시글 데이터
 const post = ref(null)
 
-// 페이지 진입시 라우터 params.id로 게시글 찾아오기
-// onMounted(() => {
-//   const postId = Number(route.params.id)
-//   post.value = boardSample.find(item => Number(item.id) === postId) || null
-// })
-
-onMounted(async () => {
+const fetchPost = async () => {
   try {
-    const res = await axios.get(`http://localhost:9090/api/boards/${route.params.id}`)
+    const res = await axios.get(`http://localhost:9090/api/boards/detail/${route.params.id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
     post.value = res.data
   } catch (err) {
     console.error('게시글 조회 실패', err)
     post.value = null
   }
+}
+
+// 페이지 진입시 라우터
+onMounted(() => {
+  fetchPost()
 })
 
-
-// 댓글 등록 (백엔드 처리 해야함)
-// const onSubmitComment = (commentData) => {
-//   if (!post.value) return
-//   if (!post.value.comments) post.value.comments = []
-
-//   post.value.comments.push({
-//     id: Date.now(),
-//     writer: '익명',
-//     content: commentData.content,
-//     likeCount: 0,
-//     createdAt: commentData.createdAt,
-//     replies: []
-//   })
-
-//   post.value.commentCount = (post.value.commentCount || 0) + 1
-// }
-
+// 댓글 등록
 const onSubmitComment = async (commentData) => {
+
   try {
-    const res = await axios.post(`http://localhost:9090/api/boards/detail/${post.value.id}/comments`, {
+    await axios.post(`http://localhost:9090/api/boards/detail/${post.value.id}/comments`, {
       boardId: post.value.id,
-      content: commentData.content
+      comment: commentData.comment,
+      parentId: null
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
     })
-    // 성공 시 새 댓글 추가
-    post.value.comments.push(res.data)
-    post.value.commentCount++
+
+    await fetchPost()  // 댓글 등록 후 전체 게시글 다시 불러오기
   } catch (err) {
     console.error('댓글 등록 실패', err)
   }
 }
 
-// 대댓글 등록 (백엔드 처리 해야함)
-// const onSubmitReply = (replyData) => {
-//   if (!post.value) return
-
-//   const targetComment = post.value.comments.find(c => c.id === replyData.commentId)
-//   if (!targetComment) return
-
-//   if (!targetComment.replies) targetComment.replies = []
-
-//   targetComment.replies.push({
-//     id: Date.now(),
-//     writer: '익명',
-//     content: replyData.content,
-//     likeCount: 0,
-//     createdAt: replyData.createdAt
-//   })
-// }
-
+// 대댓글 등록
 const onSubmitReply = async (replyData) => {
   try {
-    const res = await axios.post(`http://localhost:9090/api/boards/detail/${post.value.id}/comments`, {
+    await axios.post(`http://localhost:9090/api/boards/detail/${post.value.id}/comments`, {
       boardId: post.value.id,
       parentId: replyData.commentId,
-      content: replyData.content
+      comment: replyData.comment
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
     })
-    const targetComment = post.value.comments.find(c => c.id === replyData.commentId)
-    if (targetComment) {
-      if (!targetComment.replies) targetComment.replies = []
-      targetComment.replies.push(res.data)
-    }
+
+    await fetchPost() // 대댓글 등록 후 전체 게시글 다시 불러오기
   } catch (err) {
     console.error('대댓글 등록 실패', err)
   }
 }
 
 // 게시글 좋아요 (공감) 증가
-// const onLike = (item = null) => {
-//   if (item) {
-//     item.likeCount = (item.likeCount || 0) + 1
-//   } else if (post.value) {
-//     post.value.likeCount = (post.value.likeCount || 0) + 1
-//   }
-// }
-
 const onLike = async (item = null) => {
   try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
     if (item) {
-      // 댓글 or 답글 좋아요
-      await axios.post(`http://localhost:9090/api/comments/${item.id}/like`)
-      item.likeCount++
+      // 댓글, 답글
+      await axios.post(
+        `http://localhost:9090/api/boards/detail/${post.value.id}/comments/${item.id}/like`,
+        null,
+        config
+      )
+      item.likeCount = (item.likeCount || 0) + 1
     } else {
-      // 게시글 좋아요
-      await axios.post(`http://localhost:9090/api/boards/${post.value.id}/like`)
-      post.value.likeCount++
+      // 게시글
+      await axios.post(
+        `http://localhost:9090/api/boards/${post.value.id}/like`,
+        null,
+        config
+      )
+      await fetchPost()
     }
   } catch (err) {
-    console.error('좋아요 실패', err)
+    if (err.response?.status === 400) {
+      alert('이미 좋아요를 누르셨습니다.')
+    } else {
+      console.error('좋아요 실패', err)
+    }
   }
 }
 
@@ -224,7 +205,7 @@ const goToList = () => {
 
   .detail-post {
     width: 832px;
-    height: 232px;
+    height: auto;
     background-color: #ffffff;
     border: 1px solid #dddddd;
     padding: 15px;

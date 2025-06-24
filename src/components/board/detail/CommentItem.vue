@@ -4,7 +4,7 @@
     <div class="comment-profile">
       <div class="profile-info">
         <img class="avatar" :src="comment.avatar || defaultAvatar" alt="아바타" />
-        <span class="nickname">{{ comment.writer }}</span>
+        <span class="nickname">{{ comment.memberNickname }}</span>
       </div>
       <div class="comment-actions">
         <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
@@ -16,22 +16,25 @@
 
     <!-- 댓글 본문 -->
     <div class="comment-body">
-      <p class="comment-text">{{ comment.content }}</p>
+      <p class="comment-text">{{ comment.comment }}</p>
     </div>
 
     <!-- 댓글 메타 정보 -->
     <div class="comment-meta">
-      <span class="date">{{ formatDate(comment.createdAt) }}</span>
-      <span class="comment-likes" v-if="comment.likeCount > 0">
-        <i class="bi bi-hand-thumbs-up"></i>
+      <span class="date">{{ formatDate(comment.commentCreatedAt) }}</span>
+        <span class="comment-likes" v-if="comment.likeCount > 0">
+          <i
+            :class="comment.liked ? 'bi bi-hand-thumbs-up-fill' : 'bi bi-hand-thumbs-up'"
+          ></i>
         <span class="like-count">{{ comment.likeCount }}</span>
       </span>
     </div>
 
     <!-- 대댓글 리스트 -->
     <ReplyList
-        v-if="comment.replies && comment.replies.length"
-        :replies="comment.replies"
+        v-if="allReplies.some(r => r.parentId === comment.id)"
+        :replies="allReplies"
+        :parent-id="comment.id"
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
@@ -54,15 +57,15 @@ import ReplyForm from './ReplyForm.vue'
 import defaultAvatar from '@/assets/img/0.png'
 
 defineProps({
-  comment: {
-    type: Object,
-    required: true
-  },
-  replyInputVisible: {
-    type: [Number, String, null],
-    default: null
+  comment: Object,
+  replyInputVisible: [Number, String, null],
+  allReplies: {
+    type: Array,
+    default: () => []
   }
 })
+
+console.log('allReplies')
 
 // close-reply 이벤트 추가
 const emit = defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply', 'close-reply'])

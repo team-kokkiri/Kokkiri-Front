@@ -1,9 +1,12 @@
 <template>
   <div class="comment-list">
-    <CommentItem
-        v-for="comment in comments"
+    <!-- 댓글이 존재할 때만 렌더링 -->
+    <template v-if="comments && comments.length">
+      <CommentItem
+        v-for="comment in comments.filter(c => !c.parentId)"
         :key="comment.id"
         :comment="comment"
+        :allReplies="comments"
         :reply-input-visible="replyInputVisible"
         @reply="handleReply"
         @like="$emit('like', $event)"
@@ -11,7 +14,13 @@
         @report="$emit('report', $event)"
         @submit-reply="handleSubmitReply"
         @close-reply="handleCloseReply"
-    />
+      />
+    </template>
+
+    <!-- 댓글이 없을 때 -->
+    <div v-else class="no-comments">
+      등록된 댓글이 없습니다.
+    </div>
   </div>
 </template>
 

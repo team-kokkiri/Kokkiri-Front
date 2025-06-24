@@ -137,7 +137,7 @@ const goToList = () => {
 
   .detail-post {
     width: 832px;
-    height: 232px;
+    height: auto;
     background-color: #ffffff;
     border: 1px solid #dddddd;
     padding: 15px;

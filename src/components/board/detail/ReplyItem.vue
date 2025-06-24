@@ -4,7 +4,7 @@
     <div class="comment-profile">
       <div class="profile-info">
         <img class="avatar" :src="reply.avatar || defaultAvatar" alt="아바타" />
-        <span class="nickname">{{ reply.writer }}</span>
+        <span class="nickname">{{ reply.memberNickname }}</span>
       </div>
       <div class="comment-actions">
         <button class="btn-like" @click="$emit('like', reply)">공감</button>
@@ -15,12 +15,12 @@
 
     <!-- 대댓글 본문 -->
     <div class="comment-body">
-      <p class="reply-text">{{ reply.content }}</p>
+      <p class="reply-text">{{ reply.comment }}</p>
     </div>
 
     <!-- 대댓글 메타 정보 -->
     <div class="comment-meta">
-      <span class="date">{{ formatDate(reply.createdAt) }}</span>
+      <span class="date">{{ formatDate(reply.commentCreatedAt) }}</span>
       <span class="comment-likes" v-if="reply.likeCount > 0">
         <i class="bi bi-hand-thumbs-up"></i>
         <span class="like-count">{{ reply.likeCount }}</span>
