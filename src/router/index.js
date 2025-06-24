@@ -47,7 +47,7 @@ const routes = [
       },
       {
         path: 'free-board',
-        component: () => import('@/pages/board/FreeBoard.vue')
+        component: () => import('@/pages/board/FreeBoardList.vue')
       },
       {
         path: 'free-board/:id',

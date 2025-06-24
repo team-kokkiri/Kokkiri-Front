@@ -7,6 +7,8 @@
         <span class="nickname">{{ comment.writer }}</span>
       </div>
       <div class="comment-actions">
+        <button class="btn-edit" @click="$emit('edit', comment)">수정</button>
+        <button class="btn-delete" @click="$emit('delete', comment)">삭제</button>
         <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
         <button class="btn-like" @click="$emit('like', comment)">공감</button>
         <button class="btn-chat" @click="$emit('chat', comment)">채팅</button>
@@ -27,7 +29,14 @@
         <span class="like-count">{{ comment.likeCount }}</span>
       </span>
     </div>
-
+    <!-- 수정 입력창 -->
+    <EditForm
+        v-if="editInputVisible === comment.id"
+        :item="comment"
+        item-type="comment"
+        @submit="$emit('submit-edit', $event)"
+        @close="$emit('close-edit', $event)"
+    />
     <!-- 대댓글 리스트 -->
     <ReplyList
         v-if="comment.replies && comment.replies.length"
@@ -35,6 +44,7 @@
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
+        @delete="$emit('delete', $event)"
     />
 
     <!-- 대댓글 입력창 -->
@@ -42,7 +52,7 @@
         v-if="replyInputVisible === comment.id"
         :comment-id="comment.id"
         @submit="$emit('submit-reply', $event)"
-        @close="handleCloseReply"
+        @close="$emit('close-reply', $event)"
     />
   </div>
 </template>
@@ -52,6 +62,7 @@ import { defineProps, defineEmits } from 'vue'
 import ReplyList from './ReplyList.vue'
 import ReplyForm from './ReplyForm.vue'
 import defaultAvatar from '@/assets/img/0.png'
+import EditForm from './EditForm.vue'
 
 defineProps({
   comment: {
@@ -61,17 +72,25 @@ defineProps({
   replyInputVisible: {
     type: [Number, String, null],
     default: null
+  },
+  editInputVisible: {
+    type: [Number, String, null],
+    default: null
   }
 })
 
-// close-reply 이벤트 추가
-const emit = defineEmits(['reply', 'like', 'chat', 'report', 'submit-reply', 'close-reply'])
-
-// 대댓글 창 닫기 핸들러
-const handleCloseReply = () => {
-  console.log('ReplyForm close event received') // 디버깅용
-  emit('close-reply')
-}
+defineEmits([
+  'edit',
+  'delete',
+  'reply',
+  'like',
+  'chat',
+  'report',
+  'submit-edit',
+  'close-edit',
+  'submit-reply',
+  'close-reply'
+])
 
 // 날짜 포맷터
 function formatDate(str) {
@@ -79,6 +98,7 @@ function formatDate(str) {
   const d = new Date(str)
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -116,23 +136,6 @@ function formatDate(str) {
       display: flex;
       gap: 1px;
 
-      .btn-reply,
-      .btn-like,
-      .btn-chat,
-      .btn-report {
-        font-family: 'Spoqa Han Sans Neo', sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        color: #999999;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        line-height: 1.252;
-
-        &:hover {
-          color: #333333;
-        }
-      }
     }
   }
 
