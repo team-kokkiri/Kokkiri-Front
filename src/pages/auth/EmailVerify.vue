@@ -48,9 +48,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+import axios from '../../utils/axios';
 import { toast } from 'vue3-toastify';
-
 import { watch } from 'vue';
 
 const code = ref('');
@@ -85,7 +84,7 @@ const onVerify = async () => {
 
   try {
     // 서버에 인증 요청 보내기
-    await axios.post('http://localhost:9090/api/email/verify', null, {
+    await axios.post('/api/email/verify', null, {
       params: {
         email: email,
         code: code.value,

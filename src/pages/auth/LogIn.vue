@@ -63,7 +63,7 @@
 <script setup>
 /*####### 임포트 #######*/
 import { ref } from 'vue';
-import axios from 'axios';
+import axios from '../../utils/axios';
 import { useRouter } from 'vue-router';
 
 
@@ -77,15 +77,16 @@ const router = useRouter();
 const handleLogin = async () => {
   errorMessage.value = '';
   try {
-    const response = await axios.post('http://localhost:9090/api/members/login', {
+    const response = await axios.post('/api/members/login', {
       email: email.value,
       password: password.value,
     });
 
-    const { accessToken, refreshToken, email: userEmail } = response.data;
+    // 리프래시토큰만 쿠키로 저장
+    const { accessToken, email: userEmail, role } = response.data;
     localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('email', userEmail);
+    localStorage.setItem('role', role);
 
     await router.push('/main-page');
   } catch (error) {
