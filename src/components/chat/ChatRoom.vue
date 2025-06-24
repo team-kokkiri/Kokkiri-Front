@@ -87,6 +87,9 @@ import SockJS from 'sockjs-client'
 import Stomp from 'webstomp-client'
 import axios from 'axios'
 
+import { onBeforeRouteLeave } from 'vue-router'
+
+
 // ===== 상태(State) 관리 =====
 const chatRooms = ref([])
 const activeRoomId = ref(null)
@@ -173,26 +176,7 @@ async function fetchMessageHistory(roomId) {
   }
 }
 
-async function selectRoom(roomId) {
-  if (activeRoomId.value === roomId) return;
-  activeRoomId.value = roomId;
-  showInviteView.value = false;
-  searchQuery.value = '';
 
-  const room = currentRoom.value;
-  if(room) {
-    if (room.messages.length === 0) {
-      await fetchMessageHistory(roomId);
-    }
-    if (room.unread > 0) {
-        room.unread = 0;
-        axios.post(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/read`, null, {
-            headers: { Authorization: `Bearer ${token.value}` }
-        }).catch(err => console.error("메시지 읽음 처리 실패", err));
-    }
-  }
-  scrollToBottom();
-}
 
 function connectWebSocket() {
   if (stompClient.value && stompClient.value.connected) return;
@@ -261,6 +245,55 @@ function handleIncomingMessage(msg) {
 }
 
 // ===== UI 관련 함수들 =====
+async function sendReadStatus(roomId) {
+  if (!roomId) return;
+  try {
+    // 참고 코드에 있던 API를 호출합니다.
+    await axios.post(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/read`, {}, {
+        headers: { Authorization: `Bearer ${token.value}` }
+    });
+    console.log(`✅ [Room ID: ${roomId}] 읽음 상태 전송 성공`);
+    
+  } catch (error) {
+    console.error(`❌ [Room ID: ${roomId}] 읽음 상태 전송 실패:`, error);
+  }
+}
+
+// 이 채팅방 페이지를 떠나기 직전에 호출되는 네비게이션 가드
+onBeforeRouteLeave((to, from, next) => {
+//   console.log('채팅 페이지를 떠납니다. 현재 활성화된 방의 읽음 상태를 전송합니다.');
+  // 현재 활성화된(보고 있던) 방에 대해서만 읽음 처리를 합니다.
+  if (activeRoomId.value) {
+    sendReadStatus(activeRoomId.value);
+  }
+  next(); // 페이지 이동을 계속 진행합니다.
+});
+
+async function selectRoom(roomId) {
+  // 이미 선택된 방을 다시 누르면 아무것도 하지 않음
+  if (activeRoomId.value === roomId) return;
+  
+  // 다른 방을 선택하기 전에, 이전에 열려있던 방이 있었다면 읽음 처리 API를 먼저 호출
+  if (activeRoomId.value) {
+    sendReadStatus(activeRoomId.value);
+  }
+
+  // 새로운 방을 활성화
+  activeRoomId.value = roomId;
+  showInviteView.value = false;
+  searchQuery.value = '';
+
+  const room = currentRoom.value;
+  if(room) {
+    // 메시지 내역이 없다면 불러오기
+    if (room.messages.length === 0) {
+      await fetchMessageHistory(roomId);
+    }
+  }
+  // 스크롤을 맨 아래로
+  scrollToBottom();
+}
+
 function toggleMenu() { menuOpen.value = !menuOpen.value; }
 function handleClickOutside(event) { if (menuOpen.value && menuContainer.value && !menuContainer.value.contains(event.target)) { menuOpen.value = false; } }
 function handleEscapeKey(event) { if (event.key === 'Escape') { if (showInviteView.value) closeInviteView(); else if (menuOpen.value) menuOpen.value = false; } }
