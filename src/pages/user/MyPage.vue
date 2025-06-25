@@ -38,8 +38,12 @@
 
     <!-- 비밀번호 변경 -->
     <template v-else-if="currentView === 'password'">
-      <!-- PasswordSetting 컴포넌트 추가 예정 -->
-      <div>비밀번호 변경 컴포넌트</div>
+      <PasswordSetting
+          @back="handleBackToMain"
+          @verify-current-password="handleVerifyCurrentPassword"
+          @save="handlePasswordSave"
+          ref="passwordSettingRef"
+      />
     </template>
 
     <!-- 반 코드 변경 -->
@@ -56,6 +60,7 @@ import MyProfileBox from '@/components/mypage/MyProfileBox.vue'
 import MyAccountBox from '@/components/mypage/MyAccountBox.vue'
 import MyCommunityBox from '@/components/mypage/MyCommunityBox.vue'
 import NicknameSetting from '@/components/mypage/NicknameSetting.vue'
+import PasswordSetting from '@/components/mypage/PasswordSetting.vue'
 
 const emit = defineEmits([
   'logout',
@@ -66,6 +71,7 @@ const emit = defineEmits([
 // 화면 상태 관리 - 확장 가능한 구조
 const currentView = ref('main') // 'main' | 'profile-image' | 'nickname' | 'password' | 'class-code'
 const nicknameSettingRef = ref(null) // 닉네임 설정 컴포넌트 참조
+const passwordSettingRef = ref(null) // 비밀번호 설정 컴포넌트 참조
 
 /**
  * 메인 화면으로 돌아가기
@@ -169,6 +175,47 @@ const handleNicknameSave = async (nickname) => {
     currentView.value = 'main'
   } catch (error) {
     console.error('닉네임 저장 오류:', error)
+  }
+}
+
+/**
+ * 현재 비밀번호 확인 요청 처리
+ * @param {string} currentPassword - 확인할 현재 비밀번호
+ */
+// const handleVerifyCurrentPassword = async (currentPassword) => {
+//   try {
+//     // TODO: API 호출하여 현재 비밀번호 확인
+//     // const response = await api.verifyCurrentPassword(currentPassword)
+//
+//     // 임시로 성공으로 처리 (실제로는 API 응답에 따라 처리)
+//     const isValid = true
+//
+//     if (passwordSettingRef.value) {
+//       passwordSettingRef.value.setCurrentPasswordVerification(isValid)
+//     }
+//   } catch (error) {
+//     console.error('현재 비밀번호 확인 오류:', error)
+//     if (passwordSettingRef.value) {
+//       passwordSettingRef.value.setCurrentPasswordVerification(false)
+//     }
+//   }
+// }
+
+/**
+ * 비밀번호 변경 저장 요청 처리
+ * @param {Object} passwords - 현재 비밀번호와 새 비밀번호
+ */
+const handlePasswordSave = async (passwords) => {
+  try {
+    // TODO: API 호출하여 비밀번호 변경
+    // await api.changePassword(passwords)
+
+    console.log('비밀번호 변경:', passwords)
+
+    // 저장 성공 후 메인 화면으로 돌아가기
+    currentView.value = 'main'
+  } catch (error) {
+    console.error('비밀번호 변경 오류:', error)
   }
 }
 </script>
