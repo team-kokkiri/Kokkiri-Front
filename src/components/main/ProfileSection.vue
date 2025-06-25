@@ -3,13 +3,13 @@
     <div class="profile-wrap">
       <div class="profile-img-wrap">
         <img
-            :src="userStore.avatar || defaultProfileImage"
-            :alt="`${userStore.email} 프로필 이미지`"
+            :src="avatarUrl"
+            :alt="`${userStore.nickname} 프로필 이미지`"
             class="profile-img"
             @error="handleImageError"
         />
       </div>
-      <span class="profile-name">{{ userId }}</span>
+      <span class="profile-name">{{ nickname }}</span>
     </div>
     <div class="profile-btns">
       <a
@@ -40,13 +40,21 @@ const userStore = useUserStore()
 // Emits
 defineEmits(['profile-info', 'logout'])
 
+const nickname = computed(() => {
+  return userStore.nickname || '익명'
+})
+
+//  avatarUrl 처리 (백엔드 주소 포함)
+const avatarUrl = computed(() => {
+  if (!userStore.avatar) return defaultProfileImage
+  return userStore.avatar.startsWith('/images')
+      ? `http://localhost:9090${userStore.avatar}`
+      : userStore.avatar
+})
+
 const handleImageError = (event) => {
   event.target.src = defaultProfileImage
 }
-
-const userId = computed(() => {
-  return userStore.displayName || ''
-})
 
 </script>
 

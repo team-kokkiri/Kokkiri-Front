@@ -3,50 +3,43 @@ import { defineStore } from 'pinia'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    email: null,        // 토큰에서 받아올 정보
-    role: null,         // 토큰에서 받아올 정보
-    avatar: null,       // 토큰에서 받아올 정보
-    token: null,        // JWT 토큰
-    isLoggedIn: false,  // 명시적 로그인 상태
-    lastLoginAt: null,  // 마지막 로그인 시간
+    email: null,
+    role: null,
+    avatar: null,
+    nickname:null,
+    token: null,
+    isLoggedIn: false,
+    lastLoginAt: null,
   }),
 
   getters: {
-    // 현재 유저 정보 (컴포넌트에서 사용하기 편하게)
     currentUser: (state) => ({
       email: state.email,
       role: state.role,
       avatar: state.avatar,
       lastLoginAt: state.lastLoginAt
     }),
-
-    // 관리자 권한 확인
     isAdmin: (state) => state.role === 'admin',
-
-    // 일반 유저 권한 확인
     isUser: (state) => state.role === 'user',
-
-    // 토큰 존재 여부
     hasToken: (state) => !!state.token,
-
-    // 사용자 표시 이름 (이메일의 @ 앞부분 사용)
     displayName: (state) => {
+      if(state.nickname) return state.nickname;
       if (!state.email) return null
       return state.email.split('@')[0]
     }
   },
 
   actions: {
-    // 토큰으로부터 유저 정보 설정
     setUserInfo(tokenData) {
+      console.log('setUserInfo called', tokenData);
       this.email = tokenData.email
       this.role = tokenData.role
       this.avatar = tokenData.avatar
+      this.nickname = tokenData.nickname
       this.isLoggedIn = true
       this.lastLoginAt = new Date().toISOString()
     },
 
-    // 토큰 설정
     setToken(token) {
       this.token = token
       if (token) {
@@ -56,7 +49,6 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    // 개별 필드 업데이트 (프로필 수정용)
     updateRole(role) {
       this.role = role
     },
@@ -65,8 +57,7 @@ export const useUserStore = defineStore('user', {
       this.avatar = avatar
     },
 
-    // 유저 정보 초기화
-    clearUser() {
+    clearUser({ preserveRefreshToken = false }) {
       this.email = null
       this.role = null
       this.avatar = null
@@ -74,137 +65,141 @@ export const useUserStore = defineStore('user', {
       this.isLoggedIn = false
       this.lastLoginAt = null
 
-      // localStorage 정리
+      console.log('clearUser called', { preserveRefreshToken });
       localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
       localStorage.removeItem('email')
-    },
-
-    // 로그인 (토큰과 토큰에서 디코딩된 정보를 받음)
-    async login({ tokenData, token }) {
-      try {
-        this.setUserInfo(tokenData)
-        this.setToken(token)
-        
-        // 이메일을 localStorage에 별도 저장 (기존 구조 유지)
-        if (tokenData.email) {
-          localStorage.setItem('email', tokenData.email)
-        }
-        
-        return { success: true }
-      } catch (error) {
-        console.error('Login action error:', error)
-        return { success: false, error: error.message }
+      if (!preserveRefreshToken) {
+        localStorage.removeItem('refreshToken')
       }
     },
 
-    // 로그아웃
+    async login({ token }) {
+      try {
+        this.setToken(token);
+
+        // 로그인 직후 /api/members/me 호출해서 유저 정보 가져오기
+        const response = await fetch(`${process.env.VUE_APP_API_BASE_URL}/api/members/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: 'include', // 쿠키(리프레시 토큰) 전송 위해 필요
+        });
+
+        if (!response.ok) throw new Error('회원 정보 조회 실패');
+
+        const userInfo = await response.json();
+
+        this.setUserInfo({
+          email: userInfo.email,
+          role: userInfo.role,
+          avatar: userInfo.avatar || userInfo.avatarUrl || null,
+          nickname: userInfo.nickname,
+        });
+
+        // email도 localStorage에 저장해도 괜찮으면 저장
+        if (userInfo.email) {
+          localStorage.setItem('email', userInfo.email);
+        }
+
+        return { success: true };
+      } catch (error) {
+        console.error('Login action error:', error);
+        return { success: false, error: error.message };
+      }
+    }
+,
+
     async logout() {
       try {
-        // API 호출로 서버에서도 로그아웃 처리 (선택)
-        // await api.logout()
-
+        // 서버 로그아웃 API 호출이 있다면 여기에 추가
         this.clearUser()
         return { success: true }
       } catch (error) {
         console.error('Logout action error:', error)
-        // 에러가 있어도 로컬 데이터는 초기화
         this.clearUser()
         return { success: false, error: error.message }
       }
     },
 
-    // localStorage에서 토큰을 읽어와서 디코딩하여 유저 정보 복원
     async restoreUser() {
-      try {
-        const accessToken = localStorage.getItem('accessToken')
-        
-        if (!accessToken) {
-          return { success: false, message: 'No token found' }
-        }
+      const accessToken = localStorage.getItem('accessToken')
 
-        // JWT 토큰 디코딩하여 정보 추출
-        // jwt-decode 라이브러리가 이미 설치되어 있으므로 사용
-        try {
-          const { jwtDecode } = await import('jwt-decode')
+      try {
+        const { jwtDecode } = await import('jwt-decode')
+
+        if (accessToken) {
           const decodedToken = jwtDecode(accessToken)
-          
-          // 토큰에서 필요한 정보 추출
-          const tokenData = {
-            email: decodedToken.email || decodedToken.sub, // sub는 일반적으로 사용자 식별자
-            role: decodedToken.role || decodedToken.authorities?.[0] || 'user',
-            avatar: decodedToken.avatar || decodedToken.picture || null
-          }
-          
-          // 토큰 만료 확인
           const currentTime = Date.now() / 1000
+
           if (decodedToken.exp && decodedToken.exp < currentTime) {
-            console.warn('Token expired')
-            this.clearUser()
-            return { success: false, message: 'Token expired' }
+            console.warn('액세스토큰 만료.. 리프래시토큰 검증 중..')
+            return await this.restoreByRefresh()
           }
-          
+
+          //토큰은 유효 → /api/members/me 호출해서 닉네임 포함 정보 복원
+          const response = await fetch(`${process.env.VUE_APP_API_BASE_URL}/api/members/me`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            credentials: 'include',
+          })
+
+          if (!response.ok) throw new Error('회원 정보 조회 실패')
+
+          const tokenData = {
+            email: decodedToken.email || decodedToken.sub,
+            role: decodedToken.role || decodedToken.authorities?.[0] || 'user',
+            avatar: decodedToken.avatar || decodedToken.picture || null,
+            nickname: decodedToken.nickname,
+          }
+
           this.setToken(accessToken)
           this.setUserInfo(tokenData)
-          
-          // 이메일을 localStorage에 별도 저장 (기존 구조 유지)
-          if (tokenData.email) {
-            localStorage.setItem('email', tokenData.email)
-          }
-          
-          return { success: true, data: tokenData }
-          
-        } catch (decodeError) {
-          console.error('Token decode error:', decodeError)
-          this.clearUser()
-          return { success: false, error: 'Invalid token format' }
+          return { success: true }
+        } else {
+          return await this.restoreByRefresh()
         }
-        
       } catch (error) {
-        console.error('Restore user error:', error)
-        this.clearUser()
-        return { success: false, error: error.message }
+        console.error('restoreUser error:', error)
+        return await this.restoreByRefresh()
       }
     },
 
-    // 프로필 업데이트 (avatar만 변경 가능)
+    async restoreByRefresh() {
+      try {
+        // token.js 에서 export한 refreshAccessToken 함수를 import해서 사용
+        const { refreshAccessToken } = await import('@/utils/token')
+        const newToken = await refreshAccessToken()
+
+        const { jwtDecode } = await import('jwt-decode')
+        const decodedToken = jwtDecode(newToken)
+
+        const tokenData = {
+          email: decodedToken.email || decodedToken.sub,
+          role: decodedToken.role || decodedToken.authorities?.[0] || 'user',
+          avatar: decodedToken.avatar || decodedToken.picture || null,
+        }
+
+        this.setToken(newToken)
+        this.setUserInfo(tokenData)
+        return { success: true }
+      } catch (e) {
+        console.error('restoreByRefresh 실패:', e)
+        this.clearUser({ preserveRefreshToken: true })
+        return { success: false, error: e.message }
+      }
+    },
+
     async updateProfile(profileData) {
       try {
-        // API 호출
-        // const response = await api.updateProfile(profileData)
-
-        // 성공시 store 업데이트 (avatar만 변경 가능)
         if (profileData.avatar !== undefined) {
           this.updateAvatar(profileData.avatar)
         }
-
         return { success: true }
       } catch (error) {
         console.error('Update profile error:', error)
         return { success: false, error: error.message }
       }
     },
-
-    // 토큰 갱신 (새 토큰으로 정보 업데이트)
-    async refreshToken(newToken) {
-      try {
-        const { jwtDecode } = await import('jwt-decode')
-        const decodedToken = jwtDecode(newToken)
-        
-        const tokenData = {
-          email: decodedToken.email || decodedToken.sub,
-          role: decodedToken.role || decodedToken.authorities?.[0] || 'user',
-          avatar: decodedToken.avatar || decodedToken.picture || null
-        }
-        
-        this.setToken(newToken)
-        this.setUserInfo(tokenData)
-        
-        return { success: true, data: tokenData }
-      } catch (error) {
-        console.error('Refresh token error:', error)
-        return { success: false, error: error.message }
-      }
-    }
   }
 })
