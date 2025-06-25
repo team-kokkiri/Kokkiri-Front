@@ -39,9 +39,12 @@ import MainRight from "@/components/common/MainRight.vue"
 import { useNotifications } from '@/composables/useNotifications'
 import MainLeft from "@/components/main/MainLeft.vue";
 import MainBodyCenter from "@/components/main/MainBodyCenter.vue";
+import instance from '@/utils/axios';
+import {useUserStore} from "@/stores";
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 // 알림 데이터 중앙 관리
 const {
@@ -102,10 +105,22 @@ const handleProfileInfo = () => {
   // 프로필 정보 페이지로 이동 또는 모달 열기
 }
 
-const handleLogout = () => {
-  console.log('로그아웃 클릭')
-  // 로그아웃 로직 실행
-  // 예: 토큰 제거, 사용자 상태 초기화, 로그인 페이지로 리다이렉트
+const handleLogout = async () => {
+  try {
+    // 1. 서버에 로그아웃 요청
+    await instance.post('api/members/logout')
+
+    // 2. 프론트 상태 초기화
+    userStore.clearUser({})
+
+    // 3. (옵션) JS에서 쿠키 직접 제거 시도
+    document.cookie = 'refreshToken=; Path=/; Max-Age=0;'
+
+    // 4. 로그인 페이지로 이동
+    router.replace('/login')
+  } catch (error) {
+    console.error('로그아웃 실패:', error)
+  }
 }
 
 const handleActivityNavigate = (item) => {
@@ -118,6 +133,7 @@ const handleActivityNavigate = (item) => {
 
 // 컴포넌트 마운트 시 알림 시스템 초기화
 onMounted(() => {
+  console.log(localStorage.getItem('avatar'))
   initializeNotifications()
 })
 

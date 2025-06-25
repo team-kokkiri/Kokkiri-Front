@@ -85,11 +85,11 @@ const handleLogin = async () => {
     });
 
     // 리프래시토큰만 쿠키로 저장
-    const { accessToken, email: userEmail, role } = response.data;
+    const { accessToken, email: userEmail, role ,avatar} = response.data;
 
     // 피니아 로그인 메소드 사용
     await userStore.login({
-      tokenData: { email: userEmail, role, avatar: null },
+      tokenData: { email: userEmail, role, avatar},
       token: accessToken
     })
 

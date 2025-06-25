@@ -33,6 +33,10 @@ instance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                 return instance(originalRequest);
             } catch (refreshError) {
+                // 리프레시 토큰 재발급 실패 시 처리 추가
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('email');
+                window.location.href = '/login';  // 로그인 페이지로 이동
                 return Promise.reject(refreshError);
             }
         }
@@ -40,5 +44,6 @@ instance.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
 
 export default instance;
