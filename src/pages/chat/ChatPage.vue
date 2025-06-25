@@ -20,74 +20,31 @@
             @search="handleInviteSearch"
         />
 
-        <!-- 3. 채팅룸 메인 영역 -->
-        <div class="chat-main" v-else-if="activeRoomId && currentRoom">
-          <div class="chat-header">
-            <div class="chat-room-name">
-              <img class="avatar" :src="currentRoom.avatar" alt="아바타" />
-              <span class="nickname">{{ currentRoom.nickname }}</span>
-            </div>
-            <div class="chat-header-menu" ref="menuContainer">
-              <button class="btn-more" @click="toggleMenu">
-                <i class="bi bi-three-dots"></i>
-              </button>
-              <div class="menu-dropdown" v-if="menuOpen" ref="menuDropdown">
-                <button class="btn-invite" @click="openInvite">초대하기</button>
-                <div class="divider"></div>
-                <button class="btn-exit" @click="leaveRoom">나가기</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="chat-content" ref="chatContentRef">
-            <div
-                class="chat-message"
-                v-for="msg in currentRoom.messages"
-                :key="msg.id"
-            >
-              <img class="avatar" :src="msg.avatar" alt="아바타" />
-              <div class="message-info">
-                <div class="message-top">
-                  <span class="nickname">{{ msg.nickname }}</span>
-                  <span class="time">{{ formatDisplayTime(msg.time) }}</span>
-                </div>
-                <p class="message-text">{{ msg.text }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="chat-input-wrap">
-            <input
-                type="text"
-                class="chat-input"
-                placeholder="채팅을 입력하세요."
-                v-model="input"
-                @keyup.enter="sendMessage"
-            />
-            <button class="btn-send" @click="sendMessage">
-              <i class="bi bi-vector-pen"></i>
-            </button>
-          </div>
-        </div>
-        
-        <!-- 채팅방 선택 안됐을 때 플레이스홀더 -->
-        <div class="chat-main chat-main-placeholder" v-else>
-           <div class="placeholder-content">
-              <i class="bi bi-chat-dots"></i>
-              <p>채팅방을 선택하여 대화를 시작하세요.</p>
-           </div>
-        </div>
+        <!-- 3. 채팅룸 메인 영역 컴포넌트 (초대 뷰가 아닐 때만 표시) -->
+        <ChatMainArea
+            v-if="!showInviteView"
+            :activeRoomId="activeRoomId"
+            :currentRoom="currentRoom"
+            :input="input"
+            :menuOpen="menuOpen"
+            @update-input="updateInput"
+            @send-message="sendMessage"
+            @toggle-menu="toggleMenu"
+            @open-invite="openInvite"
+            @leave-room="leaveRoom"
+        />
       </div>
     </section>
   </div>
 </template>
 
 <script setup>
-// 3개 컴포넌트 임포트
+// 4개 컴포넌트 임포트
 import ChatSidebar from '@/components/chat/ChatSidebar.vue'
 import InviteView from '@/components/chat/InviteView.vue'
+import ChatMainArea from '@/components/chat/ChatMainArea.vue'
 import Avatar from '@/assets/img/0.png' // 기본 아바타
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted} from 'vue'
 
 // Stomp 및 통신 라이브러리 import
 import SockJS from 'sockjs-client'
@@ -103,9 +60,9 @@ const input = ref('')
 const menuOpen = ref(false)
 const showInviteView = ref(false)
 
-// DOM Refs
-const menuContainer = ref(null)
-const chatContentRef = ref(null)
+// DOM Refs (ChatMainArea로 이동됨)
+// const menuContainer = ref(null)
+// const chatContentRef = ref(null)
 
 // Stomp 관련 상태
 const stompClient = ref(null)
@@ -126,13 +83,7 @@ const currentRoom = computed(() =>
 )
 
 // ===== Helper 함수 =====
-function scrollToBottom() {
-  nextTick(() => {
-    if (chatContentRef.value) {
-      chatContentRef.value.scrollTop = chatContentRef.value.scrollHeight
-    }
-  })
-}
+// scrollToBottom, formatDisplayTime 함수들은 ChatMainArea로 이동
 
 function formatDisplayTime(dateTimeStr) {
   if (!dateTimeStr) return '';
@@ -175,7 +126,7 @@ async function fetchMessageHistory(roomId) {
         time: msg.createdTime,
         text: msg.message
       }));
-      scrollToBottom();
+      // scrollToBottom은 ChatMainArea에서 처리
     }
   } catch (error) {
     console.error("메시지 내역 로딩 실패:", error);
@@ -244,7 +195,7 @@ function handleIncomingMessage(msg) {
       time: createdTime,
       text: message
     });
-    scrollToBottom();
+    // scrollToBottom은 ChatMainArea에서 처리
   }
 }
 
@@ -291,26 +242,48 @@ async function selectRoom(roomId) {
     }
   }
 
-  scrollToBottom();
+  // scrollToBottom은 ChatMainArea에서 처리
 }
 
-function toggleMenu() { menuOpen.value = !menuOpen.value; }
-function handleClickOutside(event) { 
-  if (menuOpen.value && menuContainer.value && !menuContainer.value.contains(event.target)) { 
-    menuOpen.value = false; 
-  } 
+// ===== ChatMainArea에서 emit되는 이벤트 핸들러들 =====
+function updateInput(newValue) {
+  input.value = newValue;
 }
+
+function toggleMenu() { 
+  menuOpen.value = !menuOpen.value; 
+}
+
+function openInvite() { 
+  menuOpen.value = false; 
+  showInviteView.value = true; 
+}
+
+function leaveRoom() { 
+  menuOpen.value = false; 
+  console.log('채팅방 나가기'); 
+}
+
+// ===== 기타 UI 관련 함수들 =====
 function handleEscapeKey(event) { 
   if (event.key === 'Escape') { 
     if (showInviteView.value) closeInviteView(); 
     else if (menuOpen.value) menuOpen.value = false; 
   } 
 }
-function openInvite() { menuOpen.value = false; showInviteView.value = true; }
-function closeInviteView() { showInviteView.value = false; searchQuery.value = ''; }
-function handleInviteSearch(query) { searchQuery.value = query; }
-function handleUserInvite(user) { invitedUserIds.value.push(user.id); }
-function leaveRoom() { menuOpen.value = false; console.log('채팅방 나가기'); }
+
+function closeInviteView() { 
+  showInviteView.value = false; 
+  searchQuery.value = ''; 
+}
+
+function handleInviteSearch(query) { 
+  searchQuery.value = query; 
+}
+
+function handleUserInvite(user) { 
+  invitedUserIds.value.push(user.id); 
+}
 
 // ===== 라이프사이클 훅 =====
 onMounted(async () => {
@@ -324,13 +297,11 @@ onMounted(async () => {
   await fetchChatRooms();
   if (chatRooms.value.length > 0) { connectWebSocket(); }
 
-  document.addEventListener('click', handleClickOutside);
   document.addEventListener('keydown', handleEscapeKey);
 });
 
 onUnmounted(() => {
   disconnectWebSocket();
-  document.removeEventListener('click', handleClickOutside);
   document.removeEventListener('keydown', handleEscapeKey);
 });
 </script>
@@ -349,222 +320,5 @@ onUnmounted(() => {
     gap: 9px;
 }
 
-.chat-main {
-    width: 794px;
-    height: 778px;
-    border: 1px solid $dim-gray;
-    border-radius: 15px 15px 0px 0px;
-    background: $white;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-/* 채팅방 선택 안됐을 때 스타일 */
-.chat-main-placeholder {
-    align-items: center;
-    justify-content: center;
-    color: $silver-black;
-    .placeholder-content {
-        text-align: center;
-        .bi {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 18px;
-            font-family: $secondary-kr;
-        }
-    }
-}
-
-/* ==========================================================================
-   Chat Header
-   ========================================================================== */
-.chat-header {
-  height: 72px;
-  padding: 16px;
-  border-bottom: 1px solid $dim-gray;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .chat-room-name {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .nickname {
-      font-family: $secondary-kr;
-      font-weight: 500;
-      font-size: 18px;
-      color: $dark-black;
-    }
-  }
-
-  .chat-header-menu {
-    position: relative;
-
-    .btn-more {
-      width: 26px;
-      height: 26px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: $black;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .menu-dropdown {
-      position: absolute;
-      top: 30px;
-      right: -18px;
-      width: 64px;
-      height: 64px;
-      background: $white;
-      border: 1px solid $dim-gray;
-      border-radius: 5px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-
-      .btn-invite,
-      .btn-exit {
-        width: 100%;
-        padding: 7px;
-        background: none;
-        border: none;
-        font-family: $secondary-kr;
-        font-size: 12px;
-        color: $black;
-        cursor: pointer;
-        text-align: center;
-
-        &:hover {
-          background-color: rgba($black, 0.05);
-        }
-      }
-
-      .divider {
-        height: 1px;
-        background-color: $dim-gray;
-        margin: 0 11px;
-      }
-    }
-  }
-}
-
-/* ==========================================================================
-   Chat Content
-   ========================================================================== */
-.chat-content {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-
-  .chat-message {
-    display: flex;
-    gap: 21px;
-    align-items: flex-start;
-
-    .avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .message-info {
-      flex: 1;
-
-      .message-top {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-        margin-bottom: 7px;
-
-        .nickname {
-          font-family: $secondary-kr;
-          font-weight: 500;
-          font-size: 18px;
-          color: $dark-black;
-        }
-
-        .time {
-          font-family: $primary-kr;
-          font-size: 12px;
-          color: $silver-black;
-        }
-      }
-
-      .message-text {
-        font-family: $primary-kr;
-        font-size: 14px;
-        color: $dark-black;
-        margin: 0;
-        word-wrap: break-word;
-      }
-    }
-  }
-}
-
-/* ==========================================================================
-   Chat Input
-   ========================================================================== */
-.chat-input-wrap {
-  height: 60px;
-  border-top: 1px solid $dim-gray;
-  background-color: $light-gray;
-  display: flex;
-  align-items: center;
-
-  .chat-input {
-    flex: 1;
-    height: 100%;
-    border: none;
-    background: transparent;
-    padding: 20px;
-    font-family: $primary-kr;
-    font-size: 14px;
-    color: $dark-black;
-    outline: none;
-
-    &::placeholder {
-      color: $silver-black;
-    }
-  }
-
-  .btn-send {
-    width: 60px;
-    height: 60px;
-    background-color: $main-color;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &:hover {
-      background-color: darken($main-color, 10%);
-    }
-
-    .bi {
-      color: $white;
-      font-size: 30px;
-    }
-  }
-}
+/* 나머지 스타일들은 ChatMainArea.vue로 이동됨 */
 </style>

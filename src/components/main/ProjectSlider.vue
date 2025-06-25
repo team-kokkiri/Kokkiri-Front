@@ -136,7 +136,7 @@ const nextSlide = () => {
 
     .slider-wrapper {
       position: absolute;
-      width: 600px;
+      width: 602px;
       top: 40px;
       left: 28px;
       height: 143px;
