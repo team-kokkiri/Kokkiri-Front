@@ -12,6 +12,7 @@
         <!-- 2. 초대 뷰 컴포넌트 (조건부 렌더링) -->
         <InviteView
             v-if="showInviteView"
+            :roomId="activeRoomId"
             :users="availableUsers"
             :invitedUserIds="invitedUserIds"
             :searchQuery="searchQuery"
@@ -255,6 +256,10 @@ function toggleMenu() {
 }
 
 function openInvite() { 
+  if (!activeRoomId.value) {
+    alert("초대할 채팅방을 먼저 선택해주세요.");
+    return;
+  }
   menuOpen.value = false; 
   showInviteView.value = true; 
 }
@@ -282,7 +287,7 @@ function handleInviteSearch(query) {
 }
 
 function handleUserInvite(user) { 
-  invitedUserIds.value.push(user.id); 
+  invitedUserIds.value.push(user.memberId); 
 }
 
 // ===== 라이프사이클 훅 =====
