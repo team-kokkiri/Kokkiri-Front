@@ -87,6 +87,7 @@ function goBack() {
 function handleSearchInput(event) {
   emit('search', event.target.value)
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -96,7 +97,7 @@ function handleSearchInput(event) {
   width: 794px;
   height: 778px;
   border: 1px solid $dim-gray;
-  border-radius: 15px 15px 0px 0px;
+  border-radius: 15px 15px 0 0;
   background: $white;
   display: flex;
   flex-direction: column;
