@@ -7,6 +7,7 @@
             :chatRooms="chatRooms"
             :activeRoomId="activeRoomId"
             @select="selectRoom"
+            @create="createRoom"
         />
 
         <!-- 2. 초대 뷰 컴포넌트 (조건부 렌더링) -->
@@ -91,6 +92,13 @@ function formatDisplayTime(dateTimeStr) {
   if (isNaN(date)) return '';
   return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
+
+
+// 채팅창 생성하기!!
+function createRoom() {
+
+}
+
 
 // ===== 채팅 및 WebSocket 관련 함수 =====
 async function fetchChatRooms() {
