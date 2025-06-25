@@ -32,7 +32,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'  // ← 추가!
+import { useUserStore } from '@/stores/user'
 import MainHeader from '@/components/common/MainHeader.vue'
 import MainNav from "@/components/common/MainNav.vue"
 import MainFooter from "@/components/common/MainFooter.vue"
@@ -40,10 +40,11 @@ import MainRight from "@/components/common/MainRight.vue"
 import { useNotifications } from '@/composables/useNotifications'
 import MainLeft from "@/components/main/MainLeft.vue";
 import MainBodyCenter from "@/components/main/MainBodyCenter.vue";
+import instance from '@/utils/axios';
 
 const route = useRoute()
 const router = useRouter()
-const userStore = useUserStore()  // ← 추가!
+const userStore = useUserStore()
 
 // 알림 데이터 중앙 관리
 const {
@@ -104,43 +105,35 @@ const handleProfileInfo = () => {
   router.push('/main-page/mypage')  // ← 마이페이지로 이동
 }
 
-// 로그아웃
-const handleLogout = async () => {  // ← 수정!
+const handleLogout = async () => {
   try {
-    await userStore.logout()
-    router.push('/login')
+    // 1. 서버에 로그아웃 요청
+    await instance.post('api/members/logout')
+
+    // 2. 프론트 상태 초기화
+    userStore.clearUser({})
+
+    // 3. (옵션) JS에서 쿠키 직접 제거 시도
+    document.cookie = 'refreshToken=; Path=/; Max-Age=0;'
+
+    // 4. 로그인 페이지로 이동
+    router.replace('/login')
   } catch (error) {
-    console.error('로그아웃 중 오류:', error)
-    // 에러가 있어도 로그인 페이지로 이동
-    router.push('/login')
+    console.error('로그아웃 실패:', error)
   }
 }
 
 const handleActivityNavigate = (item) => {
   console.log('활동 메뉴 클릭:', item)
+  // 라우터를 이용한 페이지 이동
   router.push(item.route)
 }
 
-// 인증 체크  ← 추가!
-const checkAuth = () => {
-  if (!userStore.isLoggedIn && !localStorage.getItem('accessToken')) {
-    router.push('/login')
-    return false
-  }
-  return true
-}
+
 
 // 컴포넌트 마운트 시 알림 시스템 초기화
-onMounted(async () => {
-  // 먼저 토큰 복원 시도
-  if (localStorage.getItem('accessToken') && !userStore.isLoggedIn) {
-    await userStore.restoreUser()
-  }
-  
-  // 인증 체크
-  if (checkAuth()) {
-    initializeNotifications()
-  }
+onMounted(() => {
+  initializeNotifications()
 })
 
 // 컴포넌트 언마운트 시 정리
