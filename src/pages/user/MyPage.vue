@@ -48,8 +48,12 @@
 
     <!-- 반 코드 변경 -->
     <template v-else-if="currentView === 'class-code'">
-      <!-- ClassCodeSetting 컴포넌트 추가 예정 -->
-      <div>반 코드 변경 컴포넌트</div>
+      <ClassCodeSetting
+          @back="handleBackToMain"
+          @verify-class-code="handleVerifyClassCode"
+          @save="handleClassCodeSave"
+          ref="classCodeSettingRef"
+      />
     </template>
   </div>
 </template>
@@ -61,6 +65,7 @@ import MyAccountBox from '@/components/mypage/MyAccountBox.vue'
 import MyCommunityBox from '@/components/mypage/MyCommunityBox.vue'
 import NicknameSetting from '@/components/mypage/NicknameSetting.vue'
 import PasswordSetting from '@/components/mypage/PasswordSetting.vue'
+import ClassCodeSetting from '@/components/mypage/ClassCodeSetting.vue'
 
 const emit = defineEmits([
   'logout',
@@ -72,6 +77,7 @@ const emit = defineEmits([
 const currentView = ref('main') // 'main' | 'profile-image' | 'nickname' | 'password' | 'class-code'
 const nicknameSettingRef = ref(null) // 닉네임 설정 컴포넌트 참조
 const passwordSettingRef = ref(null) // 비밀번호 설정 컴포넌트 참조
+const classCodeSettingRef = ref(null) // 반 코드 설정 컴포넌트 참조
 
 /**
  * 메인 화면으로 돌아가기
@@ -216,6 +222,57 @@ const handlePasswordSave = async (passwords) => {
     currentView.value = 'main'
   } catch (error) {
     console.error('비밀번호 변경 오류:', error)
+  }
+}
+
+/**
+ * 반 코드 확인 요청 처리
+ * @param {string} classCode - 확인할 반 코드
+ */
+// const handleVerifyClassCode = async (classCode) => {
+//   try {
+//     // TODO: API 호출하여 반 코드 확인
+//     // const response = await api.verifyClassCode(classCode)
+//
+//     // 임시로 성공으로 처리 (실제로는 API 응답에 따라 처리)
+//     const isValid = true
+//     const message = isValid ? '유효한 반 코드입니다.' : '존재하지 않는 반 코드입니다.'
+//
+//     if (classCodeSettingRef.value) {
+//       classCodeSettingRef.value.setVerificationResult(isValid, message)
+//     }
+//   } catch (error) {
+//     console.error('반 코드 확인 오류:', error)
+//     if (classCodeSettingRef.value) {
+//       classCodeSettingRef.value.setVerificationResult(false, '반 코드 확인 중 오류가 발생했습니다.')
+//     }
+//   }
+// }
+
+/**
+ * 반 코드 변경 저장 요청 처리
+ * @param {string} classCode - 저장할 반 코드
+ */
+const handleClassCodeSave = async (classCode) => {
+  try {
+    // TODO: API 호출하여 반 코드 변경
+    // await api.changeClassCode(classCode)
+
+    console.log('반 코드 변경:', classCode)
+
+    if (classCodeSettingRef.value) {
+      classCodeSettingRef.value.setSaveResult('반 코드가 성공적으로 변경되었습니다.')
+    }
+
+    // 저장 성공 후 잠시 후 메인 화면으로 돌아가기
+    setTimeout(() => {
+      currentView.value = 'main'
+    }, 1500)
+  } catch (error) {
+    console.error('반 코드 변경 오류:', error)
+    if (classCodeSettingRef.value) {
+      classCodeSettingRef.value.setErrorMessage('반 코드 변경 중 오류가 발생했습니다.')
+    }
   }
 }
 </script>

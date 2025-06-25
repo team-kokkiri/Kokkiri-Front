@@ -195,6 +195,13 @@ defineExpose({
         &:hover {
           background: $royalblue;
         }
+        &:hover:not(:disabled) {
+          background: $royalblue;
+        }
+
+        &:disabled {
+          background: $light-black;
+        }
 
       }
 
