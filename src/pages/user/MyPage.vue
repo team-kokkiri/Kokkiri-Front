@@ -3,6 +3,7 @@
     <!-- 프로필 박스는 항상 노출 -->
     <MyProfileBox
         @logout="handleLogout"
+        @profile-image-change="handleProfileImageChange"
     />
 
     <!-- 기본 마이페이지 컨텐츠 -->
@@ -94,10 +95,12 @@ const handleLogout = () => {
 }
 
 /**
- * 프로필 사진 변경 화면으로 이동
+ * 프로필 사진 변경 처리
  */
 const handleProfileImageChange = () => {
-  currentView.value = 'profile-image'
+  // TODO: 프로필 사진 변경 로직 구현
+  // 예: 파일 선택 다이얼로그 열기, 이미지 업로드 모달 등
+  console.log('프로필 사진 변경 클릭')
 }
 
 /**

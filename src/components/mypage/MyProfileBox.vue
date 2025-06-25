@@ -2,12 +2,20 @@
   <div class="mypage-profile-box">
     <div class="profile-header">
       <span class="profile-title">내 정보</span>
-      <button
-          class="logout-btn"
-          @click="$emit('logout')"
-      >
-        로그아웃
-      </button>
+      <div class="header-buttons">
+        <button
+            class="photo-change-btn"
+            @click="$emit('profile-image-change')"
+        >
+          사진변경
+        </button>
+        <button
+            class="logout-btn"
+            @click="$emit('logout')"
+        >
+          로그아웃
+        </button>
+      </div>
     </div>
     <div class="profile-content">
       <div class="profile-image">
@@ -30,7 +38,7 @@ import { defineEmits, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import defaultProfileImage from '@/assets/img/0.png'
 
-defineEmits(['logout'])
+defineEmits(['logout', 'profile-image-change'])
 
 const userStore = useUserStore()
 
@@ -68,21 +76,35 @@ const displayName = computed(() => {
       color: $dark-black;
     }
 
-    .logout-btn {
-      width: 70px;
-      height: 30px;
-      background: $main-color;
-      border-radius: 30px;
-      border: none;
-      font-family: $secondary-kr;
-      font-weight: 500;
-      font-size: 12px;
-      line-height: 1.252;
-      color: $white;
-      cursor: pointer;
+    .header-buttons {
+      display: flex;
+      gap: 8px;
 
-      &:hover {
-        background: $royalblue;
+      .photo-change-btn,
+      .logout-btn {
+        width: 70px;
+        height: 30px;
+        background: $main-color;
+        border-radius: 30px;
+        border: none;
+        font-family: $secondary-kr;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 1.252;
+        color: $white;
+        cursor: pointer;
+
+        &:hover {
+          background: $royalblue;
+        }
+      }
+
+      .photo-change-btn {
+        // 사진변경 버튼 별도 스타일 (현재는 동일)
+      }
+
+      .logout-btn {
+        // 로그아웃 버튼 별도 스타일 (현재는 동일)
       }
     }
   }

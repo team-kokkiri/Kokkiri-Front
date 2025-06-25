@@ -6,12 +6,6 @@
     <div class="account-list">
       <button
           class="account-link"
-          @click="$emit('profile-image-change')"
-      >
-        <span>프로필 사진 변경</span>
-      </button>
-      <button
-          class="account-link"
           @click="$emit('nickname-change')"
       >
         <span>닉네임 변경</span>
@@ -42,7 +36,6 @@
 import { defineEmits } from 'vue'
 
 defineEmits([
-  'profile-image-change',
   'nickname-change',
   'password-change',
   'class-code-change',
@@ -55,7 +48,7 @@ defineEmits([
 
 .mypage-account-box {
   width: 478px;
-  height: 301px;
+  height: 253px;
   border: 1px solid #DDDDDD;
   border-radius: 15px;
   background: $white;
