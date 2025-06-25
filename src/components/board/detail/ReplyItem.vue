@@ -4,7 +4,7 @@
     <div class="comment-profile">
       <div class="profile-info">
         <img class="avatar" :src="reply.avatar || defaultAvatar" alt="아바타" />
-        <span class="nickname">{{ reply.writer }}</span>
+        <span class="nickname">{{ reply.memberNickname }}</span>
       </div>
       <div class="comment-actions">
         <button class="btn-edit" @click="$emit('edit', reply)">수정</button>
@@ -17,32 +17,41 @@
 
     <!-- 대댓글 본문 -->
     <div class="comment-body">
-      <p class="reply-text">{{ reply.content }}</p>
+      <p class="reply-text">{{ reply.comment }}</p>
     </div>
 
-    <!-- 대댓글 메타 정보 -->
-    <div class="comment-meta">
-      <span class="date">{{ formatDate(reply.createdAt) }}</span>
-      <span class="comment-likes" v-if="reply.likeCount > 0">
-        <i class="bi bi-hand-thumbs-up"></i>
-        <span class="like-count">{{ reply.likeCount }}</span>
-      </span>
-    </div>
-  </div>
-  <!-- 수정 입력창 -->
-  <EditForm
+    <!-- 수정 입력창 -->
+    <EditForm
       v-if="editInputVisible === reply.id"
       :item="reply"
       item-type="reply"
       @submit="$emit('submit-edit', $event)"
       @close="handleCloseEdit"
-  />
+    />
+
+    <!-- 대댓글 메타 정보 -->
+    <ReplyList
+      v-if="replies.some(r => r.parentId === reply.id)"
+      :replies="replies"
+      :parent-id="reply.id"
+      @like="$emit('like', $event)"
+      @chat="$emit('chat', $event)"
+      @report="$emit('report', $event)"
+      @edit="$emit('edit', $event)"
+      @submit-edit="$emit('submit-edit', $event)"
+      @close-edit="$emit('close-edit')"
+      @delete="$emit('delete', $event)"
+    />
+
+  </div>
 </template>
+
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import defaultAvatar from '@/assets/img/0.png'
 import EditForm from './EditForm.vue'
+import ReplyList from './ReplyList.vue'
 
 defineProps({
   reply: {
@@ -52,6 +61,10 @@ defineProps({
   editInputVisible: {
     type: [Number, String, null],
     default: null
+    },
+  replies: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -69,11 +82,11 @@ const emit = defineEmits([
 ])
 
 // 날짜 포맷터
-function formatDate(str) {
-  if (!str) return ''
-  const d = new Date(str)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
+// function formatDate(str) {
+//   if (!str) return ''
+//   const d = new Date(str)
+//   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+// }
 
 // 수정 창 닫기 핸들러
 const handleCloseEdit = () => {

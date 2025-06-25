@@ -26,14 +26,14 @@
             type="text" 
             class="input-title" 
             placeholder="글 제목"
-            v-model="formData.title"
+            v-model="formData.boardTitle"
         />
       </div>
       <div class="form-body">
         <textarea 
             class="input-body" 
             placeholder="내용을 입력하세요"
-            v-model="formData.content"
+            v-model="formData.boardContent"
         ></textarea>
       </div>
       <div class="form-footer">
@@ -41,12 +41,20 @@
           <button type="button" class="btn-upload-image" @click="handleImageUpload">
             <i class="bi bi-image"></i>
           </button>
+          <input
+            ref="fileInputRef"
+            type="file"
+            multiple
+            accept="image/*"
+            style="display: none"
+            @change="onFileChange"
+          />
         </div>
         <div class="form-actions-right">
           <label class="checkbox-wrap">
             <input 
                 type="checkbox" 
-                v-model="formData.isQuestion"
+                v-model="formData.questionYn"
             />
             <span class="label-text">질문</span>
           </label>
@@ -75,9 +83,10 @@ const showWriteForm = ref(false)
 
 // 폼 데이터
 const formData = ref({
-  title: '',
-  content: '',
-  isQuestion: false
+  boardTitle: '',
+  boardContent: '',
+  questionYn: false,
+  attachedImages: []
 })
 
 // 글쓰기 폼 dom 참조
@@ -100,33 +109,62 @@ function onFormBlur() {
 
 // 글쓰기 폼 제출
 function handleSubmit() {
-  if (!formData.value.title.trim() || !formData.value.content.trim()) {
+  if (!formData.value.boardTitle.trim() || !formData.value.boardContent.trim()) {
     alert('제목과 내용을 입력해주세요.')
     return
   }
-  
   // 부모 컴포넌트로 데이터 전달
-  emit('submit', { ...formData.value })
+emit('submit', {
+  boardTitle: formData.value.boardTitle,
+  boardContent: formData.value.boardContent,
+  questionYn: formData.value.questionYn,
+  attachedImages: formData.value.attachedImages // 이건 File[] 타입이어야 함
+})
   
   // 폼 초기화
   formData.value = {
-    title: '',
-    content: '',
-    isQuestion: false
+    boardTitle: '',
+    boardContent: '',
+    questionYn: false,
+    attachedImages: []
   }
   showWriteForm.value = false
 }
 
 // 이미지 업로드 처리
+// function handleImageUpload() {
+//   emit('imageUpload')
+// }
+
+// 이미지 업로드 처리
+const fileInputRef = ref(null)
+
 function handleImageUpload() {
-  emit('imageUpload')
+  fileInputRef.value?.click()
 }
 
-// 폼 바깥 클릭시 폼 닫힘 처리
-function handleClickOutside(e) {
-  if (formRef.value && !formRef.value.contains(e.target)) {
-    showWriteForm.value = false
+function onFileChange(event) {
+  const files = event.target.files
+  if (files && files.length > 0) {
+    formData.value.attachedImages = Array.from(files)
   }
+}
+
+
+// 클릭된 요소가 form 내부이거나 file input이거나,
+// 또는 file input을 연 원래 버튼(.btn-upload-image)을 포함하는 경우에는 닫지 않음
+function handleClickOutside(e) {
+  const formEl = formRef.value
+  const fileInputEl = fileInputRef.value
+
+  if (
+    formEl?.contains(e.target) ||
+    fileInputEl?.contains(e.target) ||
+    e.target.closest('.btn-upload-image')
+  ) {
+    return
+  }
+  showWriteForm.value = false
 }
 
 // 폼 바깥 클릭 이벤트 등록/해제

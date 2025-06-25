@@ -21,7 +21,7 @@
             @logout="handleLogout"
             @activity-navigate="handleActivityNavigate"
         />
-        <MainBodyCenter />
+        <MainBodyCenter v-if="route.meta.showCenter"/>
         <MainRight v-if="route.meta.showRight"/>
       </div>
     </div>
@@ -32,6 +32,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import MainHeader from '@/components/common/MainHeader.vue'
 import MainNav from "@/components/common/MainNav.vue"
 import MainFooter from "@/components/common/MainFooter.vue"
@@ -40,7 +41,6 @@ import { useNotifications } from '@/composables/useNotifications'
 import MainLeft from "@/components/main/MainLeft.vue";
 import MainBodyCenter from "@/components/main/MainBodyCenter.vue";
 import instance from '@/utils/axios';
-import {useUserStore} from "@/stores";
 
 const route = useRoute()
 const router = useRouter()
@@ -102,7 +102,7 @@ function handleFetchMoreNotifications() {
 // Event Handlers
 const handleProfileInfo = () => {
   console.log('프로필 정보 클릭')
-  // 프로필 정보 페이지로 이동 또는 모달 열기
+  router.push('/main-page/mypage')  // ← 마이페이지로 이동
 }
 
 const handleLogout = async () => {
@@ -133,7 +133,6 @@ const handleActivityNavigate = (item) => {
 
 // 컴포넌트 마운트 시 알림 시스템 초기화
 onMounted(() => {
-  console.log(localStorage.getItem('avatar'))
   initializeNotifications()
 })
 

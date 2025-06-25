@@ -6,14 +6,14 @@
 
     <div class="slider-content">
       <div class="slider-wrapper">
-        <div class="project-cards-container" :style="{ transform: `translateX(-${currentIndex * cardWidth}px)` }">
+        <div class="project-cards-container" :style="{ transform: `translateX(-${currentIndex * slideDistance}px)` }">
           <div
               v-for="project in projects"
               :key="project.id"
               class="project-card"
           >
             <div class="project-thumbnail">
-              <div class="thumbnail-placeholder" :style="{ backgroundColor: project.color }"></div>
+              <img :src="project.img" alt="프로젝트 썸네일" />
             </div>
             <div class="project-info">
               <h3 class="project-title">{{ project.title }}</h3>
@@ -48,8 +48,15 @@
 import { ref, computed } from 'vue'
 
 const currentIndex = ref(0)
-const cardWidth = 303 // 카드 너비(291px) + 간격(12px)
-const visibleCards = 2 // 동시에 보이는 카드 수
+const visibleCards = 2;
+const cardGap = 12; // 카드 간격 (px)
+const containerWidth = 600; // 전체 컨테이너 너비 (px)
+
+// 정확한 카드 너비 계산
+const cardWidth = (containerWidth - (cardGap * (visibleCards - 1))) / visibleCards;
+
+// 슬라이드 거리
+const slideDistance = cardWidth + cardGap;
 
 const projects = ref([
   {
@@ -57,34 +64,34 @@ const projects = ref([
     title: '프로젝트 A',
     team: 'Team KOKKIRI',
     description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    color: '#E8F4FD'
+    img: require('@/assets/img/마스코트잔디.png')
   },
   {
     id: 2,
     title: '프로젝트 B',
     team: 'Team GPT',
     description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    color: '#FFF2E8'
+    img: require('@/assets/img/너구리.jpg')
   },
   {
     id: 3,
     title: '프로젝트 C',
     team: 'Team CLAUDE',
     description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    color: '#F0F8E8'
+    img: require('@/assets/img/너구리2.png')
   },
   {
     id: 4,
     title: '프로젝트 D',
     team: 'Team REACT',
     description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    color: '#F8E8F0'
+    img: require('@/assets/img/고라니.jpg')
   }
 ])
 
 const maxIndex = computed(() => {
   return Math.max(0, projects.value.length - visibleCards)
-})
+});
 
 const prevSlide = () => {
   if (currentIndex.value > 0) {
@@ -129,40 +136,43 @@ const nextSlide = () => {
 
     .slider-wrapper {
       position: absolute;
+      width: 602px;
       top: 40px;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      left: 28px;
+      height: 143px;
       overflow: hidden;
     }
 
     .project-cards-container {
       display: flex;
-      gap: 0;
+      gap: 12px;
       transition: transform 0.3s ease;
       height: 100%;
-      padding: 3px 31px;
+      padding: 2px;
     }
 
     .project-card {
-      flex: 0 0 291px;
+      flex: 0 0 294px;
+      margin: 0;
       background: white;
       border: 1px solid #DDDDDD;
       border-radius: 15px;
       padding: 0;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       height: 138px;
-      margin-right: 12px;
 
       .project-thumbnail {
         flex: 0 0 133px;
         height: 138px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-        .thumbnail-placeholder {
-          width: 100%;
-          height: 100%;
+        img {
+          width: 95%;
+          height: 95%;
           border-radius: 15px;
           border: 2px solid white;
         }
@@ -197,16 +207,21 @@ const nextSlide = () => {
           font-size: 12px;
           color: black;
           line-height: 1.2;
-          margin: 0;
+          margin: 0 0 5px;
           white-space: pre-line;
           flex: 1;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
         }
       }
     }
 
     .slider-controls {
       position: absolute;
-      bottom: 3px;
+      top: 60%;
+      transform: translateY(-50%);
       left: 0;
       right: 0;
       display: flex;
@@ -242,11 +257,11 @@ const nextSlide = () => {
       }
 
       .prev-btn {
-        transform: rotate(180deg);
+        left: 5px;
       }
 
       .next-btn {
-        // 기본 상태
+        right: 5px;
       }
     }
   }

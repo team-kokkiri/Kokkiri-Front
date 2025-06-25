@@ -23,7 +23,7 @@ const handleSubmit = () => {
   if (!commentText.value.trim()) return
 
   emit('submit', {
-    content: commentText.value,
+    comment: commentText.value,
     createdAt: new Date().toISOString()
   })
 
