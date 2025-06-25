@@ -19,7 +19,6 @@
         @submit-edit="handleSubmitEdit"
         @close-edit="handleCloseEdit"
         @delete="$emit('delete', $event)"
-    />
       />
     </template>
 

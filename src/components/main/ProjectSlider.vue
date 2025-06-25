@@ -48,10 +48,15 @@
 import { ref, computed } from 'vue'
 
 const currentIndex = ref(0)
-const cardWidth = 291 // 실제 카드 너비
-const cardGap = 14 // 카드 간 간격
-const slideDistance = cardWidth + cardGap // 슬라이드할 거리
-const visibleCards = 2 // 동시에 보이는 카드 수
+const visibleCards = 2;
+const cardGap = 12; // 카드 간격 (px)
+const containerWidth = 600; // 전체 컨테이너 너비 (px)
+
+// 정확한 카드 너비 계산
+const cardWidth = (containerWidth - (cardGap * (visibleCards - 1))) / visibleCards;
+
+// 슬라이드 거리
+const slideDistance = cardWidth + cardGap;
 
 const projects = ref([
   {
@@ -73,20 +78,20 @@ const projects = ref([
     title: '프로젝트 C',
     team: 'Team CLAUDE',
     description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    img: '#F0F8E8'
+    img: require('@/assets/img/너구리2.png')
   },
   {
     id: 4,
     title: '프로젝트 D',
     team: 'Team REACT',
     description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    img: '#F8E8F0'
+    img: require('@/assets/img/고라니.jpg')
   }
 ])
 
 const maxIndex = computed(() => {
   return Math.max(0, projects.value.length - visibleCards)
-})
+});
 
 const prevSlide = () => {
   if (currentIndex.value > 0) {
@@ -131,9 +136,9 @@ const nextSlide = () => {
 
     .slider-wrapper {
       position: absolute;
+      width: 602px;
       top: 40px;
-      left: 31px;
-      width: 591px;
+      left: 28px;
       height: 143px;
       overflow: hidden;
     }
@@ -147,7 +152,8 @@ const nextSlide = () => {
     }
 
     .project-card {
-      flex: 0 0 288px;
+      flex: 0 0 294px;
+      margin: 0;
       background: white;
       border: 1px solid #DDDDDD;
       border-radius: 15px;
@@ -156,8 +162,6 @@ const nextSlide = () => {
       align-items: center;
       gap: 8px;
       height: 138px;
-      margin-right: 1px;
-      margin-left: 1px;
 
       .project-thumbnail {
         flex: 0 0 133px;
@@ -203,7 +207,7 @@ const nextSlide = () => {
           font-size: 12px;
           color: black;
           line-height: 1.2;
-          margin: 0;
+          margin: 0 0 5px;
           white-space: pre-line;
           flex: 1;
           overflow: hidden;

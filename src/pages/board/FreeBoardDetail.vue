@@ -62,7 +62,7 @@ import PostActionBar from '@/components/board/common/PostActionBar.vue'
 import CommentList from '@/components/board/detail/CommentList.vue'
 import CommentForm from '@/components/board/detail/CommentForm.vue'
 //import EditForm from '@/components/board/detail/EditForm.vue'
-import boardSample from '@/data/boardSample.json'
+// import boardSample from '@/data/boardSample.json'
 
 
 const route = useRoute()
