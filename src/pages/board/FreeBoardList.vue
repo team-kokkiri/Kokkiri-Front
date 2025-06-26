@@ -44,6 +44,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
+
 // 컴포넌트 import
 import ListHeader from '@/components/board/list/ListHeader.vue'
 import ListWriteForm from '@/components/board/list/ListWriteForm.vue'
@@ -63,11 +64,12 @@ const totalElements = ref(0)            // 전체 게시글 수
 const isLastPage = ref(false)           // 마지막 페이지 여부
 const searchQuery = ref('')             // 검색어 상태
 const token = localStorage.getItem('accessToken');
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
 // API에서 게시글 리스트 불러오기
 const fetchBoardList = async () => {
   try {
-    const res = await axios.get(`http://localhost:9090/api/boards/list/1`, {
+    const res = await axios.get(`${API_BASE_URL}/api/boards/list/1`, {
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -121,43 +123,31 @@ function goToDetail(id) {
 async function handleSubmitPost(formData) {
   try {
     const form = new FormData()
-
-    // 게시글 정보 (JSON 문자열로 Blob에 담기)
     form.append(
-      'board',
-      new Blob([JSON.stringify({
-        boardTitle: formData.boardTitle,
-        boardContent: formData.boardContent,
-        questionYn: formData.questionYn,
-        boardTypeId: 1
-      })], { type: 'application/json' })
+        'board',
+        new Blob([JSON.stringify({
+          boardTitle: formData.boardTitle,
+          boardContent: formData.boardContent,
+          questionYn: formData.questionYn,
+          boardTypeId: 1
+        })], { type: 'application/json' })
     )
-
-    // 이미지 파일이 있을 경우 추가
     if (formData.attachedImages && formData.attachedImages.length > 0) {
       formData.attachedImages.forEach(file => {
         form.append('files', file)
       })
     }
 
-    try {
-      const res = await axios.post('/api/boards', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-      console.log('등록 성공', res.data)
-    } catch (err) {
-      console.error('등록 실패:', err)
-    }
-
-    const res = await axios.post('http://localhost:9090/api/boards', form, {
+    // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+    const res = await axios.post(`${API_BASE_URL}/api/boards`, form, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'
       }
     })
     console.log('게시글 등록 성공:', res.data)
+    // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
     await fetchBoardList()
   } catch (err) {
     console.error('게시글 등록 실패:', err)

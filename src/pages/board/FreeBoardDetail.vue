@@ -68,6 +68,8 @@ import CommentForm from '@/components/board/detail/CommentForm.vue'
 const route = useRoute()
 const router = useRouter()
 const token = localStorage.getItem('accessToken');
+// API 기본 URL (환경 변수 사용 권장)
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
 // 현재 상세 게시글 데이터
 const post = ref(null)
@@ -78,7 +80,7 @@ const postEditVisible = ref(false)
 // 페이지 진입시 라우터 params.id로 게시글 찾아오기
 const fetchPost = async () => {
   try {
-    const res = await axios.get(`http://localhost:9090/api/boards/detail/${route.params.id}`, {
+    const res = await axios.get(`${API_BASE_URL}/api/boards/detail/${route.params.id}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -99,7 +101,7 @@ onMounted(() => {
 const onSubmitComment = async (commentData) => {
 
   try {
-    await axios.post(`http://localhost:9090/api/boards/detail/${post.value.id}/comments`, {
+    await axios.post(`${API_BASE_URL}/api/boards/detail/${post.value.id}/comments`, {
       boardId: post.value.id,
       comment: commentData.comment,
       parentId: null
@@ -116,7 +118,7 @@ const onSubmitComment = async (commentData) => {
 // 대댓글 등록
 const onSubmitReply = async (replyData) => {
   try {
-    await axios.post(`http://localhost:9090/api/boards/detail/${post.value.id}/comments`, {
+    await axios.post(`${API_BASE_URL}/api/boards/detail/${post.value.id}/comments`, {
       boardId: post.value.id,
       parentId: replyData.commentId,
       comment: replyData.comment
@@ -175,7 +177,7 @@ const onLike = async (item = null) => {
     if (item) {
       // 댓글, 답글
       await axios.post(
-        `http://localhost:9090/api/boards/detail/${post.value.id}/comments/${item.id}/like`,
+        `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}/like`,
         null,
         config
       )
@@ -183,7 +185,7 @@ const onLike = async (item = null) => {
     } else {
       // 게시글
       await axios.post(
-        `http://localhost:9090/api/boards/${post.value.id}/like`,
+        `${API_BASE_URL}/api/boards/${post.value.id}/like`,
         null,
         config
       )
