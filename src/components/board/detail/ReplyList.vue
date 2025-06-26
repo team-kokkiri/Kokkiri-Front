@@ -6,6 +6,7 @@
         :reply="reply"
         :replies="replies"
         :parent-id="reply.id"
+        :edit-input-visible="editInputVisible"
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"

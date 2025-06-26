@@ -6,13 +6,10 @@
     </div>
 
     <!-- 질문 배너 -->
-    <div class="board-free-question">
+    <div class="board-free-question" v-if="questionPosts.length > 0">
       <img class="icon-question" src="../../../assets/icon/question.png" alt="질문 아이콘"/>
       <div class="question-content">
-        <div v-if="questionPosts.length === 0" class="question-bubble">
-          <span class="question-title">질문에 답변을 달아주세요</span>
-        </div>
-        <div v-else class="question-list">
+        <div class="question-list">
           <div 
             v-for="question in questionPosts.slice(0, 10)"
             :key="question.id"

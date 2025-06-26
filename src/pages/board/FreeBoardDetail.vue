@@ -133,36 +133,31 @@ const onSubmitReply = async (replyData) => {
 }
 
 // 수정 등록 핸들러 (백엔드 처리 해야함)
-const onSubmitEdit = (editData) => {
+const onSubmitEdit = async (item) => {
   if (!post.value) return
-
-  if (editData.itemType === 'post') {
-    // 본문 수정
-    post.value.content = editData.content
-    post.value.updatedAt = editData.updatedAt
-    postEditVisible.value = false
-    console.log('본문 수정 완료:', editData)
-  } else if (editData.itemType === 'comment') {
-    // 댓글 수정
-    const targetComment = post.value.comments.find(c => c.id === editData.id)
-    if (targetComment) {
-      targetComment.content = editData.content
-      targetComment.updatedAt = editData.updatedAt
-      console.log('댓글 수정 완료:', editData)
-    }
-  } else if (editData.itemType === 'reply') {
-    // 대댓글 수정
-    for (const comment of post.value.comments) {
-      if (comment.replies) {
-        const targetReply = comment.replies.find(r => r.id === editData.id)
-        if (targetReply) {
-          targetReply.content = editData.content
-          targetReply.updatedAt = editData.updatedAt
-          console.log('대댓글 수정 완료:', editData)
-          break
-        }
+  console.log(item)
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
     }
+    // item이 게시글인지, 댓글인지, 대댓글인지 구분
+    if (item === post.value) {
+      // 게시글 수정
+    } else {
+      // 댓글 수정
+      await axios.put(
+          `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}`,
+          {
+            comment: item.content
+          },
+          config
+      )
+      await fetchPost()
+    }
+  } catch (err) {
+    console.error('수정 실패', err.response?.data || err.message || err);
   }
 }
 
@@ -211,12 +206,11 @@ const onReply = (comment) => {
 }
 
 // 수정 기능
-const onEdit = (item) => {
+const onEdit = async (item) => {
   // 본문 수정 버튼인지 검증하고, 열려있으면 닫고 닫혀있으면 여는 기능
   if (item === post.value) {
     postEditVisible.value = !postEditVisible.value
   }
-
 }
 
 // 삭제 기능 // 본문 댓글 대댓글 전부 이 메소드로 합쳤는데 필요하면 나눠드림
@@ -240,7 +234,7 @@ const onDelete = async (item) => {
     if (item === post.value) {
       // 게시글 삭제
       await axios.delete(
-          `${API_BASE_URL}/api/boards/${post.value.id}`,
+          `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
           config
       )
       await router.push('/main-page/free-board')
@@ -253,7 +247,7 @@ const onDelete = async (item) => {
       await fetchPost()
     }
   } catch (err) {
-      console.error('삭제 실패', err)
+    console.error('삭제 실패', err.response?.data || err.message || err);
   }
 }
 

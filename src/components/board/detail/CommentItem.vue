@@ -33,7 +33,7 @@
     </div>
     <!-- 수정 입력창 -->
     <EditForm
-        v-if="editInputVisible === comment.id"
+        v-if="props.editInputVisible === comment.id"
         :item="comment"
         item-type="comment"
         @submit="$emit('submit-edit', $event)"
@@ -47,12 +47,15 @@
         @like="$emit('like', $event)"
         @chat="$emit('chat', $event)"
         @report="$emit('report', $event)"
+        @edit="$emit('edit', $event)"
+        @submit-edit="$emit('submit-edit', $event)"
+        @close-edit="$emit('close-edit', $event)"
         @delete="$emit('delete', $event)"
     />
 
     <!-- 대댓글 입력창 -->
     <ReplyForm
-        v-if="replyInputVisible === comment.id"
+        v-if="props.replyInputVisible === comment.id"
         :comment-id="comment.id"
         @submit="$emit('submit-reply', $event)"
         @close="$emit('close-reply', $event)"
@@ -67,9 +70,10 @@ import ReplyForm from './ReplyForm.vue'
 import defaultAvatar from '@/assets/img/0.png'
 import EditForm from './EditForm.vue'
 
-defineProps({
+const props = defineProps({
   comment: Object,
   replyInputVisible: [Number, String, null],
+  editInputVisible: [Number, String, null],  // 수정 입력창 상태 추가
   allReplies: {
     type: Array,
     default: () => []
