@@ -44,13 +44,6 @@
           />
         </div>
         <div class="form-actions-right">
-          <label class="checkbox-wrap">
-            <input 
-              type="checkbox" 
-              v-model="formData.questionYn"
-            />
-            <span class="label-text">질문</span>
-          </label>
           <button type="submit" class="btn-submit">
             <i class="bi bi-vector-pen"></i>
           </button>
@@ -226,7 +219,7 @@ function onFileChange(event) {
 
     .form-footer {
       height: 40px;
-      padding: 0 10px;
+      padding-left: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -322,7 +315,6 @@ function onFileChange(event) {
       cursor: pointer;
       transition: all 0.2s ease;
       height: 35px;
-      width: 115px;
 
       .bi-chevron-left {
         font-size: 16px;

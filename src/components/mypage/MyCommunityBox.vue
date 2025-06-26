@@ -66,10 +66,6 @@ defineEmits([
       padding: 0 21px;
       transition: background-color 0.2s;
 
-      &:hover {
-        background: $light-gray;
-      }
-
       span {
         font-family: $secondary-kr;
         font-weight: 400;
