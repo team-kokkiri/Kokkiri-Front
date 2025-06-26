@@ -24,7 +24,7 @@
 
     <!-- 댓글/대댓글 리스트 -->
     <div class="detail-comments">
-      <CommentList
+      <CommentList v-if="post.comments && post.comments.length > 0"
           :comments="post.comments || []"
           @reply="onReply"
           @like="onLike"
@@ -278,6 +278,9 @@ const goToList = () => {
     width: 832px;
     background-color: #ffffff;
     border: 1px solid #dddddd;
+    display: flex;
+    flex-direction: column;
+    gap:  10px;
   }
 
   .detail-footer {
