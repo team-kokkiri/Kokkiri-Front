@@ -20,6 +20,9 @@
               class="nickname-input"
               @input="resetValidation"
           />
+          <div v-if="duplicateError" class="nickname-error">
+            {{ duplicateError }}
+          </div>
         </div>
 
         <div class="button-group">
@@ -45,39 +48,64 @@
 
 <script setup>
 import { defineEmits, defineExpose, ref } from 'vue'
+import axios from '../../utils/axios'
 
 const emit = defineEmits(['back', 'save', 'duplicate-check'])
 
 // 반응형 데이터
 const nickname = ref('') // 입력된 닉네임
 const isValidated = ref(false) // 중복확인 완료 여부
+const duplicateError = ref('')
 
 /**
  * 입력값 변경 시 중복확인 상태 초기화
  */
 const resetValidation = () => {
   isValidated.value = false
+  duplicateError.value = ''
 }
 
 /**
  * 닉네임 중복확인 요청
  * 입력된 닉네임을 부모 컴포넌트로 전달하여 중복확인 처리
  */
-const checkDuplicate = () => {
+// 닉네임 중복확인 API 호출
+const checkDuplicate = async () => {
   if (!nickname.value.trim()) return
 
-  emit('duplicate-check', nickname.value.trim())
-  // 부모 컴포넌트에서 결과에 따라 isValidated 값 설정
+  try {
+    const res = await axios.get('/api/members/nickname/check', {
+      params: { nickname: nickname.value.trim() }
+    })
+    if (res.data.available) {
+      isValidated.value = true
+      duplicateError.value = ''
+      alert('사용 가능한 닉네임입니다.')
+    } else {
+      isValidated.value = false
+      duplicateError.value = '이미 사용 중인 닉네임입니다.'
+
+    }
+  } catch (error) {
+    isValidated.value = false
+    duplicateError.value = '중복 확인 중 오류가 발생했습니다.'
+  }
 }
 
 /**
  * 닉네임 저장 요청
  * 유효성 검사 후 닉네임을 부모 컴포넌트로 전달
  */
-const saveNickname = () => {
+const saveNickname = async () => {
   if (!nickname.value.trim() || !isValidated.value) return
 
-  emit('save', nickname.value.trim())
+  try {
+    await axios.post('/api/members/nickname', { nickname: nickname.value.trim() })
+    alert('닉네임이 성공적으로 변경되었습니다.')
+    emit('save', nickname.value.trim())
+  } catch (error) {
+    alert(error.response?.data || '닉네임 변경에 실패했습니다.')
+  }
 }
 
 /**

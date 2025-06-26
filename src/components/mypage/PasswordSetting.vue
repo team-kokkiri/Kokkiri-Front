@@ -2,10 +2,7 @@
   <div class="password-setting-wrap">
     <div class="password-setting-box">
       <div class="setting-header">
-        <button
-            class="back-btn"
-            @click="$emit('back')"
-        >
+        <button class="back-btn" @click="$emit('back')">
           <i class="bi bi-arrow-left"></i>
         </button>
         <span class="setting-title">비밀번호 변경</span>
@@ -63,16 +60,9 @@
 
         <div class="button-group">
           <button
-              class="current-password-check-btn"
-              @click="checkCurrentPassword"
-              :disabled="!currentPassword.trim()"
-          >
-            현재 비밀번호 확인
-          </button>
-          <button
               class="save-btn"
               @click="savePassword"
-              :disabled="!isCurrentPasswordVerified || !isNewPasswordValid"
+              :disabled="!isNewPasswordValid"
           >
             저장
           </button>
@@ -89,41 +79,28 @@
 </template>
 
 <script setup>
-import { defineEmits, defineExpose, ref, computed, watch } from 'vue'
+import {ref, computed, watch, defineEmits} from 'vue'
+import axios from '../../utils/axios'
 
-const emit = defineEmits(['back', 'save', 'verify-current-password'])
+const emit = defineEmits(['back', 'save', 'duplicate-check'])
 
-// 반응형 데이터
-const currentPassword = ref('') // 현재 비밀번호
-const newPassword = ref('') // 새 비밀번호
-const currentPasswordError = ref('') // 현재 비밀번호 에러 메시지
-const isCurrentPasswordVerified = ref(false) // 현재 비밀번호 확인 여부
+const currentPassword = ref('')
+const newPassword = ref('')
+const currentPasswordError = ref('')
 
-/**
- * 입력값 변경 시 유효성 검증 상태 초기화
- */
 watch([currentPassword, newPassword], () => {
-  if (currentPasswordError.value) currentPasswordError.value = ''
+  currentPasswordError.value = ''
 })
 
-/**
- * 현재 비밀번호 에러 초기화
- */
 const resetCurrentPasswordError = () => {
   currentPasswordError.value = ''
-  isCurrentPasswordVerified.value = false
 }
 
-/**
- * 새 비밀번호 입력 시 유효성 검증 초기화
- */
 const resetValidation = () => {
-  // 새 비밀번호 변경 시 특별한 처리는 없음 (실시간 검증)
+  // validation 상태 초기화 (추후 확장 가능)
 }
 
-/**
- * 비밀번호 조건 1: 영문/숫자/특수문자 중 2가지 이상 포함
- */
+// 비밀번호 조건 체크
 const isPasswordMixed = computed(() => {
   const pwd = newPassword.value
   let types = 0
@@ -133,44 +110,23 @@ const isPasswordMixed = computed(() => {
   return types >= 2
 })
 
-/**
- * 비밀번호 조건 2: 8자 이상 32자 이하, 공백 없음
- */
 const isPasswordLengthValid = computed(() => {
   const pwd = newPassword.value
   return pwd.length >= 8 && pwd.length <= 32 && !/\s/.test(pwd)
 })
 
-/**
- * 비밀번호 조건 3: 연속 3자 이상 동일 문자/숫자 없음
- */
 const isPasswordNoRepeat = computed(() => {
   const pwd = newPassword.value
   if (pwd.length < 8) return false
   return !/(.)\1\1/.test(pwd)
 })
 
-/**
- * 새 비밀번호 유효성 검증
- */
 const isNewPasswordValid = computed(() => {
   return isPasswordMixed.value && isPasswordLengthValid.value && isPasswordNoRepeat.value
 })
 
-/**
- * 현재 비밀번호 확인 요청
- */
-const checkCurrentPassword = async () => {
-  if (!currentPassword.value.trim()) return
-
-  emit('verify-current-password', currentPassword.value.trim())
-}
-
-/**
- * 비밀번호 변경 저장 요청
- */
+// 저장 API 호출
 const savePassword = async () => {
-  // 유효성 검사
   if (!currentPassword.value.trim()) {
     currentPasswordError.value = '현재 비밀번호를 입력해주세요.'
     return
@@ -178,11 +134,6 @@ const savePassword = async () => {
 
   if (!newPassword.value.trim()) {
     currentPasswordError.value = '새 비밀번호를 입력해주세요.'
-    return
-  }
-
-  if (!isCurrentPasswordVerified.value) {
-    currentPasswordError.value = '현재 비밀번호를 먼저 확인해주세요.'
     return
   }
 
@@ -196,33 +147,42 @@ const savePassword = async () => {
     return
   }
 
-  emit('save', {
-    currentPassword: currentPassword.value.trim(),
-    newPassword: newPassword.value.trim()
-  })
-}
+  try {
+    await axios.put('/api/members/password', {
+      currentPassword: currentPassword.value.trim(),
+      newPassword: newPassword.value.trim()
+    })
 
-/**
- * 부모 컴포넌트에서 현재 비밀번호 확인 결과를 받아 처리하는 함수
- * @param {boolean} result - 현재 비밀번호 확인 결과
- */
-const setCurrentPasswordVerification = (result) => {
-  isCurrentPasswordVerified.value = result
-  if (!result) {
-    currentPasswordError.value = '현재 비밀번호가 일치하지 않습니다.'
-  } else {
-    currentPasswordError.value = ''
+    alert('비밀번호가 성공적으로 변경되었습니다.')
+    currentPassword.value = ''
+    newPassword.value = ''
+    emit('save')
+  } catch (error) {
+    currentPasswordError.value =
+        error.response?.data?.message || '비밀번호 변경에 실패했습니다.'
+    console.error(error)
   }
 }
-
-// 부모에서 호출할 수 있도록 expose
-defineExpose({
-  setCurrentPasswordVerification
-})
 </script>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/style';
+.password-input.error {
+  border-color: #dc3545;
+}
+
+.check-result {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.check-result .success {
+  color: #28a745;
+}
+
+.check-result .fail {
+  color: #dc3545;
+}
 
 .password-setting-wrap {
   display: flex;
@@ -405,4 +365,5 @@ defineExpose({
     }
   }
 }
+
 </style>
