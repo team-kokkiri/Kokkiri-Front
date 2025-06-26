@@ -104,63 +104,6 @@ body {
   justify-content: space-between;
 }
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-/* ###### Calendar-Page #######*/
-.calendar-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.calendar-container .calendar-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1180px;
-  height: 100vh;
-  background: red;
-}
-.calendar-container .calendar-inner span {
-  color: white;
-  font-size: 300px;
-}
-
-/* ###### Party-Page #######*/
-.party-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.party-container .party-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1180px;
-  height: 100vh;
-  background: red;
-}
-.party-container .party-inner span {
-  color: white;
-  font-size: 250px;
-}
-
-/* ###### Notice-Page #######*/
-.notice-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.notice-container .notice-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1180px;
-  height: 100vh;
-  background: red;
-}
-.notice-container .notice-inner span {
-  color: white;
-  font-size: 250px;
-}
-
 /* ###### Admin-Page #######*/
 .admin-container {
   display: flex;

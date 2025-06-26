@@ -27,7 +27,7 @@ const routes = [
       },
       {
         path: 'notice',
-        component: () => import('@/pages/board/NoticePage.vue'),
+        component: () => import('@/pages/board/NoticeBoardList.vue'),
         meta: { showNav: false, showLeft: false, showCenter: false },
       },
       {
@@ -63,7 +63,22 @@ const routes = [
       },
       {
         path: 'share-board',
-        component: () => import('@/pages/board/ShareBoard.vue'),
+        component: () => import('@/pages/board/ShareBoardList.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
+      {
+        path: 'project-board',
+        component: () => import('@/pages/board/ProjectBoardList.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
+      {
+        path: 'my-written-posts',
+        component: () => import('@/pages/user/MyWrittenPosts.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
+      {
+        path: 'my-commented-posts',
+        component: () => import('@/pages/user/MyCommentedPosts.vue'),
         meta: { showLeft: false, showCenter: false },
       },
     ]

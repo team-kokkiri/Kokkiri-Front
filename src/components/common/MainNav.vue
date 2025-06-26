@@ -30,6 +30,7 @@
     { name: '자유게시판', path: '/free-board' },
     { name: '자료공유 게시판', path: '/share-board' },
     { name: 'HOT 게시물', path: '/hot-board' },
+    { name: '프로젝트 소개', path: '/project-board' },
   ]
 
   const activeMenu = ref('')

@@ -1,10 +1,11 @@
 <template>
   <BoardPageLayout
-      title="HOT 게시판"
-      description="공감 10개를 받으면 HOT 게시물로 자동 선정됩니다."
-      :items="hotBoardList"
+      title="댓글 단 글"
+      description="내가 댓글을 작성한 모든 게시물을 확인할 수 있습니다."
+      :items="myCommentedList"
       :currentPage="currentPage"
       :hasNext="hasNextPage"
+      :showPagination="false"
       @first="goFirst"
       @prev="goPrev"
       @next="goNext"
@@ -32,7 +33,7 @@ import CommonBoardList from '@/components/common/layout/CommonBoardList.vue'
 const router = useRouter()
 
 // 상태 변수들
-const hotBoardList = ref([])            // HOT 게시글 목록
+const myCommentedList = ref([])         // 댓글 단 글 목록
 const currentPage = ref(1)              // 현재 페이지
 const isLastPage = ref(false)           // 마지막 페이지 여부
 const token = localStorage.getItem('accessToken')
@@ -40,67 +41,62 @@ const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080'
 
 // 게시판 설정
 const boardConfig = {
-  showBoardType: true,  // 게시판명 표시
-  showPreview: true,    // 내용 미리보기 표시
-  emptyMessage: 'HOT 게시물이 없습니다.',
-  emptyDescription: '좋아요 10개 이상을 받은 게시물이 여기에 표시됩니다.'
+  showBoardType: false,  // 게시판명 숨기기
+  showPreview: false,    // 내용 미리보기 숨기기
+  emptyMessage: '댓글을 작성한 게시물이 없습니다.',
+  emptyDescription: '댓글을 작성하면 여기에 표시됩니다.'
 }
 
-// API에서 HOT 게시글 리스트 불러오기
-const fetchHotBoardList = async () => {
+// API에서 댓글 단 글 리스트 불러오기
+const fetchMyCommentedList = async () => {
   try {
-    // HOT 게시글은 모든 게시판에서 좋아요 10개 이상인 게시글을 가져옴
-    const res = await axios.get(`${API_BASE_URL}/api/boards/list/3`, {
+    const res = await axios.get(`${API_BASE_URL}/api/myboards/commented`, {
       headers: {
         Authorization: `Bearer ${token}`
-      },
-      params: {
-        page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
-        size: 15,                     // HOT 게시판은 더 많이 보여줌
       }
     })
     const data = res.data
-    console.log('HOT 게시글 API 응답:', data)
+    console.log('댓글 단 글 API 응답:', data)
 
-    hotBoardList.value = data;
+    myCommentedList.value = data;
 
   } catch (err) {
-    console.error('HOT 게시글 목록 가져오기 실패:', err)
+    console.error('댓글 단 글 목록 가져오기 실패:', err)
   }
 }
 
-// 페이지 진입 시 HOT 게시글 호출
+// 페이지 진입 시 댓글 단 글 호출
 onMounted(async () => {
-  await fetchHotBoardList()
+  await fetchMyCommentedList()
 })
 
 // 다음 페이지 존재 여부
 const hasNextPage = computed(() => !isLastPage.value)
 
-// 게시글 상세로 이동하는 함수 - 각 게시판의 상세 페이지로 이동
-function goToDetail({ id, route, boardId }) {
-  const targetId = id || boardId
-  const targetRoute = route || 'free-board' // 기본값 설정
-  router.push(`/main-page/${targetRoute}/${targetId}`)
+// 게시글 상세로 이동하는 함수
+function goToDetail({ boardId }) {
+  // 게시판 종류에 따라 다른 라우트로 이동할 수 있도록 구현
+  // 현재는 자유게시판으로 이동하도록 설정 (실제로는 게시판 종류를 구분해야 함)
+  router.push(`/main-page/free-board/${boardId}`)
 }
 
-// 페이지 이동
+// 페이지 이동 (현재는 페이지네이션이 없으므로 빈 함수)
 function goFirst() {
   currentPage.value = 1
-  fetchHotBoardList()
+  // fetchMyCommentedList()
 }
 
 function goPrev() {
   if (currentPage.value > 1) {
     currentPage.value--
-    fetchHotBoardList()
+    // fetchMyCommentedList()
   }
 }
 
 function goNext() {
   if (!isLastPage.value) {
     currentPage.value++
-    fetchHotBoardList()
+    // fetchMyCommentedList()
   }
 }
 </script>
