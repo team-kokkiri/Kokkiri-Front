@@ -1,5 +1,14 @@
 <template>
-  <div class="board-free-detail" v-if="post">
+  <!-- 수정 모드 -->
+  <PostEditForm 
+    v-if="postEditVisible && post"
+    :post="post"
+    @submit="onSubmitEdit"
+    @cancel="onCancelEdit"
+  />
+  
+  <!-- 일반 상세보기 모드 -->
+  <div class="board-free-detail" v-else-if="post">
     <!-- 상세 헤딩 -->
     <div class="detail-heading">
       <h2 class="board-title">자유게시판</h2>
@@ -32,7 +41,7 @@
           @report="onReport"
           @submit-reply="onSubmitReply"
           @edit="onEdit"
-          @submit-edit="onSubmitEdit"
+          @submit-edit="onSubmitCommentEdit"
           @delete = "onDelete"
       />
       <CommentForm @submit="onSubmitComment" />
@@ -61,7 +70,7 @@ import PostReactionBar from '@/components/board/common/PostReactionBar.vue'
 import PostActionBar from '@/components/board/common/PostActionBar.vue'
 import CommentList from '@/components/board/detail/CommentList.vue'
 import CommentForm from '@/components/board/detail/CommentForm.vue'
-//import EditForm from '@/components/board/detail/EditForm.vue'
+import PostEditForm from '@/components/board/detail/PostEditForm.vue'
 // import boardSample from '@/data/boardSample.json'
 
 
@@ -132,32 +141,83 @@ const onSubmitReply = async (replyData) => {
   }
 }
 
-// 수정 등록 핸들러 (백엔드 처리 해야함)
-const onSubmitEdit = async (item) => {
+// 게시글 수정 등록 핸들러
+const onSubmitEdit = async (editData) => {
   if (!post.value) return
-  console.log(item)
+  
+  try {
+    // FormData 생성
+    const formData = new FormData()
+    
+    // board 데이터를 JSON으로 변환하여 Blob으로 추가
+    const boardData = {
+      boardTitle: editData.boardTitle,
+      boardContent: editData.boardContent,
+      keepFileIds: [] // 기존 파일 유지 ID들 (필요시 구현)
+    }
+    
+    // JSON을 Blob으로 변환하고 Content-Type 지정
+    const boardBlob = new Blob([JSON.stringify(boardData)], {
+      type: 'application/json'
+    })
+    
+    formData.append('board', boardBlob)
+    
+    // 첨부파일이 있다면 추가
+    if (editData.attachedImages && editData.attachedImages.length > 0) {
+      editData.attachedImages.forEach(file => {
+        formData.append('files', file)
+      })
+    }
+    
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+        // Content-Type은 FormData 사용시 자동으로 설정되므로 지정하지 않음
+      }
+    }
+    
+    // 게시글 수정 API 호출
+    await axios.put(
+      `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
+      formData,
+      config
+    )
+    
+    // 수정 완료 후 상세보기 모드로 돌아가기
+    postEditVisible.value = false
+    // 게시글 데이터 다시 불러오기
+    await fetchPost()
+    
+    alert('게시글이 수정되었습니다.')
+  } catch (err) {
+    console.error('게시글 수정 실패', err.response?.data || err.message || err)
+    alert('게시글 수정에 실패했습니다.')
+  }
+}
+
+// 댓글 수정 등록 핸들러
+const onSubmitCommentEdit = async (item) => {
+  if (!post.value) return
+  
   try {
     const config = {
       headers: {
         Authorization: `Bearer ${token}`
       }
     }
-    // item이 게시글인지, 댓글인지, 대댓글인지 구분
-    if (item === post.value) {
-      // 게시글 수정
-    } else {
-      // 댓글 수정
-      await axios.put(
-          `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}`,
-          {
-            comment: item.content
-          },
-          config
-      )
-      await fetchPost()
-    }
+    
+    // 댓글 수정
+    await axios.put(
+        `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}`,
+        {
+          comment: item.content
+        },
+        config
+    )
+    await fetchPost()
   } catch (err) {
-    console.error('수정 실패', err.response?.data || err.message || err);
+    console.error('댓글 수정 실패', err.response?.data || err.message || err)
   }
 }
 
@@ -211,6 +271,11 @@ const onEdit = async (item) => {
   if (item === post.value) {
     postEditVisible.value = !postEditVisible.value
   }
+}
+
+// 수정 취소 기능
+const onCancelEdit = () => {
+  postEditVisible.value = false
 }
 
 // 삭제 기능 // 본문 댓글 대댓글 전부 이 메소드로 합쳤는데 필요하면 나눠드림
