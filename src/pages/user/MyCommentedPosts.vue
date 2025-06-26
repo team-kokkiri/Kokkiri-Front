@@ -1,32 +1,23 @@
 <template>
-  <div class="my-commented-posts-content">
-    <div class="my-commented-posts-inner">
-      <!-- 헤더 -->
-      <div class="my-commented-posts-header">
-        <div class="header-title">
-          <h1>댓글 단 글</h1>
-          <p class="description">내가 댓글을 작성한 모든 게시물을 확인할 수 있습니다.</p>
-        </div>
-      </div>
-
-      <!-- 댓글 단 글 리스트 -->
-      <MyCommentedBoardList
-          :items="myCommentedList"
-          @itemClick="goToDetail"
+  <BoardPageLayout
+      title="댓글 단 글"
+      description="내가 댓글을 작성한 모든 게시물을 확인할 수 있습니다."
+      :items="myCommentedList"
+      :currentPage="currentPage"
+      :hasNext="hasNextPage"
+      :showPagination="false"
+      @first="goFirst"
+      @prev="goPrev"
+      @next="goNext"
+  >
+    <template #board-list="{ items }">
+      <CommonBoardList 
+          :items="items" 
+          :config="boardConfig"
+          @itemClick="goToDetail" 
       />
-
-      <!-- 하단 페이지네이션 -->
-      <div class="my-commented-posts-footer" v-if="myCommentedList.length > 0">
-        <ListPagination
-            :currentPage="currentPage"
-            :hasNext="hasNextPage"
-            @first="goFirst"
-            @prev="goPrev"
-            @next="goNext"
-        />
-      </div>
-    </div>
-  </div>
+    </template>
+  </BoardPageLayout>
 </template>
 
 <script setup>
@@ -35,8 +26,8 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 
 // 컴포넌트 import
-import MyCommentedBoardList from '@/components/user/MyCommentedBoardList.vue'
-import ListPagination from '@/components/board/list/ListPagination.vue'
+import BoardPageLayout from '@/components/common/layout/BoardPageLayout.vue'
+import CommonBoardList from '@/components/common/layout/CommonBoardList.vue'
 
 // 라우터 인스턴스 생성
 const router = useRouter()
@@ -47,6 +38,14 @@ const currentPage = ref(1)              // 현재 페이지
 const isLastPage = ref(false)           // 마지막 페이지 여부
 const token = localStorage.getItem('accessToken')
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
+
+// 게시판 설정
+const boardConfig = {
+  showBoardType: false,  // 게시판명 숨기기
+  showPreview: false,    // 내용 미리보기 숨기기
+  emptyMessage: '댓글을 작성한 게시물이 없습니다.',
+  emptyDescription: '댓글을 작성하면 여기에 표시됩니다.'
+}
 
 // API에서 댓글 단 글 리스트 불러오기
 const fetchMyCommentedList = async () => {
@@ -103,50 +102,5 @@ function goNext() {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/style';
-
-.my-commented-posts-content {
-  display: flex;
-  justify-content: flex-start;
-  width: 1180px;
-  margin: 0 auto; // 중앙 정렬
-
-  .my-commented-posts-inner {
-    width: 832px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-
-    .my-commented-posts-header {
-      border: 1px solid #DDDDDD;
-      padding: 24px;
-      margin-bottom: 5px;
-
-      .header-title {
-        h1 {
-          font-family: 'Noto Sans KR', sans-serif;
-          font-weight: 600;
-          font-size: 20px;
-          color: #333333;
-          margin: 0 0 8px 0;
-        }
-
-        .description {
-          font-family: 'Noto Sans KR', sans-serif;
-          font-weight: 400;
-          font-size: 14px;
-          color: #999999;
-          margin: 0;
-        }
-      }
-    }
-
-    .my-commented-posts-footer {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-  }
-}
-
+// 모든 스타일이 BoardPageLayout으로 이동했으므로 빈 상태
 </style>
