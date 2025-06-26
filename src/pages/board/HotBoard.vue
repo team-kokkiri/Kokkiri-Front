@@ -56,7 +56,7 @@ const fetchHotBoardList = async () => {
       },
       params: {
         page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
-        size: 15,                     // HOT 게시판은 더 많이 보여줌
+        size: 20,                     // HOT 게시판은 더 많이 보여줌
       }
     })
     const data = res.data

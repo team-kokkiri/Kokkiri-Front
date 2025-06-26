@@ -83,7 +83,7 @@ const fetchBoardList = async () => {
       },
       params: {
         page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
-        size: 10
+        size: 20
       }
     })
 
