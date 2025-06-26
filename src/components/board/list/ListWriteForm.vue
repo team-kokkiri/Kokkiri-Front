@@ -28,6 +28,14 @@
             placeholder="제목을 입력하세요"
             v-model="formData.boardTitle"
         />
+        <button
+            type="button"
+            class="btn-close"
+            @click="showWriteForm = false"
+            aria-label="닫기"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
       <div class="form-body">
         <textarea 
@@ -68,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits } from 'vue'
 
 // Props
 defineProps({
@@ -98,13 +106,6 @@ let formFocusTimer = null
 // 글쓰기 폼 포커스 처리
 function onFormFocus() {
   clearTimeout(formFocusTimer)
-}
-
-// 글쓰기 폼 포커스 아웃 처리 (짧은 delay 후 숨김)
-function onFormBlur() {
-  formFocusTimer = setTimeout(() => {
-    showWriteForm.value = false
-  }, 80)
 }
 
 // 글쓰기 폼 제출
@@ -151,29 +152,6 @@ function onFileChange(event) {
 }
 
 
-// 클릭된 요소가 form 내부이거나 file input이거나,
-// 또는 file input을 연 원래 버튼(.btn-upload-image)을 포함하는 경우에는 닫지 않음
-function handleClickOutside(e) {
-  const formEl = formRef.value
-  const fileInputEl = fileInputRef.value
-
-  if (
-    formEl?.contains(e.target) ||
-    fileInputEl?.contains(e.target) ||
-    e.target.closest('.btn-upload-image')
-  ) {
-    return
-  }
-  showWriteForm.value = false
-}
-
-// 폼 바깥 클릭 이벤트 등록/해제
-onMounted(() => {
-  document.addEventListener('mousedown', handleClickOutside)
-})
-onUnmounted(() => {
-  document.removeEventListener('mousedown', handleClickOutside)
-})
 </script>
 
 <style lang="scss" scoped>
@@ -219,6 +197,7 @@ onUnmounted(() => {
       padding: 15px;
       border-bottom: 1px solid $dim-gray;
       background: $cloudy-gray;
+      display: flex;
 
       .input-title {
         width: 100%;
@@ -234,6 +213,11 @@ onUnmounted(() => {
           font-size: 16px;
           color: $silver-black;
         }
+      }
+      .btn-close {
+        background: white;
+        border: none;
+        font-size: 20px;
       }
     }
 
