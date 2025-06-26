@@ -66,6 +66,16 @@ const routes = [
         component: () => import('@/pages/board/ShareBoard.vue'),
         meta: { showLeft: false, showCenter: false },
       },
+      {
+        path: 'my-written-posts',
+        component: () => import('@/pages/user/MyWrittenPosts.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
+      {
+        path: 'my-commented-posts',
+        component: () => import('@/pages/user/MyCommentedPosts.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
     ]
   },
     //oauth2 토큰저장페이지

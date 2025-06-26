@@ -196,7 +196,7 @@ function onFileChange(event) {
     .form-title {
       padding: 15px;
       border-bottom: 1px solid $dim-gray;
-      background: $cloudy-gray;
+      background: $white;
       display: flex;
 
       .input-title {

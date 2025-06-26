@@ -2,14 +2,14 @@
   <div class="activity-section">
     <div
         class="activity-item"
-        @click="$emit('activity-click', { id: 'my-posts', route: '/main-page/mypage' })"
+        @click="$emit('activity-click', { id: 'my-posts', route: '/main-page/my-written-posts' })"
     >
       <i class="bi bi-list-ul"></i>
       <span class="text">내가 쓴 글</span>
     </div>
     <div
         class="activity-item"
-        @click="$emit('activity-click', { id: 'my-comments', route: '/main-page/mypage' })"
+        @click="$emit('activity-click', { id: 'my-comments', route: '/main-page/my-commented-posts' })"
     >
       <i class="bi bi-chat"></i>
       <span class="text">댓글 단 글</span>
