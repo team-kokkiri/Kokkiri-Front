@@ -31,7 +31,7 @@
                   <div class="btn-action-wrap">
                     <template v-if="item.type === 'invite'">
                       <button class="btn-accept" @click="handleAcceptClick(item)">수락</button>
-                      <button class="btn-reject" @click="rejectInvitation(item)">거절</button>
+                      <button class="btn-reject" @click="handleRejectClick(item)">거절</button>
                     </template>
                     <template v-else>
                       <button class="btn-delete" @click="deleteNotification(item.id)">삭제</button>
@@ -70,6 +70,18 @@
       </div>
     </div>
   </div>
+
+  <div v-if="showRejectModal" class="modal-overlay" @click.self="closeRejectModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        <strong>'{{ rejectionRoomName }}'</strong> 초대를 거절하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmRejectInvitation">네</button>
+        <button class="btn-modal btn-cancel" @click="closeRejectModal">아니오</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -98,16 +110,28 @@ const showNotification = ref(false);
 const notificationRef = ref(null);
 const notificationListRef = ref(null);
 
+// 수락 모달 상태
 const showAcceptModal = ref(false);
 const notificationToAccept = ref(null);
 
-// ✨ 오류 해결: 새로운 메시지 형식에 맞춰 이름 추출 로직 변경
+// ✨ 거절 모달 상태 관리를 위한 ref 추가
+const showRejectModal = ref(false);
+const notificationToReject = ref(null);
+
+
+// 모달에 표시될 채팅방 이름을 파싱하기 위한 computed 속성
 const invitationRoomName = computed(() => {
   if (!notificationToAccept.value) return '';
   const message = notificationToAccept.value.message;
-  // 정규식을 사용하여 꺾쇠 괄호(<...>) 사이의 문자열(채팅방 이름)을 추출
   const match = message.match(/<([^>]+)>/);
-  // match[1]이 실제 채팅방 이름에 해당합니다.
+  return match && match[1] ? match[1] : '해당';
+});
+
+// ✨ 거절 모달에 표시될 채팅방 이름을 위한 computed 속성 추가
+const rejectionRoomName = computed(() => {
+  if (!notificationToReject.value) return '';
+  const message = notificationToReject.value.message;
+  const match = message.match(/<([^>]+)>/);
   return match && match[1] ? match[1] : '해당';
 });
 
@@ -150,6 +174,7 @@ function goMain() {
   router.push('/main-page');
 }
 
+// 수락 모달 제어 함수들
 function handleAcceptClick(item) {
   notificationToAccept.value = item;
   showAcceptModal.value = true;
@@ -166,6 +191,27 @@ async function confirmAcceptInvitation() {
   }
   closeAcceptModal();
 }
+
+// ✨ 초대 거절 버튼 클릭 시 모달을 여는 함수
+function handleRejectClick(item) {
+  notificationToReject.value = item;
+  showRejectModal.value = true;
+}
+
+// ✨ 거절 모달을 닫는 함수
+function closeRejectModal() {
+  showRejectModal.value = false;
+  notificationToReject.value = null;
+}
+
+// ✨ 모달의 '네' 버튼 클릭 시 초대를 최종 거절하는 함수
+async function confirmRejectInvitation() {
+  if (notificationToReject.value) {
+    await rejectInvitation(notificationToReject.value);
+  }
+  closeRejectModal();
+}
+
 
 let scrollHandler = null;
 
