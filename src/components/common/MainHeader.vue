@@ -30,7 +30,7 @@
                   </div>
                   <div class="btn-action-wrap">
                     <template v-if="item.type === 'invite'">
-                      <button class="btn-accept" @click="acceptInvitation(item)">수락</button>
+                      <button class="btn-accept" @click="handleAcceptClick(item)">수락</button>
                       <button class="btn-reject" @click="rejectInvitation(item)">거절</button>
                     </template>
                     <template v-else>
@@ -58,14 +58,25 @@
       </div>
     </div>
   </div>
+
+  <div v-if="showAcceptModal" class="modal-overlay" @click.self="closeAcceptModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        <strong>'{{ invitationRoomName }}'</strong> 방에 참여하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmAcceptInvitation">네</button>
+        <button class="btn-modal btn-cancel" @click="closeAcceptModal">아니오</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
 
-// Header가 모든 상태와 함수를 useNotifications에서 직접 가져옵니다.
 const {
   notifications,
   hasNewChatMessage,
@@ -86,6 +97,19 @@ const route = useRoute();
 const showNotification = ref(false);
 const notificationRef = ref(null);
 const notificationListRef = ref(null);
+
+const showAcceptModal = ref(false);
+const notificationToAccept = ref(null);
+
+// ✨ 오류 해결: 새로운 메시지 형식에 맞춰 이름 추출 로직 변경
+const invitationRoomName = computed(() => {
+  if (!notificationToAccept.value) return '';
+  const message = notificationToAccept.value.message;
+  // 정규식을 사용하여 꺾쇠 괄호(<...>) 사이의 문자열(채팅방 이름)을 추출
+  const match = message.match(/<([^>]+)>/);
+  // match[1]이 실제 채팅방 이름에 해당합니다.
+  return match && match[1] ? match[1] : '해당';
+});
 
 const menuList = [
   { name: '게시판', path: '' }, { name: '캘린더', path: '/calendar' }, { name: '파티찾기', path: '/party' },
@@ -122,15 +146,28 @@ function goMypage() {
   router.push('/main-page/mypage');
 }
 
-
-// 메인페이지 이동
 function goMain() {
-  router.push('/main-page')
+  router.push('/main-page');
 }
 
-// 스크롤 이벤트 핸들러 (무한 스크롤용)
-let scrollHandler = null
+function handleAcceptClick(item) {
+  notificationToAccept.value = item;
+  showAcceptModal.value = true;
+}
 
+function closeAcceptModal() {
+  showAcceptModal.value = false;
+  notificationToAccept.value = null;
+}
+
+async function confirmAcceptInvitation() {
+  if (notificationToAccept.value) {
+    await acceptInvitation(notificationToAccept.value);
+  }
+  closeAcceptModal();
+}
+
+let scrollHandler = null;
 
 onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside);
@@ -142,7 +179,7 @@ onMounted(() => {
           scrollHandler = () => {
             const isNearBottom = listEl.scrollHeight - listEl.scrollTop <= listEl.clientHeight + 100;
             if (isNearBottom && !isLoading.value && hasMore.value) {
-              fetchNotifications(); // 직접 호출
+              fetchNotifications();
             }
           };
           listEl.addEventListener('scroll', scrollHandler);
@@ -168,7 +205,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-/* 여기에 red-dot 스타일이 필요하다면 추가해주세요. */
+/* red-dot 스타일 */
 .red-dot {
   position: absolute;
   top: 0;
@@ -182,6 +219,68 @@ onBeforeUnmount(() => {
 
 @import '@/assets/scss/style';
 
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 320px;
+}
+
+.modal-text {
+  font-size: 16px;
+  margin: 0 0 20px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-modal {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 80px;
+}
+
+.btn-confirm {
+  background-color: $main-color;
+  color: white;
+  &:hover {
+    background-color: darken($main-color, 10%);
+  }
+}
+
+.btn-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+  &:hover {
+    background-color: #e0e0e0;
+  }
+}
+
 /* ###### Component-Header #######*/
 .mainpage-header {
   width: 100%;
@@ -190,7 +289,7 @@ onBeforeUnmount(() => {
   min-height: 80px;
   display: flex;
   align-items: center;
-  background: #fff; // 필요시 배경색 조절
+  background: #fff;
   border-bottom: 1px solid $dim-gray;
   .header-inner {
     width: 1180px;
@@ -198,45 +297,38 @@ onBeforeUnmount(() => {
     height: 100%;
     display: flex;
     align-items: center;
-    //border: 1px solid black;
-
     .header-row {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       .header-left {
         display: flex;
         align-items: center;
         cursor: pointer;
         img {
           width: 246px;
-          height: 80px; // 로고 이미지 크기 조절
+          height: 80px;
           margin-bottom: 1.5px;
         }
       }
-
       .header-center {
         display: flex;
         gap: 42px;
         margin-right: 90px;
-
         .gnb-menu-item {
           position: relative;
           display: flex;
           align-items: center;
           cursor: pointer;
           height: 80px;
-
           .menu-text {
             font-size: 16px;
             font-weight: bold;
             color: $dark-black;
             transition: color 0.2s;
           }
-
           &.active {
             border-bottom: 5px solid $main-color;
             padding-top: 10px;
@@ -245,11 +337,10 @@ onBeforeUnmount(() => {
             color: $main-color;
           }
           &.active .menu-text {
-            color: $main-color // 활성화된 메뉴 글씨 색상
+            color: $main-color
           }
         }
       }
-
       .header-right {
         display: flex;
         gap: 24px;
@@ -262,7 +353,6 @@ onBeforeUnmount(() => {
           width: 40px;
           height: 40px;
           border-radius: 10px;
-          // 헤더 우측 버튼3개
           .icon-btn {
             display: flex;
             align-items: center;
@@ -291,7 +381,6 @@ onBeforeUnmount(() => {
               height: 24px;
               fill: $dim-black;
             }
-
             em {
               width: 20px;
               height: 20px;
@@ -308,7 +397,6 @@ onBeforeUnmount(() => {
               justify-content: center;
             }
           }
-          // 알림창 눌렀을때 드롭다운창
           .notification-dropdown {
             position: absolute;
             top: 48px;
@@ -324,8 +412,6 @@ onBeforeUnmount(() => {
             display: flex;
             flex-direction: column;
             animation: fadeIn 0.18s;
-
-            // 헤더
             .notification-header {
               display: flex;
               align-items: center;
@@ -333,14 +419,12 @@ onBeforeUnmount(() => {
               border-bottom: 1px solid $dim-gray;
               padding: 34px 27px;
               height: 80px;
-
               h3.title {
                 font-size: 24px;
                 font-weight: normal;
                 color: $dark-black;
                 margin: 0 10px 0 0;
               }
-
               em.badge-count {
                 display: flex;
                 align-items: center;
@@ -357,7 +441,6 @@ onBeforeUnmount(() => {
                 font-family: SpoqaHanSansNeo-Regular, serif;
                 font-style: normal;
               }
-
               .btn-read-all {
                 margin-left: auto;
                 background: none;
@@ -369,13 +452,10 @@ onBeforeUnmount(() => {
                 padding: 0;
               }
             }
-
-            // 알림 리스트 (최대 5개, 스크롤)
             .notification-list {
               flex: 1 1 0%;
-              max-height: 300px;        // 60px * 5
+              max-height: 300px;
               overflow-y: auto;
-
               &::-webkit-scrollbar {
                 width: 8px;
               }
@@ -383,7 +463,6 @@ onBeforeUnmount(() => {
                 background: #d9d9d9;
                 border-radius: 8px;
               }
-
               .notification-item {
                 display: flex;
                 align-items: flex-start;
@@ -391,11 +470,9 @@ onBeforeUnmount(() => {
                 min-height: 60px;
                 height: 60px;
                 border-bottom: 1px solid $dim-gray;
-
                 &:last-child {
                   border-bottom: none;
                 }
-
                 .item-mark {
                   width: 15px;
                   height: 58px;
@@ -407,7 +484,6 @@ onBeforeUnmount(() => {
                     background: $orangered;
                   }
                 }
-
                 .item-content {
                   flex: 1 1 0%;
                   display: flex;
@@ -453,7 +529,6 @@ onBeforeUnmount(() => {
               }
             }
           }
-
           @keyframes fadeIn {
             0% { opacity: 0; transform: translateY(-10px);}
             100% { opacity: 1; transform: translateY(0);}

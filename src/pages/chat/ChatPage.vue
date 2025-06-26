@@ -51,7 +51,8 @@ import SockJS from 'sockjs-client'
 import Stomp from 'webstomp-client'
 import axios from 'axios'
 
-import { onBeforeRouteLeave } from 'vue-router'
+// ✨ useRoute import 추가
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
 
 // ===== 상태(State) 관리 =====
 const chatRooms = ref([])
@@ -73,6 +74,9 @@ const currentUserEmail = ref('')
 // 초대 관련 상태
 const searchQuery = ref('')
 const invitedUserIds = ref([])
+
+// ✨ route 객체 생성
+const route = useRoute();
 
 // API 기본 URL (환경 변수 사용 권장)
 const VUE_APP_API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
@@ -149,18 +153,12 @@ async function fetchMessageHistory(roomId) {
   }
 }
 
-/**
- * 주어진 채팅방 목록에 대해 STOMP 구독을 실행하는 헬퍼 함수
- * @param {Array} roomsToSubscribe - 구독할 채팅방 객체 배열
- */
 function subscribeToRooms(roomsToSubscribe) {
   if (!stompClient.value?.connected) return;
 
   roomsToSubscribe.forEach(chat => {
-    console.log(`Subscribing to /topic/${chat.roomId}`);
     stompClient.value.subscribe(`/topic/${chat.roomId}`, 
       (message) => handleIncomingMessage(JSON.parse(message.body)),
-      // ✨✨✨ 오류 해결: 빠뜨렸던 인증 헤더를 다시 추가합니다. ✨✨✨
       { 
         id: `sub-${chat.roomId}`,
         Authorization: `Bearer ${token.value}`
@@ -169,9 +167,6 @@ function subscribeToRooms(roomsToSubscribe) {
   });
 }
 
-/**
- * 웹소켓에 연결하고, 초기에 로드된 모든 채팅방을 구독하는 함수
- */
 function connectWebSocket() {
   if (stompClient.value && stompClient.value.connected) return;
 
@@ -180,7 +175,6 @@ function connectWebSocket() {
   stompClient.value.debug = () => {};
 
   stompClient.value.connect({ Authorization: `Bearer ${token.value}` }, () => {
-    console.log('WebSocket connected. Subscribing to initial rooms...');
     subscribeToRooms(chatRooms.value);
   });
 }
@@ -293,17 +287,43 @@ function closeInviteView() { showInviteView.value = false; searchQuery.value = '
 function handleInviteSearch(query) { searchQuery.value = query; }
 function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
 
+// ✨ onMounted 훅 수정
 onMounted(async () => {
+  // 1. 기본 정보 설정
   currentUserEmail.value = localStorage.getItem('email');
   token.value = localStorage.getItem('accessToken');
   if (!token.value || !currentUserEmail.value) { 
     console.error("로그인 정보가 없습니다."); 
     return; 
   }
+
+  // 2. 채팅방 목록을 먼저 모두 불러옵니다.
   await fetchChatRooms();
+
+  // 3. 웹소켓 연결
   if (chatRooms.value.length > 0) { 
     connectWebSocket(); 
   }
+
+  // 4. ✨ URL에서 roomId를 확인하고 해당 채팅방을 자동으로 선택합니다.
+  const targetRoomId = route.query.roomId;
+  if (targetRoomId) {
+    // URL의 쿼리 파라미터는 문자열이므로 숫자로 변환합니다.
+    const roomIdAsNumber = parseInt(targetRoomId, 10);
+    
+    // 불러온 채팅 목록에 해당 ID가 있는지 확인합니다.
+    const roomExists = chatRooms.value.some(room => room.roomId === roomIdAsNumber);
+
+    if (roomExists) {
+      console.log(`URL에서 채팅방 ID(${roomIdAsNumber})를 감지하여 자동으로 선택합니다.`);
+      // selectRoom 함수를 호출하여 채팅방을 활성화합니다.
+      await selectRoom(roomIdAsNumber);
+    } else {
+      console.warn(`URL의 채팅방 ID(${roomIdAsNumber})가 현재 사용자의 채팅 목록에 없습니다.`);
+    }
+  }
+
+  // 5. 키보드 이벤트 리스너 추가
   document.addEventListener('keydown', handleEscapeKey);
 });
 
