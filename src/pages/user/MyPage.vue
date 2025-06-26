@@ -304,10 +304,9 @@ const handleClassCodeSave = async (classCode) => {
 .mypage-wrap {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
   padding-top: 24px;
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>

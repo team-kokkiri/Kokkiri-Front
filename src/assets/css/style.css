@@ -86,8 +86,12 @@ body {
 /* ######### Main-Page ##########*/
 .container.mainpage {
   min-width: 1180px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 .container.mainpage .mainpage-body {
+  flex: 1;
   display: flex;
   justify-content: center;
   margin-top: 26px;

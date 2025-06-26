@@ -34,12 +34,16 @@ body {
 /* ######### Main-Page ##########*/
 .container.mainpage {
   min-width: 1180px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;  // 전체 높이 화면 기준
   .mainpage-nav {
     // 네브바 영역
     .mainnav-inner {
     }
   }
   .mainpage-body {
+    flex: 1;
     display: flex;
     justify-content: center;
     margin-top: 26px;
