@@ -84,40 +84,6 @@ const fetchHotBoardList = async () => {
   } catch (err) {
     console.error('HOT 게시글 목록 가져오기 실패:', err)
 
-    // API가 아직 구현되지 않은 경우 임시 데이터
-    // 실제 구현 시에는 이 부분을 제거해주세요
-    hotBoardList.value = [
-      {
-        id: 1,
-        boardTitle: "Vue.js 3.0 완벽 가이드",
-        boardContent: "Vue.js 3.0의 새로운 기능들을 정리했습니다. Composition API, Teleport, Fragments 등 다양한 기능들을 예제와 함께 설명드리겠습니다.",
-        likeCount: 32,
-        commentCount: 9,
-        writer: "고라니",
-        createdAt: "2024-06-25T10:30:00",
-        boardTypeId: 1
-      },
-      {
-        id: 2,
-        boardTitle: "React vs Vue 성능 비교",
-        boardContent: "실제 프로젝트에서 React와 Vue의 성능을 비교해본 결과를 공유합니다.",
-        likeCount: 28,
-        commentCount: 15,
-        writer: "개발자A",
-        createdAt: "2024-06-25T09:15:00",
-        boardTypeId: 2
-      },
-      {
-        id: 3,
-        boardTitle: "JavaScript ES2024 새로운 기능",
-        boardContent: "JavaScript ES2024에 추가된 새로운 기능들을 정리했습니다. Array grouping, Promise.withResolvers 등을 살펴보겠습니다.",
-        likeCount: 25,
-        commentCount: 7,
-        writer: "프론트엔드",
-        createdAt: "2024-06-25T08:45:00",
-        boardTypeId: 1
-      }
-    ]
   }
 }
 
