@@ -146,11 +146,13 @@ export const useUserStore = defineStore('user', {
 
           if (!response.ok) throw new Error('회원 정보 조회 실패')
 
+          const userInfo = await response.json();
+
           const tokenData = {
             email: decodedToken.email || decodedToken.sub,
-            role: decodedToken.role || decodedToken.authorities?.[0] || 'user',
-            avatar: decodedToken.avatar || decodedToken.picture || null,
-            nickname: decodedToken.nickname,
+            role: userInfo.role,
+            avatar: userInfo.avatar || null,
+            nickname: userInfo.nickname,
           }
 
           this.setToken(accessToken)
