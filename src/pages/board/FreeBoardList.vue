@@ -9,7 +9,6 @@
           @submit="handleSubmitPost"
           @imageUpload="handleImageUpload"
       />
-      <FreeBoardWriteForm @submit="handleSubmitPost" @imageUpload="handleImageUpload" />
 
       <!-- 게시글 리스트 컴포넌트 -->
       <BoardList
@@ -26,8 +25,6 @@
             @search="handleSearch"
             @input="handleSearchInput"
         />
-        
-        <FreeBoardSearch :visible="currentPage === 1" @search="handleSearch" @input="handleSearchInput" />
 
         <!-- 페이지네이션 컴포넌트 -->
         <ListPagination
@@ -37,8 +34,6 @@
             @prev="goPrev"
             @next="goNext"
         />
-        <FreeBoardPagination :currentPage="currentPage" :hasNext="hasNextPage" @first="goFirst" @prev="goPrev"
-          @next="goNext" />
       </div>
     </div>
   </div>

@@ -49,12 +49,12 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    updateRole(role) {
-      this.role = role
-    },
-
     updateAvatar(avatar) {
       this.avatar = avatar
+    },
+
+    updateNickname(nickname) {
+      this.nickname = nickname
     },
 
     clearUser({ preserveRefreshToken = false }) {
@@ -97,9 +97,20 @@ export const useUserStore = defineStore('user', {
         });
 
         // email도 localStorage에 저장해도 괜찮으면 저장
-        if (userInfo.email) {
-          localStorage.setItem('email', userInfo.email);
-        }
+        localStorage.setItem('token', token);
+        localStorage.setItem('email', userInfo.email);
+        localStorage.setItem('role', userInfo.role);
+        localStorage.setItem('avatar', userInfo.avatar);
+        localStorage.setItem('nickname', userInfo.nickname);
+
+        // ---- 여기서 state 로그 출력 ----
+        console.log('Pinia에 저장된 토큰:', this.token);
+        console.log('Pinia에 저장된 유저 정보:', this.userInfo);
+        // 만약 userInfo가 없고 각각 state에 저장한다면 아래처럼
+        console.log('Pinia email:', this.email);
+        console.log('Pinia role:', this.role);
+        console.log('Pinia avatar:', this.avatar);
+        console.log('Pinia nickname:', this.nickname);
 
         return { success: true };
       } catch (error) {
@@ -108,7 +119,6 @@ export const useUserStore = defineStore('user', {
       }
     }
 ,
-
     async logout() {
       try {
         // 서버 로그아웃 API 호출이 있다면 여기에 추가
@@ -118,77 +128,6 @@ export const useUserStore = defineStore('user', {
         console.error('Logout action error:', error)
         this.clearUser()
         return { success: false, error: error.message }
-      }
-    },
-
-    async restoreUser() {
-      const accessToken = localStorage.getItem('accessToken')
-
-      try {
-        const { jwtDecode } = await import('jwt-decode')
-
-        if (accessToken) {
-          const decodedToken = jwtDecode(accessToken)
-          const currentTime = Date.now() / 1000
-
-          if (decodedToken.exp && decodedToken.exp < currentTime) {
-            console.warn('액세스토큰 만료.. 리프래시토큰 검증 중..')
-            return await this.restoreByRefresh()
-          }
-
-          //토큰은 유효 → /api/members/me 호출해서 닉네임 포함 정보 복원
-          const response = await fetch(`${process.env.VUE_APP_API_BASE_URL}/api/members/me`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-            credentials: 'include',
-          })
-
-          if (!response.ok) throw new Error('회원 정보 조회 실패')
-
-          const userInfo = await response.json();
-
-          const tokenData = {
-            email: decodedToken.email || decodedToken.sub,
-            role: userInfo.role,
-            avatar: userInfo.avatar || null,
-            nickname: userInfo.nickname,
-          }
-
-          this.setToken(accessToken)
-          this.setUserInfo(tokenData)
-          return { success: true }
-        } else {
-          return await this.restoreByRefresh()
-        }
-      } catch (error) {
-        console.error('restoreUser error:', error)
-        return await this.restoreByRefresh()
-      }
-    },
-
-    async restoreByRefresh() {
-      try {
-        // token.js 에서 export한 refreshAccessToken 함수를 import해서 사용
-        const { refreshAccessToken } = await import('@/utils/token')
-        const newToken = await refreshAccessToken()
-
-        const { jwtDecode } = await import('jwt-decode')
-        const decodedToken = jwtDecode(newToken)
-
-        const tokenData = {
-          email: decodedToken.email || decodedToken.sub,
-          role: decodedToken.role || decodedToken.authorities?.[0] || 'user',
-          avatar: decodedToken.avatar || decodedToken.picture || null,
-        }
-
-        this.setToken(newToken)
-        this.setUserInfo(tokenData)
-        return { success: true }
-      } catch (e) {
-        console.error('restoreByRefresh 실패:', e)
-        this.clearUser({ preserveRefreshToken: true })
-        return { success: false, error: e.message }
       }
     },
 

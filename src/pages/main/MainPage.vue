@@ -133,7 +133,23 @@ const handleActivityNavigate = (item) => {
 
 // 컴포넌트 마운트 시 알림 시스템 초기화
 onMounted(() => {
+  // 예시: localStorage에서 유저 정보 읽어서 Pinia에 저장
+  const tokenData = {
+    email: localStorage.getItem('email'),
+    role: localStorage.getItem('role'),
+    avatar: localStorage.getItem('avatar'),
+    nickname: localStorage.getItem('nickname'),
+  }
+
+  // 값이 모두 있으면 Pinia 스토어에 저장
+  if (tokenData.email && tokenData.role && tokenData.nickname) {
+    userStore.setUserInfo(tokenData)
+  }
+
+  console.log('Pinia에 현재 저장된 state:', userStore.$state)
+
   initializeNotifications()
+
 })
 
 // 컴포넌트 언마운트 시 정리

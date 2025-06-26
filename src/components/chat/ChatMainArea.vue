@@ -2,9 +2,9 @@
   <!-- 채팅방이 선택되고 currentRoom이 있을 때 -->
   <div class="chat-main" v-if="activeRoomId && currentRoom">
     <div class="chat-header">
-      <div class="chat-room-name">
-        <img class="avatar" :src="currentRoom.avatar" alt="아바타" />
-        <span class="nickname">{{ currentRoom.nickname }}</span>
+      <div class="chat-room-user-count">
+        <i class="bi bi-person-circle"></i>
+        <span class="user-count">{{ userCount || 1 }}</span>
       </div>
       <div class="chat-header-menu" ref="menuContainer">
         <button class="btn-more" @click="toggleMenu">
@@ -12,6 +12,8 @@
         </button>
         <div class="menu-dropdown" v-if="menuOpen" ref="menuDropdown">
           <button class="btn-invite" @click="openInvite">초대하기</button>
+          <div class="divider"></div>
+          <button class="btn-invite" @click="openList">유저목록</button>
           <div class="divider"></div>
           <button class="btn-exit" @click="leaveRoom">나가기</button>
         </div>
@@ -67,7 +69,8 @@ const props = defineProps({
   activeRoomId: [String, Number],
   currentRoom: Object,
   input: String,
-  menuOpen: Boolean
+  menuOpen: Boolean,
+  userCount: Number,
 })
 
 // Emits 정의  
@@ -76,7 +79,8 @@ const emit = defineEmits([
   'send-message', 
   'toggle-menu',
   'open-invite',
-  'leave-room'
+  'leave-room',
+  'open-List'
 ])
 
 // DOM Refs
@@ -118,6 +122,9 @@ function openInvite() {
 
 function leaveRoom() {
   emit('leave-room')
+}
+function openList() {
+  emit('open-List')
 }
 
 // currentRoom의 messages가 변경될 때 스크롤 이동
@@ -179,23 +186,24 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
 
-  .chat-room-name {
+  .chat-room-user-count {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 14px;
 
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+    .bi {
+      font-size: 30px;
       object-fit: cover;
+      color:  $silver-black;
     }
 
-    .nickname {
+    .user-count {
       font-family: $secondary-kr;
       font-weight: 500;
       font-size: 18px;
       color: $dark-black;
+      margin-top: 5px;
     }
   }
 
@@ -220,7 +228,7 @@ onMounted(() => {
       top: 30px;
       right: -18px;
       width: 64px;
-      height: 64px;
+      height: 98px;
       background: $white;
       border: 1px solid $dim-gray;
       border-radius: 5px;

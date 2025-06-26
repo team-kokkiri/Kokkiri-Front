@@ -3,7 +3,9 @@
     <div class="chat-sidebar-header">
       <h2 class="chat-title">채팅목록</h2>
     </div>
-    <div class="chat-room-list">
+
+    <!-- 채팅방 목록이 있을 때 -->
+    <div v-if="chatRooms && chatRooms.length > 0" class="chat-room-list">
       <div
           v-for="room in chatRooms"
           :key="room.id"
@@ -20,25 +22,32 @@
         </div>
       </div>
     </div>
+
+    <!-- 채팅방 목록이 없을 때 생성 버튼 -->
+    <div v-else class="empty-chat-section">
+      <div class="create-chat-button" @click="$emit('create')">
+        <i class="bi bi-plus-lg"></i>
+      </div>
+    </div>
   </aside>
 </template>
 
 <script setup>
-  import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 
-  defineProps({
-    chatRooms: Array,
-    activeRoomId: [String, Number]
-  })
-  const emit = defineEmits(['select'])
-  function selectRoom(id) {
-    emit('select', id)
-  }
+defineProps({
+  chatRooms: Array,
+  activeRoomId: [String, Number]
+})
+
+const emit = defineEmits(['select', 'create'])
+
+function selectRoom(id) {
+  emit('select', id)
+}
 </script>
 
 <style lang="scss">
-// ChatSidebar.vue 컴포넌트 스타일
-// src > assets > scss > style.scss 임포트 필수
 @import "@/assets/scss/style.scss";
 
 .chat-sidebar {
@@ -81,14 +90,10 @@
       &.active {
         background-color: $main-color;
         color: $white;
-        &.active {
-          background-color: $main-color;
-          color: $white;
-          .nickname,
-          .time,
-          .preview{
-            color: $white !important;
-          }
+        .nickname,
+        .time,
+        .preview{
+          color: $white !important;
         }
       }
 
@@ -153,6 +158,40 @@
             margin-left: 1px;
           }
         }
+      }
+    }
+  }
+
+  // 채팅방이 없을 때 생성 버튼 영역
+  .empty-chat-section {
+    padding: 25px 17px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    .create-chat-button {
+      width: 343px;
+      height: 78px;
+      border: 1px solid $main-color;
+      border-radius: 15px;
+      background: $white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: rgba($main-color, 0.05);
+      }
+
+      &:active {
+        transform: translateY(2px);
+      }
+
+      i {
+        font-size: 30px;
+        color: $main-color;
       }
     }
   }
