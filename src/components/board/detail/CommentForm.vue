@@ -39,7 +39,6 @@ const handleSubmit = () => {
   height: 40px;
   background-color: #f5f5f5;
   border-top: 1px solid #dddddd;
-  margin-top: 15px;
 
   .input-comment {
     flex: 1;

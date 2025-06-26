@@ -20,15 +20,6 @@
       <p class="reply-text">{{ reply.comment }}</p>
     </div>
 
-    <!-- 수정 입력창 -->
-    <EditForm
-      v-if="editInputVisible === reply.id"
-      :item="reply"
-      item-type="reply"
-      @submit="$emit('submit-edit', $event)"
-      @close="handleCloseEdit"
-    />
-
     <!-- 대댓글 메타 정보 -->
     <ReplyList
       v-if="replies.some(r => r.parentId === reply.id)"
@@ -42,8 +33,15 @@
       @close-edit="$emit('close-edit')"
       @delete="$emit('delete', $event)"
     />
-
   </div>
+  <!-- 수정 입력창 -->
+  <EditForm
+      v-if="props.editInputVisible === reply.id"
+      :item="reply"
+      item-type="reply"
+      @submit="$emit('submit-edit', $event)"
+      @close="handleCloseEdit"
+  />
 </template>
 
 
@@ -53,7 +51,7 @@ import defaultAvatar from '@/assets/img/0.png'
 import EditForm from './EditForm.vue'
 import ReplyList from './ReplyList.vue'
 
-defineProps({
+const props = defineProps({
   reply: {
     type: Object,
     required: true
