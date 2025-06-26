@@ -5,10 +5,18 @@
       :items="shareBoardList"
       :currentPage="currentPage"
       :hasNext="hasNextPage"
+      :showWriteForm="true"
       @first="goFirst"
       @prev="goPrev"
       @next="goNext"
   >
+    <template #write-form>
+      <ListWriteForm
+          @submit="handleSubmitPost"
+          @imageUpload="handleImageUpload"
+      />
+    </template>
+    
     <template #board-list="{ items }">
       <CommonBoardList 
           :items="items" 
@@ -27,6 +35,7 @@ import axios from 'axios'
 // 컴포넌트 import
 import BoardPageLayout from '@/components/common/layout/BoardPageLayout.vue'
 import CommonBoardList from '@/components/common/layout/CommonBoardList.vue'
+import ListWriteForm from '@/components/board/list/ListWriteForm.vue'
 
 // 라우터 인스턴스 생성
 const router = useRouter()
@@ -101,6 +110,44 @@ function goNext() {
     currentPage.value++
     fetchShareBoardList()
   }
+}
+
+// 글쓰기 폼 제출 핸들러
+async function handleSubmitPost(formData) {
+  try {
+    const form = new FormData()
+    form.append(
+        'board',
+        new Blob([JSON.stringify({
+          boardTitle: formData.boardTitle,
+          boardContent: formData.boardContent,
+          questionYn: formData.questionYn,
+          boardTypeId: 2 // 자료공유 게시판 ID
+        })], { type: 'application/json' })
+    )
+    if (formData.attachedImages && formData.attachedImages.length > 0) {
+      formData.attachedImages.forEach(file => {
+        form.append('files', file)
+      })
+    }
+
+    const res = await axios.post(`${API_BASE_URL}/api/boards`, form, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    console.log('게시글 등록 성공:', res.data)
+    
+    await fetchShareBoardList()
+  } catch (err) {
+    console.error('게시글 등록 실패:', err)
+  }
+}
+
+// 이미지 업로드 핸들러
+function handleImageUpload() {
+  console.log('이미지 업로드 요청')
 }
 </script>
 

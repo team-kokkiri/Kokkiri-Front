@@ -9,6 +9,9 @@
         </div>
       </div>
 
+      <!-- 글쓰기 폼 슬롯 (옵션) -->
+      <slot name="write-form" v-if="showWriteForm" />
+
       <!-- 게시판 리스트 슬롯 -->
       <slot name="board-list" :items="items" />
 
@@ -55,6 +58,10 @@ defineProps({
   showPagination: {
     type: Boolean,
     default: true
+  },
+  showWriteForm: {
+    type: Boolean,
+    default: false
   }
 })
 
