@@ -221,8 +221,40 @@ const onEdit = (item) => {
 
 // 삭제 기능 // 본문 댓글 대댓글 전부 이 메소드로 합쳤는데 필요하면 나눠드림
 // 타입으로 구분해서 처리하면 될 듯 합니다
-const onDelete = (item) => {
-  console.log('삭제 버튼 클릭:', item)
+const onDelete = async (item) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    const confirmMessage = item === post.value
+        ? '게시글을 삭제하시겠습니까?'
+        : '댓글을 삭제하시겠습니까?'
+
+    if (!confirm(confirmMessage)) {
+      return // 사용자가 취소하면 함수 종료
+    }
+
+    // item이 게시글인지, 댓글인지, 대댓글인지 구분
+    if (item === post.value) {
+      // 게시글 삭제
+      await axios.delete(
+          `${API_BASE_URL}/api/boards/${post.value.id}`,
+          config
+      )
+      await router.push('/main-page/free-board')
+    } else {
+      // 댓글 대댓글 삭제
+      await axios.delete(
+          `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}`,
+          config
+      )
+      await fetchPost()
+    }
+  } catch (err) {
+      console.error('삭제 실패', err)
+  }
 }
 
 // 채팅 기능
