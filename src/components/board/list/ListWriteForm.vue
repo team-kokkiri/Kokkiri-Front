@@ -25,7 +25,7 @@
         <input 
             type="text" 
             class="input-title" 
-            placeholder="글 제목"
+            placeholder="제목을 입력하세요"
             v-model="formData.boardTitle"
         />
       </div>

@@ -46,12 +46,13 @@ const hotBoardList = ref([])            // HOT 게시글 목록
 const currentPage = ref(1)              // 현재 페이지 // 전체 게시글 수
 const isLastPage = ref(false)           // 마지막 페이지 여부
 const token = localStorage.getItem('accessToken')
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
 // API에서 HOT 게시글 리스트 불러오기
 const fetchHotBoardList = async () => {
   try {
     // HOT 게시글은 모든 게시판에서 좋아요 10개 이상인 게시글을 가져옴
-    const res = await axios.get(`http://localhost:9090/api/boards/list/1`, {
+    const res = await axios.get(`${API_BASE_URL}/api/boards/list/3`, {
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -65,8 +66,7 @@ const fetchHotBoardList = async () => {
 
     // API 응답에 따라 조정 (실제 API 구조에 맞게 수정 필요)
 
-    const minLikes = 10
-    hotBoardList.value = res.data.filter(post => post.likes >= minLikes)
+    hotBoardList.value = data;
 
   } catch (err) {
     console.error('HOT 게시글 목록 가져오기 실패:', err)

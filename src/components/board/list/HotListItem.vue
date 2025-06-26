@@ -1,7 +1,7 @@
 <template>
   <div class="hot-board-item" :class="{ 'two-line': isTwoLine }" @click="handleClick">
     <!-- 게시판명 -->
-    <span class="board-name">{{ getBoardName(item.boardTypeId) }}</span>
+    <span class="board-name">{{ item.boardType }}</span>
 
     <!-- 제목 -->
     <h3 class="title">{{ item.boardTitle }}</h3>
@@ -38,17 +38,6 @@ const props = defineProps({
 
 // Emits
 const emit = defineEmits(['click'])
-
-// 게시판명 매핑
-const getBoardName = (boardTypeId) => {
-  const boardNames = {
-    1: '자유게시판',
-    2: '자료공유 게시판',
-    3: '질문게시판',
-    // 필요에 따라 추가
-  }
-  return boardNames[boardTypeId] || '게시판'
-}
 
 // 내용 길이에 따라 2줄 표시 여부 결정
 const isTwoLine = computed(() => {
@@ -90,6 +79,9 @@ function formatDate(dateString) {
   // 그 외는 날짜 표시
   return dateString.slice(0, 10)
 }
+
+console.log('item:', props.item)
+
 </script>
 
 <style lang="scss" scoped>
