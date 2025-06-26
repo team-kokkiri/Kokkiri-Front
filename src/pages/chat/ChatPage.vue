@@ -2,32 +2,31 @@
   <div class="page-container">
     <section class="chat-room">
       <div class="chat-room-inner">
-        <!-- 1. 채팅 사이드바 컴포넌트 -->
         <ChatSidebar
-            :chatRooms="chatRooms"
-            :activeRoomId="activeRoomId"
+            :chat-rooms="chatRooms"
+            :active-room-id="activeRoomId"
+            :is-loading="isLoading"
+            :has-more="hasMore"
             @select="selectRoom"
+            @load-more="fetchMoreChatRooms"
         />
 
-        <!-- 2. 초대 뷰 컴포넌트 (조건부 렌더링) -->
         <InviteView
             v-if="showInviteView"
-            :roomId="activeRoomId"
-            :users="availableUsers"
-            :invitedUserIds="invitedUserIds"
-            :searchQuery="searchQuery"
+            :room-id="activeRoomId"
+            :invited-user-ids="invitedUserIds"
+            :search-query="searchQuery"
             @back="closeInviteView"
             @invite="handleUserInvite"
             @search="handleInviteSearch"
         />
 
-        <!-- 3. 채팅룸 메인 영역 컴포넌트 (초대 뷰가 아닐 때만 표시) -->
         <ChatMainArea
             v-if="!showInviteView"
-            :activeRoomId="activeRoomId"
-            :currentRoom="currentRoom"
+            :active-room-id="activeRoomId"
+            :current-room="currentRoom"
             :input="input"
-            :menuOpen="menuOpen"
+            :menu-open="menuOpen"
             @update-input="updateInput"
             @send-message="sendMessage"
             @toggle-menu="toggleMenu"
@@ -61,9 +60,10 @@ const input = ref('')
 const menuOpen = ref(false)
 const showInviteView = ref(false)
 
-// DOM Refs (ChatMainArea로 이동됨)
-// const menuContainer = ref(null)
-// const chatContentRef = ref(null)
+// 페이징 상태 관리 변수 추가
+const page = ref(0)
+const isLoading = ref(false)
+const hasMore = ref(true)
 
 // Stomp 관련 상태
 const stompClient = ref(null)
@@ -73,44 +73,62 @@ const currentUserEmail = ref('')
 // 초대 관련 상태
 const searchQuery = ref('')
 const invitedUserIds = ref([])
-const availableUsers = ref([])
+// ✨ 오류 수정: 사용하지 않는 availableUsers 변수 선언 삭제
+// const availableUsers = ref([]) 
 
 // API 기본 URL (환경 변수 사용 권장)
-const VUE_APP_API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
+const VUE_APP_API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
 
 // ===== Computed 속성 =====
 const currentRoom = computed(() =>
-    chatRooms.value.find(room => room.id === activeRoomId.value)
+    chatRooms.value.find(room => room.roomId === activeRoomId.value)
 )
-
-// ===== Helper 함수 =====
-// scrollToBottom, formatDisplayTime 함수들은 ChatMainArea로 이동
-
-function formatDisplayTime(dateTimeStr) {
-  if (!dateTimeStr) return '';
-  const date = new Date(dateTimeStr);
-  if (isNaN(date)) return '';
-  return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
-}
 
 // ===== 채팅 및 WebSocket 관련 함수 =====
 async function fetchChatRooms() {
+  if (isLoading.value || !hasMore.value) return;
+
+  isLoading.value = true;
   try {
     const response = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/myRooms`, {
-      headers: { Authorization: `Bearer ${token.value}` }
+      headers: { Authorization: `Bearer ${token.value}` },
+      params: {
+        page: page.value,
+        size: 10
+      }
     });
-    chatRooms.value = response.data.map(room => ({
-      id: room.roomId,
+    
+    const data = response.data;
+    const newRooms = data.content.map(room => ({
+      roomId: room.roomId,
       avatar: Avatar,
-      nickname: room.roomName,
-      time: formatDisplayTime(room.lastMessageTime),
-      preview: room.lastMessage,
-      unread: room.unReadCount,
+      roomName: room.roomName,
+      lastMessageTime: room.lastMessageTime,
+      lastMessage: room.lastMessage,
+      unReadCount: room.unReadCount,
       messages: []
     }));
+
+    chatRooms.value.push(...newRooms);
+    hasMore.value = !data.last;
+    
+    if (hasMore.value) {
+      page.value++;
+    }
+    
+    if (stompClient.value && stompClient.value.connected) {
+      subscribeToRooms(newRooms);
+    }
+
   } catch (error) {
     console.error("채팅방 목록 로딩 실패:", error);
+  } finally {
+    isLoading.value = false;
   }
+}
+
+function fetchMoreChatRooms() {
+  fetchChatRooms();
 }
 
 async function fetchMessageHistory(roomId) {
@@ -118,7 +136,7 @@ async function fetchMessageHistory(roomId) {
     const res = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/history/${roomId}`, {
       headers: { Authorization: `Bearer ${token.value}` }
     });
-    const room = chatRooms.value.find(r => r.id === roomId);
+    const room = chatRooms.value.find(r => r.roomId === roomId);
     if (room) {
       room.messages = res.data.map(msg => ({
         id: msg.id,
@@ -127,11 +145,19 @@ async function fetchMessageHistory(roomId) {
         time: msg.createdTime,
         text: msg.message
       }));
-      // scrollToBottom은 ChatMainArea에서 처리
     }
   } catch (error) {
     console.error("메시지 내역 로딩 실패:", error);
   }
+}
+
+function subscribeToRooms(roomsToSubscribe) {
+  roomsToSubscribe.forEach(chat => {
+    stompClient.value.subscribe(`/topic/${chat.roomId}`, 
+      (message) => handleIncomingMessage(JSON.parse(message.body)),
+      { Authorization: `Bearer ${token.value}` }
+    );
+  });
 }
 
 function connectWebSocket() {
@@ -141,12 +167,7 @@ function connectWebSocket() {
   stompClient.value.debug = () => {};
 
   stompClient.value.connect({ Authorization: `Bearer ${token.value}` }, () => {
-    chatRooms.value.forEach(chat => {
-      stompClient.value.subscribe(`/topic/${chat.id}`, 
-        (message) => handleIncomingMessage(JSON.parse(message.body)),
-        { Authorization: `Bearer ${token.value}` }
-      );
-    });
+    subscribeToRooms(chatRooms.value);
   });
 }
 
@@ -167,23 +188,21 @@ function sendMessage() {
 
 function handleIncomingMessage(msg) {
   const { roomId, senderEmail, message, createdTime } = msg;
-  const chatIndex = chatRooms.value.findIndex(c => c.id === roomId);
+  const chatIndex = chatRooms.value.findIndex(c => c.roomId === roomId);
   
   if (chatIndex !== -1) {
     const chat = chatRooms.value[chatIndex];
-    chat.preview = message;
-    chat.time = formatDisplayTime(createdTime);
+    chat.lastMessage = message;
+    chat.lastMessageTime = createdTime;
     if (senderEmail !== currentUserEmail.value) {
       if (roomId === activeRoomId.value) {
-        // 현재 보고 있는 방이면 바로 읽음 처리
         axios.post(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/read`, null, {
           headers: { Authorization: `Bearer ${token.value}` }
         });
       } else {
-        chat.unread += 1;
+        chat.unReadCount += 1;
       }
     }
-    // 목록 순서 최신화 (가장 최근 메시지 온 방을 위로)
     chatRooms.value.splice(chatIndex, 1);
     chatRooms.value.unshift(chat);
   }
@@ -196,11 +215,9 @@ function handleIncomingMessage(msg) {
       time: createdTime,
       text: message
     });
-    // scrollToBottom은 ChatMainArea에서 처리
   }
 }
 
-// ===== UI 관련 함수들 =====
 async function sendReadStatus(roomId) {
   if (!roomId) return;
   try {
@@ -214,7 +231,6 @@ async function sendReadStatus(roomId) {
   }
 }
 
-// 이 채팅방 페이지를 떠나기 직전에 호출되는 네비게이션 가드
 onBeforeRouteLeave((to, from, next) => {
   if (activeRoomId.value) {
     sendReadStatus(activeRoomId.value);
@@ -223,18 +239,17 @@ onBeforeRouteLeave((to, from, next) => {
 });
 
 async function selectRoom(roomId) {
-  // 이미 선택된 방을 다시 누르면 아무것도 하지 않음
   if (activeRoomId.value === roomId) return;
 
   activeRoomId.value = roomId;
   showInviteView.value = false;
   searchQuery.value = '';
 
-  const room = chatRooms.value.find(r => r.id === roomId);
+  const room = chatRooms.value.find(r => r.roomId === roomId);
 
   if (room) {
-    if (room.unread > 0) {
-      room.unread = 0;
+    if (room.unReadCount > 0) {
+      room.unReadCount = 0;
       sendReadStatus(roomId);
     }
 
@@ -242,11 +257,8 @@ async function selectRoom(roomId) {
       await fetchMessageHistory(roomId);
     }
   }
-
-  // scrollToBottom은 ChatMainArea에서 처리
 }
 
-// ===== ChatMainArea에서 emit되는 이벤트 핸들러들 =====
 function updateInput(newValue) {
   input.value = newValue;
 }
@@ -269,7 +281,6 @@ function leaveRoom() {
   console.log('채팅방 나가기'); 
 }
 
-// ===== 기타 UI 관련 함수들 =====
 function handleEscapeKey(event) { 
   if (event.key === 'Escape') { 
     if (showInviteView.value) closeInviteView(); 
@@ -290,7 +301,6 @@ function handleUserInvite(user) {
   invitedUserIds.value.push(user.memberId); 
 }
 
-// ===== 라이프사이클 훅 =====
 onMounted(async () => {
   currentUserEmail.value = localStorage.getItem('email');
   token.value = localStorage.getItem('accessToken');
@@ -300,7 +310,9 @@ onMounted(async () => {
   }
 
   await fetchChatRooms();
-  if (chatRooms.value.length > 0) { connectWebSocket(); }
+  if (chatRooms.value.length > 0) { 
+    connectWebSocket(); 
+  }
 
   document.addEventListener('keydown', handleEscapeKey);
 });
@@ -324,6 +336,4 @@ onUnmounted(() => {
     display: flex;
     gap: 9px;
 }
-
-/* 나머지 스타일들은 ChatMainArea.vue로 이동됨 */
 </style>

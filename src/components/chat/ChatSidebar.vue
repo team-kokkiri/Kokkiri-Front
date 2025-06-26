@@ -3,42 +3,94 @@
     <div class="chat-sidebar-header">
       <h2 class="chat-title">채팅목록</h2>
     </div>
-    <div class="chat-room-list">
+    <div class="chat-room-list" @scroll="handleScroll">
       <div
           v-for="room in chatRooms"
-          :key="room.id"
-          :class="['chat-room-item', { active: room.id === activeRoomId }]"
-          @click="selectRoom(room.id)"
+          :key="room.roomId"
+          :class="['chat-room-item', { active: room.roomId === activeRoomId }]"
+          @click="selectRoom(room.roomId)"
       >
         <div class="chat-room-top">
-          <span class="nickname">{{ room.nickname }}</span>
-          <span class="time">{{ room.time }}</span>
+          <span class="nickname">{{ room.roomName }}</span>
+          <span class="time">{{ formatDisplayTime(room.lastMessageTime) }}</span>
         </div>
         <div class="chat-room-bottom">
-          <span class="preview">{{ room.preview }}</span>
-          <span class="badge-alert" v-if="room.unread > 0"><em>{{ room.unread }}</em></span>
+          <span class="preview">{{ room.lastMessage }}</span>
+          <span class="badge-alert" v-if="room.unReadCount > 0"><em>{{ room.unReadCount }}</em></span>
         </div>
+      </div>
+      <div v-if="isLoading" class="loading-indicator">
+        채팅 목록을 불러오는 중...
       </div>
     </div>
   </aside>
 </template>
 
 <script setup>
-  import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 
-  defineProps({
-    chatRooms: Array,
-    activeRoomId: [String, Number]
-  })
-  const emit = defineEmits(['select'])
-  function selectRoom(id) {
-    emit('select', id)
+// 부모로부터 받을 props를 정의합니다.
+const props = defineProps({
+  chatRooms: Array,
+  activeRoomId: [String, Number],
+  isLoading: {
+    type: Boolean,
+    default: false
+  },
+  hasMore: {
+    type: Boolean,
+    default: true
   }
+})
+
+// 부모로 보낼 이벤트를 정의합니다.
+const emit = defineEmits(['select', 'load-more'])
+
+// 채팅방 선택 이벤트를 발생시키는 함수
+function selectRoom(id) {
+  emit('select', id)
+}
+
+// 스크롤 위치를 감지하여 추가 데이터 로딩 이벤트를 발생시키는 함수
+function handleScroll(event) {
+  const { scrollTop, scrollHeight, clientHeight } = event.target
+
+  // 로딩 중이거나 더 이상 불러올 데이터가 없으면 함수를 종료합니다.
+  if (props.isLoading || !props.hasMore) {
+    return
+  }
+
+  // 스크롤이 맨 아래에서 50px 이내로 가까워지면 'load-more' 이벤트를 발생시킵니다.
+  if (scrollHeight - scrollTop <= clientHeight + 50) {
+    emit('load-more')
+  }
+}
+
+// 날짜/시간 포맷팅 유틸리티 함수
+function formatDisplayTime(dateTimeString) {
+  if (!dateTimeString) return '';
+  const now = new Date();
+  const messageDate = new Date(dateTimeString);
+
+  if (isNaN(messageDate.getTime())) return ''; // 유효하지 않은 날짜 처리
+
+  const isToday = now.toDateString() === messageDate.toDateString();
+  
+  if (isToday) {
+    // 오늘 보낸 메시지는 '오후 3:30' 형식으로 표시
+    return messageDate.toLocaleTimeString('ko-KR', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+  } else {
+    // 어제 또는 그 이전에 보낸 메시지는 '2025. 6. 26.' 형식으로 표시
+    return messageDate.toLocaleDateString('ko-KR');
+  }
+}
 </script>
 
 <style lang="scss">
-// ChatSidebar.vue 컴포넌트 스타일
-// src > assets > scss > style.scss 임포트 필수
 @import "@/assets/scss/style.scss";
 
 .chat-sidebar {
@@ -47,13 +99,16 @@
   border: 1px solid $dim-gray;
   border-radius: 15px;
   background: $white;
+  display: flex;
+  flex-direction: column;
 
   .chat-sidebar-header {
-    padding: 0 17px 0 17px;
+    padding: 0 17px;
     height: 72px;
     display: flex;
     align-items: center;
     border-bottom: 1px solid $dim-gray;
+    flex-shrink: 0;
     .chat-title {
       font-family: $secondary-kr;
       font-weight: 700;
@@ -65,6 +120,17 @@
   }
 
   .chat-room-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #d9d9d9;
+      border-radius: 6px;
+    }
+
     .chat-room-item {
       width: 100%;
       height: 64px;
@@ -73,6 +139,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       position: relative;
+      box-sizing: border-box;
 
       &:hover {
         background-color: rgba($main-color, 0.05);
@@ -80,15 +147,10 @@
 
       &.active {
         background-color: $main-color;
-        color: $white;
-        &.active {
-          background-color: $main-color;
-          color: $white;
-          .nickname,
-          .time,
-          .preview{
-            color: $white !important;
-          }
+        .nickname,
+        .time,
+        .preview{
+          color: $white !important;
         }
       }
 
@@ -148,13 +210,18 @@
             font-size: 12px;
             color: $white;
             font-style: normal;
-            margin-top: 0;
-            margin-bottom: 2px;
-            margin-left: 1px;
+            line-height: 1;
           }
         }
       }
     }
+  }
+
+  .loading-indicator {
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #888;
   }
 }
 </style>
