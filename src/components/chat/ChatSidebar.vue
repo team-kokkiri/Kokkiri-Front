@@ -3,30 +3,24 @@
     <div class="chat-sidebar-header">
       <h2 class="chat-title">채팅목록</h2>
     </div>
-
-    <!-- 채팅방 목록이 있을 때 -->
-    <div v-if="chatRooms && chatRooms.length > 0" class="chat-room-list">
+    <div class="chat-room-list" @scroll="handleScroll">
       <div
           v-for="room in chatRooms"
-          :key="room.id"
-          :class="['chat-room-item', { active: room.id === activeRoomId }]"
-          @click="selectRoom(room.id)"
+          :key="room.roomId"
+          :class="['chat-room-item', { active: room.roomId === activeRoomId }]"
+          @click="selectRoom(room.roomId)"
       >
         <div class="chat-room-top">
-          <span class="nickname">{{ room.nickname }}</span>
-          <span class="time">{{ room.time }}</span>
+          <span class="nickname">{{ room.roomName }}</span>
+          <span class="time">{{ formatDisplayTime(room.lastMessageTime) }}</span>
         </div>
         <div class="chat-room-bottom">
-          <span class="preview">{{ room.preview }}</span>
-          <span class="badge-alert" v-if="room.unread > 0"><em>{{ room.unread }}</em></span>
+          <span class="preview">{{ room.lastMessage }}</span>
+          <span class="badge-alert" v-if="room.unReadCount > 0"><em>{{ room.unReadCount }}</em></span>
         </div>
       </div>
-    </div>
-
-    <!-- 채팅방 목록이 없을 때 생성 버튼 -->
-    <div v-else class="empty-chat-section">
-      <div class="create-chat-button" @click="$emit('create')">
-        <i class="bi bi-plus-lg"></i>
+      <div v-if="isLoading" class="loading-indicator">
+        채팅 목록을 불러오는 중...
       </div>
     </div>
   </aside>
@@ -35,15 +29,59 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 
-defineProps({
+// 부모로부터 받을 props를 정의합니다.
+const props = defineProps({
   chatRooms: Array,
-  activeRoomId: [String, Number]
+  activeRoomId: [String, Number],
+  isLoading: {
+    type: Boolean,
+    default: false
+  },
+  hasMore: {
+    type: Boolean,
+    default: true
+  }
 })
 
-const emit = defineEmits(['select', 'create'])
+// 부모로 보낼 이벤트를 정의합니다.
+const emit = defineEmits(['select', 'load-more'])
 
+// 채팅방 선택 이벤트를 발생시키는 함수
 function selectRoom(id) {
   emit('select', id)
+}
+
+// 스크롤 위치를 감지하여 추가 데이터 로딩 이벤트를 발생시키는 함수
+function handleScroll(event) {
+  
+  const { scrollTop, scrollHeight, clientHeight } = event.target
+  if (props.isLoading || !props.hasMore) return
+  if (scrollHeight - scrollTop <= clientHeight + 50) {
+    emit('load-more')
+  }
+}
+
+// 날짜/시간 포맷팅 유틸리티 함수
+function formatDisplayTime(dateTimeString) {
+  if (!dateTimeString) return '';
+  const now = new Date();
+  const messageDate = new Date(dateTimeString);
+
+  if (isNaN(messageDate.getTime())) return ''; // 유효하지 않은 날짜 처리
+
+  const isToday = now.toDateString() === messageDate.toDateString();
+  
+  if (isToday) {
+    // 오늘 보낸 메시지는 '오후 3:30' 형식으로 표시
+    return messageDate.toLocaleTimeString('ko-KR', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+  } else {
+    // 어제 또는 그 이전에 보낸 메시지는 '2025. 6. 26.' 형식으로 표시
+    return messageDate.toLocaleDateString('ko-KR');
+  }
 }
 </script>
 
@@ -56,13 +94,16 @@ function selectRoom(id) {
   border: 1px solid $dim-gray;
   border-radius: 15px;
   background: $white;
+  display: flex;
+  flex-direction: column;
 
   .chat-sidebar-header {
-    padding: 0 17px 0 17px;
+    padding: 0 17px;
     height: 72px;
     display: flex;
     align-items: center;
     border-bottom: 1px solid $dim-gray;
+    flex-shrink: 0;
     .chat-title {
       font-family: $secondary-kr;
       font-weight: 700;
@@ -74,6 +115,17 @@ function selectRoom(id) {
   }
 
   .chat-room-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #d9d9d9;
+      border-radius: 6px;
+    }
+
     .chat-room-item {
       width: 100%;
       height: 64px;
@@ -82,6 +134,7 @@ function selectRoom(id) {
       cursor: pointer;
       transition: all 0.2s ease;
       position: relative;
+      box-sizing: border-box;
 
       &:hover {
         background-color: rgba($main-color, 0.05);
@@ -89,7 +142,6 @@ function selectRoom(id) {
 
       &.active {
         background-color: $main-color;
-        color: $white;
         .nickname,
         .time,
         .preview{
@@ -153,47 +205,18 @@ function selectRoom(id) {
             font-size: 12px;
             color: $white;
             font-style: normal;
-            margin-top: 0;
-            margin-bottom: 2px;
-            margin-left: 1px;
+            line-height: 1;
           }
         }
       }
     }
   }
 
-  // 채팅방이 없을 때 생성 버튼 영역
-  .empty-chat-section {
-    padding: 25px 17px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-
-    .create-chat-button {
-      width: 343px;
-      height: 78px;
-      border: 1px solid $main-color;
-      border-radius: 15px;
-      background: $white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background-color: rgba($main-color, 0.05);
-      }
-
-      &:active {
-        transform: translateY(2px);
-      }
-
-      i {
-        font-size: 30px;
-        color: $main-color;
-      }
-    }
+  .loading-indicator {
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #888;
   }
 }
 </style>
