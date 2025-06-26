@@ -51,7 +51,7 @@ const token = localStorage.getItem('accessToken')
 const fetchHotBoardList = async () => {
   try {
     // HOT 게시글은 모든 게시판에서 좋아요 10개 이상인 게시글을 가져옴
-    const res = await axios.get(`http://localhost:9090/api/boards/list/1`, {
+    const res = await axios.get(`http://localhost:9090/api/boards/list/3`, {
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -65,8 +65,7 @@ const fetchHotBoardList = async () => {
 
     // API 응답에 따라 조정 (실제 API 구조에 맞게 수정 필요)
 
-    const minLikes = 10
-    hotBoardList.value = res.data.filter(post => post.likes >= minLikes)
+    hotBoardList.value = data;
 
   } catch (err) {
     console.error('HOT 게시글 목록 가져오기 실패:', err)
