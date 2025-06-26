@@ -43,9 +43,7 @@ const router = useRouter()
 
 // 상태 변수들
 const hotBoardList = ref([])            // HOT 게시글 목록
-const currentPage = ref(1)              // 현재 페이지
-const totalPages = ref(1)               // 전체 페이지 수
-const totalElements = ref(0)            // 전체 게시글 수
+const currentPage = ref(1)              // 현재 페이지 // 전체 게시글 수
 const isLastPage = ref(false)           // 마지막 페이지 여부
 const token = localStorage.getItem('accessToken')
 
@@ -53,37 +51,25 @@ const token = localStorage.getItem('accessToken')
 const fetchHotBoardList = async () => {
   try {
     // HOT 게시글은 모든 게시판에서 좋아요 10개 이상인 게시글을 가져옴
-    const res = await axios.get(`http://localhost:9090/api/boards/hot`, {
+    const res = await axios.get(`http://localhost:9090/api/boards/list/1`, {
       headers: {
         Authorization: `Bearer ${token}`
       },
       params: {
         page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
         size: 15,                     // HOT 게시판은 더 많이 보여줌
-        minLikes: 10                  // 최소 좋아요 수
       }
     })
-
     const data = res.data
-
     console.log('HOT 게시글 API 응답:', data)
 
     // API 응답에 따라 조정 (실제 API 구조에 맞게 수정 필요)
-    if (Array.isArray(data)) {
-      hotBoardList.value = data
-    } else if (data.content) {
-      hotBoardList.value = data.content
-      currentPage.value = data.number + 1
-      totalPages.value = data.totalPages
-      totalElements.value = data.totalElements
-      isLastPage.value = data.last
-    } else {
-      hotBoardList.value = data.data || []
-    }
+
+    const minLikes = 10
+    hotBoardList.value = res.data.filter(post => post.likes >= minLikes)
 
   } catch (err) {
     console.error('HOT 게시글 목록 가져오기 실패:', err)
-
   }
 }
 

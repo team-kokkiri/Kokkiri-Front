@@ -22,10 +22,6 @@
       />
     </template>
 
-    <!-- 댓글이 없을 때 -->
-    <div v-else class="no-comments">
-      등록된 댓글이 없습니다.
-    </div>
   </div>
 </template>
 

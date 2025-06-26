@@ -129,8 +129,6 @@ const handleActivityNavigate = (item) => {
   router.push(item.route)
 }
 
-
-
 // 컴포넌트 마운트 시 알림 시스템 초기화
 onMounted(() => {
   // 예시: localStorage에서 유저 정보 읽어서 Pinia에 저장

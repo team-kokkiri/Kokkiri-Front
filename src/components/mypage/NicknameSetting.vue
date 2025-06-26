@@ -49,6 +49,7 @@
 <script setup>
 import { defineEmits, defineExpose, ref } from 'vue'
 import axios from '../../utils/axios'
+import {useUserStore} from "@/stores";
 
 const emit = defineEmits(['back', 'save', 'duplicate-check'])
 
@@ -56,6 +57,7 @@ const emit = defineEmits(['back', 'save', 'duplicate-check'])
 const nickname = ref('') // 입력된 닉네임
 const isValidated = ref(false) // 중복확인 완료 여부
 const duplicateError = ref('')
+const userStore = useUserStore()
 
 /**
  * 입력값 변경 시 중복확인 상태 초기화
@@ -102,6 +104,13 @@ const saveNickname = async () => {
   try {
     await axios.post('/api/members/nickname', { nickname: nickname.value.trim() })
     alert('닉네임이 성공적으로 변경되었습니다.')
+
+    // pinia업데이트
+    userStore.updateNickname(nickname.value.trim())
+
+    //localStorage도 업데이트
+    localStorage.setItem('nickname', nickname.value.trim())
+
     emit('save', nickname.value.trim())
   } catch (error) {
     alert(error.response?.data || '닉네임 변경에 실패했습니다.')

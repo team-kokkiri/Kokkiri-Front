@@ -67,6 +67,9 @@ import MyCommunityBox from '@/components/mypage/MyCommunityBox.vue'
 import NicknameSetting from '@/components/mypage/NicknameSetting.vue'
 import PasswordSetting from '@/components/mypage/PasswordSetting.vue'
 import ClassCodeSetting from '@/components/mypage/ClassCodeSetting.vue'
+import instance from "@/utils/axios";
+import {useRouter} from "vue-router";
+import {useUserStore} from "@/stores";
 
 const emit = defineEmits([
   'logout',
@@ -79,7 +82,8 @@ const currentView = ref('main') // 'main' | 'profile-image' | 'nickname' | 'pass
 const nicknameSettingRef = ref(null) // 닉네임 설정 컴포넌트 참조
 const passwordSettingRef = ref(null) // 비밀번호 설정 컴포넌트 참조
 const classCodeSettingRef = ref(null) // 반 코드 설정 컴포넌트 참조
-
+const router = useRouter()
+const userStore = useUserStore()
 /**
  * 메인 화면으로 돌아가기
  */
@@ -91,7 +95,21 @@ const handleBackToMain = () => {
  * 로그아웃 처리
  */
 const handleLogout = () => {
-  emit('logout')
+  try {
+    // 1. 서버에 로그아웃 요청
+    instance.post('api/members/logout')
+
+    // 2. 프론트 상태 초기화
+    userStore.clearUser({})
+
+    // 3. (옵션) JS에서 쿠키 직접 제거 시도
+    document.cookie = 'refreshToken=; Path=/; Max-Age=0;'
+
+    // 4. 로그인 페이지로 이동
+    router.replace('/login')
+  } catch (error) {
+    console.error('로그아웃 실패:', error)
+  }
 }
 
 /**
@@ -286,10 +304,9 @@ const handleClassCodeSave = async (classCode) => {
 .mypage-wrap {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
   padding-top: 24px;
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>
