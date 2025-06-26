@@ -2,7 +2,10 @@
   <div class="board-free-content">
     <div class="board-free-inner">
       <!-- 헤더 컴포넌트 -->
-      <ListHeader />
+      <ListHeader 
+        :question-posts="questionPosts" 
+        @question-click="goToDetail"
+      />
 
       <!-- 글쓰기 폼 컴포넌트 -->
       <ListWriteForm
@@ -65,6 +68,11 @@ const isLastPage = ref(false)           // 마지막 페이지 여부
 const searchQuery = ref('')             // 검색어 상태
 const token = localStorage.getItem('accessToken');
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
+
+// 질문글 필터링된 리스트
+const questionPosts = computed(() => {
+  return boardList.value.filter(post => post.questionYn === true)
+})
 
 // API에서 게시글 리스트 불러오기
 const fetchBoardList = async () => {

@@ -8,15 +8,43 @@
     <!-- 질문 배너 -->
     <div class="board-free-question">
       <img class="icon-question" src="../../../assets/icon/question.png" alt="질문 아이콘"/>
-      <div class="question-bubble">
-        <span class="question-title">질문에 답변을 달아주세요</span>
+      <div class="question-content">
+        <div v-if="questionPosts.length === 0" class="question-bubble">
+          <span class="question-title">질문에 답변을 달아주세요</span>
+        </div>
+        <div v-else class="question-list">
+          <div 
+            v-for="question in questionPosts.slice(0, 10)"
+            :key="question.id"
+            class="question-item"
+            @click="$emit('questionClick', question.id)"
+          >
+            <span class="question-title">
+              {{ question.boardTitle.length > 10
+                            ? question.boardTitle.slice(0, 10) + '...'
+                            : question.boardTitle }}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// props나 특별한 로직이 필요하지 않은 정적 헤더 컴포넌트
+import { defineProps, defineEmits } from 'vue'
+
+// props 정의
+defineProps({
+  questionPosts: {
+    type: Array,
+    default: () => []
+  }
+})
+
+// 이벤트 정의
+defineEmits(['questionClick'])
+
 </script>
 
 <style lang="scss" scoped>
@@ -48,10 +76,16 @@
     .icon-question {
       width: 24px;
       height: 24px;
+      flex-shrink: 0;
+    }
+
+    .question-content {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .question-bubble {
-      display: block;
       background: rgba(0, 210, 211, 0.1);
       border-radius: 15px;
       padding: 12px;
@@ -68,6 +102,40 @@
       .question-title {
         font-size: 12px;
         color: #686868;
+      }
+    }
+
+    .question-list {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      max-height: 37px;
+      overflow: hidden;
+      
+      .question-item {
+        display: flex;
+        align-items: center;
+        justify-content:  center;
+        cursor: pointer;
+        padding: 15px 12px;
+        border-radius: 15px;
+        background-color: rgba(0, 210, 211, 0.1);
+        
+        .question-title {
+          font-size: 12px;
+          color: #333333;
+          font-weight: 500;
+          display: block;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-bottom: 2px;
+        }
+        
+        .question-meta {
+          font-size: 10px;
+          color: #888888;
+        }
       }
     }
   }
