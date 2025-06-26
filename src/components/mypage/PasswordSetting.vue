@@ -36,6 +36,19 @@
           />
         </div>
 
+        <!-- 재확인 비밀번호 -->
+        <div class="input-group">
+          <label for="new-password">재확인 비밀번호</label>
+          <input
+              type="password"
+              id="new-password"
+              v-model="confirmPassword"
+              placeholder="재확인 비밀번호 입력"
+              class="password-input"
+              @input="resetValidation"
+          />
+        </div>
+
         <!-- 비밀번호 조건 표시 -->
         <div class="password-rules">
           <div class="rule-item">
@@ -86,6 +99,7 @@ const emit = defineEmits(['back', 'save', 'duplicate-check'])
 
 const currentPassword = ref('')
 const newPassword = ref('')
+const confirmPassword = ref('')
 const currentPasswordError = ref('')
 
 watch([currentPassword, newPassword], () => {
@@ -156,7 +170,9 @@ const savePassword = async () => {
     alert('비밀번호가 성공적으로 변경되었습니다.')
     currentPassword.value = ''
     newPassword.value = ''
+    confirmPassword.value = ''
     emit('save')
+    // router.push('/mypage')
   } catch (error) {
     currentPasswordError.value =
         error.response?.data?.message || '비밀번호 변경에 실패했습니다.'
