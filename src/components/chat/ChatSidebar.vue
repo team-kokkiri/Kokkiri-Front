@@ -53,14 +53,9 @@ function selectRoom(id) {
 
 // 스크롤 위치를 감지하여 추가 데이터 로딩 이벤트를 발생시키는 함수
 function handleScroll(event) {
+  
   const { scrollTop, scrollHeight, clientHeight } = event.target
-
-  // 로딩 중이거나 더 이상 불러올 데이터가 없으면 함수를 종료합니다.
-  if (props.isLoading || !props.hasMore) {
-    return
-  }
-
-  // 스크롤이 맨 아래에서 50px 이내로 가까워지면 'load-more' 이벤트를 발생시킵니다.
+  if (props.isLoading || !props.hasMore) return
   if (scrollHeight - scrollTop <= clientHeight + 50) {
     emit('load-more')
   }

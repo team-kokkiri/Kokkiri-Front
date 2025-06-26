@@ -73,8 +73,6 @@ const currentUserEmail = ref('')
 // 초대 관련 상태
 const searchQuery = ref('')
 const invitedUserIds = ref([])
-// ✨ 오류 수정: 사용하지 않는 availableUsers 변수 선언 삭제
-// const availableUsers = ref([]) 
 
 // API 기본 URL (환경 변수 사용 권장)
 const VUE_APP_API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
@@ -94,7 +92,7 @@ async function fetchChatRooms() {
       headers: { Authorization: `Bearer ${token.value}` },
       params: {
         page: page.value,
-        size: 10
+        size: 20
       }
     });
     
@@ -151,22 +149,38 @@ async function fetchMessageHistory(roomId) {
   }
 }
 
+/**
+ * 주어진 채팅방 목록에 대해 STOMP 구독을 실행하는 헬퍼 함수
+ * @param {Array} roomsToSubscribe - 구독할 채팅방 객체 배열
+ */
 function subscribeToRooms(roomsToSubscribe) {
+  if (!stompClient.value?.connected) return;
+
   roomsToSubscribe.forEach(chat => {
+    console.log(`Subscribing to /topic/${chat.roomId}`);
     stompClient.value.subscribe(`/topic/${chat.roomId}`, 
       (message) => handleIncomingMessage(JSON.parse(message.body)),
-      { Authorization: `Bearer ${token.value}` }
+      // ✨✨✨ 오류 해결: 빠뜨렸던 인증 헤더를 다시 추가합니다. ✨✨✨
+      { 
+        id: `sub-${chat.roomId}`,
+        Authorization: `Bearer ${token.value}`
+      }
     );
   });
 }
 
+/**
+ * 웹소켓에 연결하고, 초기에 로드된 모든 채팅방을 구독하는 함수
+ */
 function connectWebSocket() {
   if (stompClient.value && stompClient.value.connected) return;
+
   const sockJs = new SockJS(`${VUE_APP_API_BASE_URL}/connect`);
   stompClient.value = Stomp.over(sockJs);
   stompClient.value.debug = () => {};
 
   stompClient.value.connect({ Authorization: `Bearer ${token.value}` }, () => {
+    console.log('WebSocket connected. Subscribing to initial rooms...');
     subscribeToRooms(chatRooms.value);
   });
 }
@@ -240,33 +254,23 @@ onBeforeRouteLeave((to, from, next) => {
 
 async function selectRoom(roomId) {
   if (activeRoomId.value === roomId) return;
-
   activeRoomId.value = roomId;
   showInviteView.value = false;
   searchQuery.value = '';
-
   const room = chatRooms.value.find(r => r.roomId === roomId);
-
   if (room) {
     if (room.unReadCount > 0) {
       room.unReadCount = 0;
       sendReadStatus(roomId);
     }
-
     if (room.messages.length === 0) {
       await fetchMessageHistory(roomId);
     }
   }
 }
 
-function updateInput(newValue) {
-  input.value = newValue;
-}
-
-function toggleMenu() { 
-  menuOpen.value = !menuOpen.value; 
-}
-
+function updateInput(newValue) { input.value = newValue; }
+function toggleMenu() { menuOpen.value = !menuOpen.value; }
 function openInvite() { 
   if (!activeRoomId.value) {
     alert("초대할 채팅방을 먼저 선택해주세요.");
@@ -275,31 +279,19 @@ function openInvite() {
   menuOpen.value = false; 
   showInviteView.value = true; 
 }
-
 function leaveRoom() { 
   menuOpen.value = false; 
   console.log('채팅방 나가기'); 
 }
-
 function handleEscapeKey(event) { 
   if (event.key === 'Escape') { 
     if (showInviteView.value) closeInviteView(); 
     else if (menuOpen.value) menuOpen.value = false; 
   } 
 }
-
-function closeInviteView() { 
-  showInviteView.value = false; 
-  searchQuery.value = ''; 
-}
-
-function handleInviteSearch(query) { 
-  searchQuery.value = query; 
-}
-
-function handleUserInvite(user) { 
-  invitedUserIds.value.push(user.memberId); 
-}
+function closeInviteView() { showInviteView.value = false; searchQuery.value = ''; }
+function handleInviteSearch(query) { searchQuery.value = query; }
+function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
 
 onMounted(async () => {
   currentUserEmail.value = localStorage.getItem('email');
@@ -308,12 +300,10 @@ onMounted(async () => {
     console.error("로그인 정보가 없습니다."); 
     return; 
   }
-
   await fetchChatRooms();
   if (chatRooms.value.length > 0) { 
     connectWebSocket(); 
   }
-
   document.addEventListener('keydown', handleEscapeKey);
 });
 
@@ -325,13 +315,11 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 @import "@/assets/scss/style.scss";
-
 .page-container {
   display: flex;
   justify-content: center;
   padding: 20px;
 }
-
 .chat-room-inner {
     display: flex;
     gap: 9px;
