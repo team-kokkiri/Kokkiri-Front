@@ -13,7 +13,6 @@ function isImage(url) {
   return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url)
 }
 
-
 function resolveImageUrl(url) {
   const baseUrl = process.env.VUE_APP_API_BASE_URL
   return `${baseUrl}${url}`

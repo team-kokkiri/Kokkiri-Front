@@ -1,18 +1,29 @@
 <template>
   <div class="board-free-item" @click="handleClick">
-    <h3 class="title">{{ item.boardTitle }}</h3>
-    <p class="preview">{{ item.boardContent }}</p>
-    <div class="item-info">
-      <span class="likes" v-if="item.likeCount > 0">
-        <i class="bi bi-hand-thumbs-up"></i>
-        <em>{{ item.likeCount }}</em>
-      </span>
-      <span class="comments" v-if="item.commentCount > 0">
-        <i class="bi bi-chat"></i>
-        <em>{{ item.commentCount }}</em>
-      </span>
-      <span class="datetime">{{ formatDate(item.createdAt) }}</span>
-      <span class="writer">{{ item.writer }}</span>
+    <div class="item-main">
+      <div class="item-content">
+        <h3 class="title">{{ item.boardTitle }}</h3>
+        <p class="preview">{{ item.boardContent }}</p>
+        <div class="item-info">
+          <span class="likes" v-if="item.likeCount > 0">
+            <i class="bi bi-hand-thumbs-up"></i>
+            <em>{{ item.likeCount }}</em>
+          </span>
+          <span class="comments" v-if="item.commentCount > 0">
+            <i class="bi bi-chat"></i>
+            <em>{{ item.commentCount }}</em>
+          </span>
+          <span class="datetime">{{ formatDate(item.createdAt) }}</span>
+          <span class="writer">{{ item.writer }}</span>
+        </div>
+      </div>
+      <div v-if="item.thumbnailUrl" class="thumbnail">
+        <img
+            :src="resolveImageUrl(item.thumbnailUrl)"
+            alt="썸네일"
+            class="thumbnail-image"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -20,7 +31,6 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 
-// Props
 const props = defineProps({
   item: {
     type: Object,
@@ -28,15 +38,27 @@ const props = defineProps({
   }
 })
 
-// Emits
 const emit = defineEmits(['click'])
 
-// 클릭 핸들러
+function resolveImageUrl(url) {
+  if (!url) return ''
+  
+  const baseUrl = process.env.VUE_APP_API_BASE_URL
+  
+  // thumbnailUrl의 로컬 경로에서 파일명만 추출
+  if (url.includes('\\') || url.includes('C:')) {
+    const fileName = url.split('\\').pop() || url.split('/').pop()
+    return `${baseUrl}/api/files/${fileName}`
+  }
+  
+  // 이미 API 경로 형태인 경우
+  return `${baseUrl}${url}`
+}
+
 function handleClick() {
   emit('click', props.item.id)
 }
 
-// 날짜 포맷팅
 function formatDate(dateString) {
   return dateString ? dateString.slice(0, 10) : ''
 }
@@ -136,6 +158,29 @@ function formatDate(dateString) {
 
     .writer {
       color: #a6a6a6;
+    }
+  }
+  
+  .item-main {
+    display: flex;
+    gap: 15px;
+    
+    .item-content {
+      flex: 1;
+    }
+    
+    .thumbnail {
+      flex-shrink: 0;
+      width: 60px;
+      height: 60px;
+      
+      .thumbnail-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+      }
     }
   }
 }
