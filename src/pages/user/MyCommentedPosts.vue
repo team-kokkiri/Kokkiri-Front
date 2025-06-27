@@ -50,15 +50,19 @@ const boardConfig = {
 // API에서 댓글 단 글 리스트 불러오기
 const fetchMyCommentedList = async () => {
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/myboards/commented`, {
+    const res = await axios.get(`${API_BASE_URL}/api/boards/my/commented`, {
       headers: {
         Authorization: `Bearer ${token}`
+      },
+      params: {
+        page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
+        size: 20
       }
     })
     const data = res.data
     console.log('댓글 단 글 API 응답:', data)
 
-    myCommentedList.value = data;
+    myCommentedList.value = data.boardListResDtos;
 
   } catch (err) {
     console.error('댓글 단 글 목록 가져오기 실패:', err)

@@ -89,8 +89,6 @@ const fetchBoardList = async () => {
 
     const data = res.data
 
-    console.log('API 전체 응답:', data);
-
     boardList.value = data
     currentPage.value = data.currentPage + 1  // 0부터 시작하는 걸 프론트는 1부터 보여주기 위함
     totalPages.value = data.totalPages
