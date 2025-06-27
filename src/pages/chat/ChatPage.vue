@@ -6,8 +6,11 @@
         <ChatSidebar
             :chatRooms="chatRooms"
             :activeRoomId="activeRoomId"
+            :is-loading="isLoading"
+            :has-more="hasMore"
             @select="selectRoom"
             @create="createRoom"
+            @load-more="fetchMoreChatRooms"
         />
 
         <!-- 2. 유저목록 뷰 컴포넌트 (조건부 렌더링) -->
@@ -17,15 +20,6 @@
             :searchQuery="userListSearchQuery"
             @back="closeUserListView"
             @search="handleUserListSearch"
-        />
-
-        <ChatSidebar
-            :chat-rooms="chatRooms"
-            :active-room-id="activeRoomId"
-            :is-loading="isLoading"
-            :has-more="hasMore"
-            @select="selectRoom"
-            @load-more="fetchMoreChatRooms"
         />
 
         <InviteView
