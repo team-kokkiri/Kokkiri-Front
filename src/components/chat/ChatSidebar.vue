@@ -3,7 +3,11 @@
     <div class="chat-sidebar-header">
       <h2 class="chat-title">채팅목록</h2>
     </div>
-    <div class="chat-room-list" @scroll="handleScroll">
+    <div
+        class="chat-room-list"
+        v-if="chatRooms && chatRooms.length > 0"
+        @scroll="handleScroll"
+    >
       <div
           v-for="room in chatRooms"
           :key="room.roomId"
@@ -16,15 +20,24 @@
         </div>
         <div class="chat-room-bottom">
           <span class="preview">{{ room.lastMessage }}</span>
-          <span class="badge-alert" v-if="room.unReadCount > 0"><em>{{ room.unReadCount }}</em></span>
+          <span class="badge-alert" v-if="room.unReadCount > 0">
+            <em>{{ room.unReadCount }}</em>
+          </span>
         </div>
       </div>
       <div v-if="isLoading" class="loading-indicator">
         채팅 목록을 불러오는 중...
       </div>
     </div>
+    <!-- 채팅방 목록이 없을 때 생성 버튼 -->
+    <div v-else class="empty-chat-section">
+      <div class="create-chat-button" @click="$emit('create')">
+        <i class="bi bi-plus-lg"></i>
+      </div>
+    </div>
   </aside>
 </template>
+
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
@@ -217,6 +230,39 @@ function formatDisplayTime(dateTimeString) {
     text-align: center;
     font-size: 14px;
     color: #888;
+  }
+
+  .empty-chat-section {
+    padding: 25px 17px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    .create-chat-button {
+      width: 343px;
+      height: 78px;
+      border: 1px solid $main-color;
+      border-radius: 15px;
+      background: $white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: rgba($main-color, 0.05);
+      }
+
+      &:active {
+        transform: translateY(2px);
+      }
+
+      i {
+        font-size: 30px;
+        color: $main-color;
+      }
+    }
   }
 }
 </style>

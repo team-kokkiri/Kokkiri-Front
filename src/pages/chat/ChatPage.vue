@@ -2,17 +2,28 @@
   <div class="page-container">
     <section class="chat-room">
       <div class="chat-room-inner">
+        <!-- 1. 채팅 사이드바 컴포넌트 -->
         <ChatSidebar
-            :chat-rooms="chatRooms"
-            :active-room-id="activeRoomId"
+            :chatRooms="chatRooms"
+            :activeRoomId="activeRoomId"
             :is-loading="isLoading"
             :has-more="hasMore"
             @select="selectRoom"
+            @create="createRoom"
             @load-more="fetchMoreChatRooms"
         />
 
+        <!-- 2. 유저목록 뷰 컴포넌트 (조건부 렌더링) -->
+        <ChatUserList
+            v-if="showUserListView"
+            :users="roomUsers"
+            :searchQuery="userListSearchQuery"
+            @back="closeUserListView"
+            @search="handleUserListSearch"
+        />
+
         <InviteView
-            v-if="showInviteView"
+            v-else-if="showInviteView"
             :room-id="activeRoomId"
             :invited-user-ids="invitedUserIds"
             :search-query="searchQuery"
@@ -22,16 +33,18 @@
         />
 
         <ChatMainArea
-            v-if="!showInviteView"
+            v-else
             :active-room-id="activeRoomId"
             :current-room="currentRoom"
             :input="input"
             :menu-open="menuOpen"
+            :userCount="userCount"
             @update-input="updateInput"
             @send-message="sendMessage"
             @toggle-menu="toggleMenu"
             @open-invite="openInvite"
             @leave-room="leaveRoom"
+            @open-list="openList"
         />
       </div>
     </section>
@@ -53,6 +66,70 @@ import axios from 'axios'
 
 // ✨ useRoute import 추가
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import ChatUserList from "@/components/chat/ChatUserList.vue";
+
+// ============새로 추가한거(구현필요 or 확인하고 옮기쇼)===============
+// 유저목록 관련 상태 (새로 추가)
+const userListSearchQuery = ref('')
+// 접속 유저들 목록
+const roomUsers = ref([])
+// 유저 목록 수
+const userCount = ref(5)
+// 유저 리스트 뷰를 보여주는 상태
+const showUserListView = ref(false)
+// 채팅창 생성하기!!
+function createRoom() {
+}
+
+// 유저목록 열기
+async function openList() {
+  if (!activeRoomId.value) {
+    console.warn('활성화된 채팅방이 없습니다.');
+    return;
+  }
+
+  menuOpen.value = false;
+  showInviteView.value = false;
+  showUserListView.value = true;
+  userListSearchQuery.value = '';
+
+  // 채팅방 유저 목록 가져오기
+  await fetchRoomUsers(activeRoomId.value);
+}
+
+
+// 채팅방 유저 목록 가져오기
+async function fetchRoomUsers(roomId) {
+  try {
+    const response = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/users`, {
+      headers: { Authorization: `Bearer ${token.value}` }
+    });
+    roomUsers.value = response.data.map(user => ({
+      id: user.id,
+      nickname: user.nickname,
+      email: user.email,
+      avatar: user.avatar || Avatar
+    }));
+  } catch (error) {
+    console.error("채팅방 유저 목록 로딩 실패:", error);
+    // 실패 시 빈 배열로 설정
+    roomUsers.value = [];
+  }
+}
+
+// 유저목록 뷰 닫기 (새로 추가)
+function closeUserListView() {
+  showUserListView.value = false;
+  userListSearchQuery.value = '';
+}
+
+// 유저목록 검색 핸들러 (새로 추가)
+function handleUserListSearch(query) {
+  userListSearchQuery.value = query;
+}
+
+// ======================================
+
 
 // ===== 상태(State) 관리 =====
 const chatRooms = ref([])
