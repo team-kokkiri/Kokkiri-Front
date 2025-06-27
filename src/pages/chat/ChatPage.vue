@@ -2,6 +2,23 @@
   <div class="page-container">
     <section class="chat-room">
       <div class="chat-room-inner">
+        <!-- 1. 채팅 사이드바 컴포넌트 -->
+        <ChatSidebar
+            :chatRooms="chatRooms"
+            :activeRoomId="activeRoomId"
+            @select="selectRoom"
+            @create="createRoom"
+        />
+
+        <!-- 2. 유저목록 뷰 컴포넌트 (조건부 렌더링) -->
+        <ChatUserList
+            v-if="showUserListView"
+            :users="roomUsers"
+            :searchQuery="userListSearchQuery"
+            @back="closeUserListView"
+            @search="handleUserListSearch"
+        />
+
         <ChatSidebar
             :chat-rooms="chatRooms"
             :active-room-id="activeRoomId"
@@ -53,6 +70,34 @@ import axios from 'axios'
 
 // ✨ useRoute import 추가
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
+
+// ============새로 추가한거(구현필요)===============
+// 유저목록 관련 상태 (새로 추가)
+const userListSearchQuery = ref('')
+// 접속 유저들 목록
+const roomUsers = ref([])
+// 유저 목록 수
+const userCount = ref(5)
+// 채팅창 생성하기!!
+function createRoom() {
+}
+// 유저목록 열기 (새로 구현)
+async function openList() {
+  if (!activeRoomId.value) {
+    console.warn('활성화된 채팅방이 없습니다.');
+    return;
+  }
+
+  menuOpen.value = false;
+  showInviteView.value = false;
+  showUserListView.value = true;
+  userListSearchQuery.value = '';
+
+  // 채팅방 유저 목록 가져오기
+  await fetchRoomUsers(activeRoomId.value);
+}
+// ======================================
+
 
 // ===== 상태(State) 관리 =====
 const chatRooms = ref([])
