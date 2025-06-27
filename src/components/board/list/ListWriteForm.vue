@@ -53,7 +53,6 @@
             ref="fileInputRef"
             type="file"
             multiple
-            accept="image/*"
             style="display: none"
             @change="onFileChange"
           />
@@ -131,11 +130,6 @@ emit('submit', {
   }
   showWriteForm.value = false
 }
-
-// 이미지 업로드 처리
-// function handleImageUpload() {
-//   emit('imageUpload')
-// }
 
 // 이미지 업로드 처리
 const fileInputRef = ref(null)
