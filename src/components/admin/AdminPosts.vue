@@ -1,28 +1,39 @@
 <template>
   <div class="admin-posts">
-    <!-- 헤더 -->
-    <div class="posts-header">
-      <div class="header-title">
-        <h2>게시판관리</h2>
+    <!-- 게시판 목록 화면 -->
+    <div v-if="!showManagementView" class="posts-list-view">
+      <!-- 헤더 -->
+      <div class="posts-header">
+        <div class="header-title">
+          <h2>게시판관리</h2>
+        </div>
+        <div class="header-line"></div>
       </div>
-      <div class="header-line"></div>
+
+      <!-- HOT 게시판 섹션 -->
+      <div class="hot-board-section">
+        <div class="hot-board-header">
+          <span class="hot-board-title">HOT 게시판</span>
+          <button class="manage-btn" @click="handleHotBoardManage">
+            관리
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- HOT 게시판 섹션 -->
-    <div class="hot-board-section">
-      <div class="hot-board-header">
-        <span class="hot-board-title">HOT 게시판</span>
-        <button class="manage-btn" @click="handleHotBoardManage">
-          관리
-        </button>
-      </div>
-    </div>
-
+    <!-- HOT 게시판 관리 화면 -->
+    <HotBoardManagement
+      v-if="showManagementView"
+      :current-criteria="currentLikesCriteria"
+      @back="handleBackToList"
+      @criteria-updated="handleCriteriaUpdated"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits } from 'vue'
+import { ref, computed, defineProps, defineEmits } from 'vue'
+import HotBoardManagement from './HotBoardManagement.vue'
 
 // ===== Props =====
 const props = defineProps({
@@ -34,6 +45,10 @@ const props = defineProps({
 
 // ===== Emits =====
 defineEmits(['refresh'])
+
+// ===== 상태 관리 =====
+const showManagementView = ref(false)
+const currentLikesCriteria = ref(10) // 현재 HOT 게시물 선정 기준
 
 // Mock 데이터 (API 연동 전 테스트용)
 const mockPosts = [
@@ -92,8 +107,25 @@ computed(() => {
 
 // ===== 이벤트 핸들러 =====
 function handleHotBoardManage() {
-  // TODO: HOT 게시판 관리 로직 구현
-  console.log('HOT 게시판 관리')
+  showManagementView.value = true
+}
+
+function handleBackToList() {
+  showManagementView.value = false
+}
+
+function handleCriteriaUpdated(updateData) {
+  // HOT 게시물 선정 기준 업데이트 처리
+  console.log('HOT 게시물 선정 기준 변경:', updateData)
+  
+  // 실제 구현에서는 API 호출로 서버에 변경사항 전송
+  currentLikesCriteria.value = updateData.newCriteria
+  
+  // 성공 처리 후 목록으로 돌아가기
+  showManagementView.value = false
+  
+  // 부모 컴포넌트에 변경사항 알림
+  // emit('refresh')
 }
 
 </script>
@@ -102,6 +134,13 @@ function handleHotBoardManage() {
 @import "@/assets/scss/style.scss";
 
 .admin-posts {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.posts-list-view {
   width: 100%;
   height: 100%;
   border: 1px solid $dim-gray;
