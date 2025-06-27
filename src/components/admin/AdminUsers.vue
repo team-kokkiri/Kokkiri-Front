@@ -1,50 +1,62 @@
 <template>
   <div class="admin-users">
-    <!-- 헤더 -->
-    <div class="users-header">
-      <div class="header-title">
-        <span>회원관리</span>
+    <!-- 회원 목록 화면 -->
+    <div v-if="!showDetailView" class="users-list-view">
+      <!-- 헤더 -->
+      <div class="users-header">
+        <div class="header-title">
+          <span>회원관리</span>
+        </div>
       </div>
-    </div>
 
-    <!-- 회원 목록 -->
-    <div class="users-list">
-      <div class="users-container">
-        <UserListItem
-          v-for="user in filteredUsers"
-          :key="user.id"
-          :user="user"
-          @manage="handleUserManage"
-        />
-        
-        <!-- 데이터가 없을 때 -->
-        <div v-if="filteredUsers.length === 0" class="no-data">
-          <p>표시할 회원이 없습니다.</p>
+      <!-- 회원 목록 -->
+      <div class="users-list">
+        <div class="users-container">
+          <UserListItem
+            v-for="user in filteredUsers"
+            :key="user.id"
+            :user="user"
+            @manage="handleUserManage"
+          />
+          
+          <!-- 데이터가 없을 때 -->
+          <div v-if="filteredUsers.length === 0" class="no-data">
+            <p>표시할 회원이 없습니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 검색창 -->
+      <div class="search-section">
+        <div class="search-box">
+          <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="검색하려는 이름을 입력하세요"
+              class="search-input"
+              @input="handleSearch"
+          />
+          <div class="search-icon">
+            <i class="bi bi-search"></i>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 검색창 -->
-    <div class="search-section">
-      <div class="search-box">
-        <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="검색하려는 이름을 입력하세요"
-            class="search-input"
-            @input="handleSearch"
-        />
-        <div class="search-icon">
-          <i class="bi bi-search"></i>
-        </div>
-      </div>
-    </div>
+    <!-- 회원 관리 상세 화면 -->
+    <UserManagementDetail
+      v-if="showDetailView"
+      :selected-user="selectedUser"
+      @back="handleBackToList"
+      @user-updated="handleUserUpdated"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, defineProps, defineEmits } from 'vue'
 import UserListItem from './UserListItem.vue'
+import UserManagementDetail from './UserManagementDetail.vue'
 
 // ===== Props =====
 const props = defineProps({
@@ -55,23 +67,25 @@ const props = defineProps({
 })
 
 // ===== Emits =====
-defineEmits(['refresh'])
+const emit = defineEmits(['refresh'])
 
 // ===== 상태 관리 =====
 const searchQuery = ref('')
+const showDetailView = ref(false)
+const selectedUser = ref(null)
 
 // Mock 데이터 (API 연동 전 테스트용)
 const mockUsers = [
-  { id: 1, name: '고라니', email: 'sp2877@naver.com', avatar: '' },
-  { id: 2, name: '사용자1', email: 'user1@example.com', avatar: '' },
-  { id: 3, name: '사용자2', email: 'user2@example.com', avatar: '' },
-  { id: 4, name: '사용자3', email: 'user3@example.com', avatar: '' },
-  { id: 5, name: '사용자4', email: 'user4@example.com', avatar: '' },
-  { id: 6, name: '사용자5', email: 'user5@example.com', avatar: '' },
-  { id: 7, name: '사용자6', email: 'user6@example.com', avatar: '' },
-  { id: 8, name: '사용자7', email: 'user7@example.com', avatar: '' },
-  { id: 9, name: '사용자8', email: 'user8@example.com', avatar: '' },
-  { id: 10, name: '사용자9', email: 'user9@example.com', avatar: '' }
+  { id: 1, name: '고라니', email: 'sp2877@naver.com', avatar: '', role: 'normal', isRestricted: false },
+  { id: 2, name: '사용자1', email: 'user1@example.com', avatar: '', role: 'admin', isRestricted: false },
+  { id: 3, name: '사용자2', email: 'user2@example.com', avatar: '', role: 'normal', isRestricted: true },
+  { id: 4, name: '사용자3', email: 'user3@example.com', avatar: '', role: 'normal', isRestricted: false },
+  { id: 5, name: '사용자4', email: 'user4@example.com', avatar: '', role: 'normal', isRestricted: false },
+  { id: 6, name: '사용자5', email: 'user5@example.com', avatar: '', role: 'admin', isRestricted: false },
+  { id: 7, name: '사용자6', email: 'user6@example.com', avatar: '', role: 'normal', isRestricted: false },
+  { id: 8, name: '사용자7', email: 'user7@example.com', avatar: '', role: 'normal', isRestricted: true },
+  { id: 9, name: '사용자8', email: 'user8@example.com', avatar: '', role: 'normal', isRestricted: false },
+  { id: 10, name: '사용자9', email: 'user9@example.com', avatar: '', role: 'normal', isRestricted: false }
 ]
 
 // ===== Computed =====
@@ -96,11 +110,34 @@ function handleSearch() {
 }
 
 function handleUserManage(user) {
-  // TODO: 회원 관리 액션 구현 (수정, 삭제, 권한 변경 등)
-  console.log('User manage:', user)
+  selectedUser.value = user
+  showDetailView.value = true
+}
+
+function handleBackToList() {
+  showDetailView.value = false
+  selectedUser.value = null
+}
+
+function handleUserUpdated(updateData) {
+  // 사용자 정보 업데이트 처리
+  console.log('User updated:', updateData)
   
-  // 예시: 관리 모달 열기, 상태 변경 등
-  // 현재는 콘솔 로그만 출력
+  // 실제 구현에서는 API 호출로 서버에 변경사항 전송
+  // 현재는 로컬 mock 데이터 업데이트
+  const userIndex = mockUsers.findIndex(u => u.id === updateData.userId)
+  if (userIndex !== -1) {
+    if (updateData.type === 'permission') {
+      mockUsers[userIndex].role = updateData.data.role
+    } else if (updateData.type === 'restriction') {
+      mockUsers[userIndex].isRestricted = updateData.data.isRestricted
+    }
+    // selectedUser도 업데이트
+    selectedUser.value = { ...mockUsers[userIndex] }
+  }
+  
+  // 부모 컴포넌트에 변경사항 알림
+  emit('refresh')
 }
 </script>
 
@@ -108,6 +145,13 @@ function handleUserManage(user) {
 @import "@/assets/scss/style.scss";
 
 .admin-users {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.users-list-view {
   width: 100%;
   height: 100%;
   border: 1px solid $dim-gray;
