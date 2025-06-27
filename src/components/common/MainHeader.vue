@@ -19,25 +19,32 @@
             <div v-if="showNotification" class="notification-dropdown" ref="notificationRef">
               <div class="notification-header">
                 <h3 class="title">알림</h3>
-                <button type="button" class="btn-read-all" @click="markAllAsRead">모두 읽음</button>
+                <button type="button" class="btn-read-all" @click="handleMarkAllAsReadClick">모두 읽음</button>
               </div>
               <div class="notification-list" ref="notificationListRef">
-                <div class="notification-item" v-for="item in notifications" :key="item.id">
-                  <div class="item-mark" :class="{ 'invite': item.type === 'invite' }"></div>
-                  <div class="item-content">
-                    <p class="message">{{ item.message }}</p>
-                    <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
+                <template v-if="notifications.length > 0">
+                  <div class="notification-item"
+                       v-for="item in notifications"
+                       :key="item.id"
+                       @click="handleNotificationClick(item)"
+                       :class="{ 'clickable': item.url && item.type !== 'invite' }">
+                    <div class="item-mark" :class="{ 'invite': item.type === 'invite' }"></div>
+                    <div class="item-content">
+                      <p class="message">{{ item.message }}</p>
+                      <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
+                    </div>
+                    <div class="btn-action-wrap">
+                      <template v-if="item.type === 'invite'">
+                        <button class="btn-accept" @click.stop="handleAcceptClick(item)">수락</button>
+                        <button class="btn-reject" @click.stop="handleRejectClick(item)">거절</button>
+                      </template>
+                      <template v-else>
+                        <!-- ✨ 삭제 버튼 클릭 시 모달 열도록 변경 -->
+                        <button class="btn-delete" @click.stop="handleDeleteClick(item.id)">삭제</button>
+                      </template>
+                    </div>
                   </div>
-                  <div class="btn-action-wrap">
-                    <template v-if="item.type === 'invite'">
-                      <button class="btn-accept" @click="acceptInvitation(item)">수락</button>
-                      <button class="btn-reject" @click="rejectInvitation(item)">거절</button>
-                    </template>
-                    <template v-else>
-                      <button class="btn-delete" @click="deleteNotification(item.id)">삭제</button>
-                    </template>
-                  </div>
-                </div>
+                </template>
                 <div v-if="isLoading" class="loading-indicator">알림을 불러오는 중...</div>
                 <div v-if="notifications.length === 0 && !isLoading" class="no-data">새로운 알림이 없습니다.</div>
               </div>
@@ -58,14 +65,65 @@
       </div>
     </div>
   </div>
+
+  <!-- 초대 수락 확인 모달 -->
+  <div v-if="showAcceptModal" class="modal-overlay" @click.self="closeAcceptModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        <strong>'{{ invitationRoomName }}'</strong> 방에 참여하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmAcceptInvitation">네</button>
+        <button class="btn-modal btn-cancel" @click="closeAcceptModal">아니오</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 초대 거절 확인 모달 -->
+  <div v-if="showRejectModal" class="modal-overlay" @click.self="closeRejectModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        <strong>'{{ rejectionRoomName }}'</strong> 초대를 거절하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmRejectInvitation">네</button>
+        <button class="btn-modal btn-cancel" @click="closeRejectModal">아니오</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- '모두 읽음' 확인 모달 -->
+  <div v-if="showMarkAllAsReadModal" class="modal-overlay" @click.self="closeMarkAllAsReadModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        모든 알림을 삭제하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmMarkAllAsRead">네</button>
+        <button class="btn-modal btn-cancel" @click="closeMarkAllAsReadModal">아니오</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✨ 삭제 확인 모달 추가 -->
+  <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        이 알림을 삭제하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmDelete">네</button>
+        <button class="btn-modal btn-cancel" @click="closeDeleteModal">아니오</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
 
-// Header가 모든 상태와 함수를 useNotifications에서 직접 가져옵니다.
 const {
   notifications,
   hasNewChatMessage,
@@ -86,6 +144,32 @@ const route = useRoute();
 const showNotification = ref(false);
 const notificationRef = ref(null);
 const notificationListRef = ref(null);
+
+const showAcceptModal = ref(false);
+const notificationToAccept = ref(null);
+
+const showRejectModal = ref(false);
+const notificationToReject = ref(null);
+
+const showMarkAllAsReadModal = ref(false);
+
+// ✨ 삭제 모달 상태 관리를 위한 ref 추가
+const showDeleteModal = ref(false);
+const notificationIdToDelete = ref(null);
+
+const invitationRoomName = computed(() => {
+  if (!notificationToAccept.value) return '';
+  const message = notificationToAccept.value.message;
+  const match = message.match(/<([^>]+)>/);
+  return match && match[1] ? match[1] : '해당';
+});
+
+const rejectionRoomName = computed(() => {
+  if (!notificationToReject.value) return '';
+  const message = notificationToReject.value.message;
+  const match = message.match(/<([^>]+)>/);
+  return match && match[1] ? match[1] : '해당';
+});
 
 const menuList = [
   { name: '게시판', path: '' }, { name: '캘린더', path: '/calendar' }, { name: '파티찾기', path: '/party' },
@@ -122,15 +206,80 @@ function goMypage() {
   router.push('/main-page/mypage');
 }
 
-
-// 메인페이지 이동
 function goMain() {
-  router.push('/main-page')
+  router.push('/main-page');
 }
 
-// 스크롤 이벤트 핸들러 (무한 스크롤용)
-let scrollHandler = null
+// 수락 관련 함수
+function handleAcceptClick(item) {
+  notificationToAccept.value = item;
+  showAcceptModal.value = true;
+}
+function closeAcceptModal() {
+  showAcceptModal.value = false;
+  notificationToAccept.value = null;
+}
+async function confirmAcceptInvitation() {
+  if (notificationToAccept.value) {
+    await acceptInvitation(notificationToAccept.value);
+  }
+  closeAcceptModal();
+}
 
+// 거절 관련 함수
+function handleRejectClick(item) {
+  notificationToReject.value = item;
+  showRejectModal.value = true;
+}
+function closeRejectModal() {
+  showRejectModal.value = false;
+  notificationToReject.value = null;
+}
+async function confirmRejectInvitation() {
+  if (notificationToReject.value) {
+    await rejectInvitation(notificationToReject.value);
+  }
+  closeRejectModal();
+}
+
+// 모두 읽음 관련 함수
+function handleMarkAllAsReadClick() {
+  showMarkAllAsReadModal.value = true;
+}
+function closeMarkAllAsReadModal() {
+  showMarkAllAsReadModal.value = false;
+}
+async function confirmMarkAllAsRead() {
+  await markAllAsRead();
+  closeMarkAllAsReadModal();
+}
+
+// ✨ 삭제 관련 함수 추가
+function handleDeleteClick(id) {
+  notificationIdToDelete.value = id;
+  showDeleteModal.value = true;
+}
+function closeDeleteModal() {
+  showDeleteModal.value = false;
+  notificationIdToDelete.value = null;
+}
+async function confirmDelete() {
+  if (notificationIdToDelete.value) {
+    await deleteNotification(notificationIdToDelete.value);
+  }
+  closeDeleteModal();
+}
+
+
+function handleNotificationClick(item) {
+  if (item.type === 'invite') return;
+  if (item.url) {
+    router.push(item.url);
+    showNotification.value = false;
+  }
+}
+
+let scrollHandler = null;
 
 onMounted(() => {
   document.addEventListener('mousedown', handleClickOutside);
@@ -142,7 +291,7 @@ onMounted(() => {
           scrollHandler = () => {
             const isNearBottom = listEl.scrollHeight - listEl.scrollTop <= listEl.clientHeight + 100;
             if (isNearBottom && !isLoading.value && hasMore.value) {
-              fetchNotifications(); // 직접 호출
+              fetchNotifications();
             }
           };
           listEl.addEventListener('scroll', scrollHandler);
@@ -168,7 +317,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-/* 여기에 red-dot 스타일이 필요하다면 추가해주세요. */
+/* red-dot 스타일 */
 .red-dot {
   position: absolute;
   top: 0;
@@ -182,7 +331,63 @@ onBeforeUnmount(() => {
 
 @import '@/assets/scss/style';
 
-/* ###### Component-Header #######*/
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 320px;
+}
+.modal-text {
+  font-size: 16px;
+  margin: 0 0 20px;
+  color: #333;
+  line-height: 1.5;
+}
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.btn-modal {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 80px;
+}
+.btn-confirm {
+  background-color: $main-color;
+  color: white;
+  &:hover {
+    background-color: darken($main-color, 10%);
+  }
+}
+.btn-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+  &:hover {
+    background-color: #e0e0e0;
+  }
+}
+
+/* 전체 헤더 스타일 */
 .mainpage-header {
   width: 100%;
   height: 80px;
@@ -190,7 +395,7 @@ onBeforeUnmount(() => {
   min-height: 80px;
   display: flex;
   align-items: center;
-  background: #fff; // 필요시 배경색 조절
+  background: #fff;
   border-bottom: 1px solid $dim-gray;
   .header-inner {
     width: 1180px;
@@ -198,45 +403,38 @@ onBeforeUnmount(() => {
     height: 100%;
     display: flex;
     align-items: center;
-    //border: 1px solid black;
-
     .header-row {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       .header-left {
         display: flex;
         align-items: center;
         cursor: pointer;
         img {
           width: 246px;
-          height: 80px; // 로고 이미지 크기 조절
+          height: 80px;
           margin-bottom: 1.5px;
         }
       }
-
       .header-center {
         display: flex;
         gap: 42px;
         margin-right: 90px;
-
         .gnb-menu-item {
           position: relative;
           display: flex;
           align-items: center;
           cursor: pointer;
           height: 80px;
-
           .menu-text {
             font-size: 16px;
             font-weight: bold;
             color: $dark-black;
             transition: color 0.2s;
           }
-
           &.active {
             border-bottom: 5px solid $main-color;
             padding-top: 10px;
@@ -245,11 +443,10 @@ onBeforeUnmount(() => {
             color: $main-color;
           }
           &.active .menu-text {
-            color: $main-color // 활성화된 메뉴 글씨 색상
+            color: $main-color
           }
         }
       }
-
       .header-right {
         display: flex;
         gap: 24px;
@@ -262,7 +459,7 @@ onBeforeUnmount(() => {
           width: 40px;
           height: 40px;
           border-radius: 10px;
-          // 헤더 우측 버튼3개
+          
           .icon-btn {
             display: flex;
             align-items: center;
@@ -270,45 +467,11 @@ onBeforeUnmount(() => {
             font-size: 24px;
             background: white;
             border: none;
-            i {
-              font-size: 24px;
-              transition: color 0.2s;
-            }
-            .bi.bi-bell-fill {
-              width: 20px;
-              height: 20px;
-              fill: white;
-              stroke: $dark-black;
-              stroke-width: 1.5px;
-            }
-            .bi.bi-chat-dots-fill {
-              width: 20px;
-              height: 20px;
-              fill: $dim-black;
-            }
-            .bi.bi-person-fill {
-              width: 24px;
-              height: 24px;
-              fill: $dim-black;
-            }
-
-            em {
-              width: 20px;
-              height: 20px;
-              position: absolute;
-              top: -15px;
-              right: -10px;
-              background: $orangered;
-              color: white;
-              font-size: 12px;
-              font-weight: normal;
-              border-radius: 30px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
+            .bi.bi-bell-fill { width: 20px; height: 20px; fill: white; stroke: $dark-black; stroke-width: 1.5px; }
+            .bi.bi-chat-dots-fill { width: 20px; height: 20px; fill: $dim-black; }
+            .bi.bi-person-fill { width: 24px; height: 24px; fill: $dim-black; }
           }
-          // 알림창 눌렀을때 드롭다운창
+          
           .notification-dropdown {
             position: absolute;
             top: 48px;
@@ -325,39 +488,19 @@ onBeforeUnmount(() => {
             flex-direction: column;
             animation: fadeIn 0.18s;
 
-            // 헤더
             .notification-header {
               display: flex;
               align-items: center;
-              justify-content: center;
               border-bottom: 1px solid $dim-gray;
-              padding: 34px 27px;
+              padding: 0 27px;
               height: 80px;
-
+              flex-shrink: 0;
               h3.title {
                 font-size: 24px;
                 font-weight: normal;
                 color: $dark-black;
-                margin: 0 10px 0 0;
+                margin: 0;
               }
-
-              em.badge-count {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 24px;
-                height: 24px;
-                font-size: 16px;
-                font-weight: 400;
-                background: $orangered;
-                color: #fff;
-                border-radius: 7px;
-                margin-left: 4px;
-                margin-top: 3px;
-                font-family: SpoqaHanSansNeo-Regular, serif;
-                font-style: normal;
-              }
-
               .btn-read-all {
                 margin-left: auto;
                 background: none;
@@ -369,74 +512,67 @@ onBeforeUnmount(() => {
                 padding: 0;
               }
             }
-
-            // 알림 리스트 (최대 5개, 스크롤)
+            
             .notification-list {
-              flex: 1 1 0%;
-              max-height: 300px;        // 60px * 5
+              flex: 1;
               overflow-y: auto;
-
-              &::-webkit-scrollbar {
-                width: 8px;
-              }
-              &::-webkit-scrollbar-thumb {
-                background: #d9d9d9;
-                border-radius: 8px;
-              }
+              display: flex;
+              flex-direction: column;
+              &::-webkit-scrollbar { width: 8px; }
+              &::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 8px; }
 
               .notification-item {
                 display: flex;
-                align-items: flex-start;
-                justify-content: center;
+                align-items: center;
                 min-height: 60px;
-                height: 60px;
+                height: 80px;
                 border-bottom: 1px solid $dim-gray;
-
-                &:last-child {
-                  border-bottom: none;
+                flex-shrink: 0;
+                box-sizing: border-box;
+                position: relative;
+                
+                &:last-child { border-bottom: none; }
+                
+                &.clickable {
+                  cursor: pointer;
+                  &:hover { background-color: #f8f9fa; }
                 }
 
                 .item-mark {
                   width: 15px;
-                  height: 58px;
+                  height: 70px;
                   background: white;
                   flex-shrink: 0;
                   border: none;
-                  margin-top: 1px;
-                  &.invite {
-                    background: $orangered;
-                  }
+                  &.invite { background: $orangered; }
                 }
 
                 .item-content {
-                  flex: 1 1 0%;
+                  flex: 1;
                   display: flex;
                   flex-direction: column;
                   justify-content: center;
-                  margin-top: 12px;
-                  margin-left: 22px;
+                  margin: 0 12px;
                   p.message {
                     font-size: 16px;
                     font-weight: 500;
                     color: $dark-black;
-                    margin: 0;
-                    line-height: 1.2;
-                    font-family: $secondary-kr;
-                    letter-spacing: 1px;
+                    margin: 0 0 4px 0;
+                    line-height: 1.4;
                   }
                   span.datetime {
                     font-size: 12px;
                     color: $dim-black;
-                    margin-top: 2px;
                     font-weight: normal;
                   }
                 }
+
                 .btn-action-wrap {
+                  position: absolute;
+                  right: 18px;
+                  bottom: 10px;
                   display: flex;
-                  align-items: center;
-                  height: 100%;
-                  margin-top: 15px;
-                  margin-right: 6px;
+                  
                   .btn-delete,
                   .btn-accept,
                   .btn-reject {
@@ -450,6 +586,12 @@ onBeforeUnmount(() => {
                     padding: 0;
                   }
                 }
+              }
+
+              .no-data, .loading-indicator {
+                margin: auto;
+                color: #888;
+                font-size: 14px;
               }
             }
           }
