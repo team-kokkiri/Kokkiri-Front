@@ -72,14 +72,18 @@ const onVerifyClasscode = async () => {
       return;
     }
 
-    // 2. 유효하면 teamCode를 세션에 저장 요청
-    await axios.post('/api/team/session', {
+    // 2. 유효하면 state 생성 요청 (랜덤 UUID 받고 Redis에 teamCode 저장됨)
+    const stateRes = await axios.post('/api/team/state', {
       teamCode: classcode.value.trim(),
     }, { withCredentials: true });
 
+    const state = stateRes.data.state;
+    console.log('발급된 state:', state);
     toast.success('인증이 완료되었습니다.');
+
     setTimeout(() => {
-      router.push('/signup'); // teamCode는 세션에서 가져오게 됨
+      // state를 쿼리 파라미터로 넘겨서 회원가입 페이지 이동
+      router.push(`/signup?state=${encodeURIComponent(state)}`);
     }, 1000);
   } catch (error) {
     console.error('반 코드 검증 실패:', error);
