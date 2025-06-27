@@ -19,25 +19,32 @@
             <div v-if="showNotification" class="notification-dropdown" ref="notificationRef">
               <div class="notification-header">
                 <h3 class="title">알림</h3>
-                <button type="button" class="btn-read-all" @click="markAllAsRead">모두 읽음</button>
+                <button type="button" class="btn-read-all" @click="handleMarkAllAsReadClick">모두 읽음</button>
               </div>
               <div class="notification-list" ref="notificationListRef">
-                <div class="notification-item" v-for="item in notifications" :key="item.id">
-                  <div class="item-mark" :class="{ 'invite': item.type === 'invite' }"></div>
-                  <div class="item-content">
-                    <p class="message">{{ item.message }}</p>
-                    <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
+                <template v-if="notifications.length > 0">
+                  <div class="notification-item"
+                       v-for="item in notifications"
+                       :key="item.id"
+                       @click="handleNotificationClick(item)"
+                       :class="{ 'clickable': item.url && item.type !== 'invite' }">
+                    <div class="item-mark" :class="{ 'invite': item.type === 'invite' }"></div>
+                    <div class="item-content">
+                      <p class="message">{{ item.message }}</p>
+                      <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
+                    </div>
+                    <div class="btn-action-wrap">
+                      <template v-if="item.type === 'invite'">
+                        <button class="btn-accept" @click.stop="handleAcceptClick(item)">수락</button>
+                        <button class="btn-reject" @click.stop="handleRejectClick(item)">거절</button>
+                      </template>
+                      <template v-else>
+                        <!-- ✨ 삭제 버튼 클릭 시 모달 열도록 변경 -->
+                        <button class="btn-delete" @click.stop="handleDeleteClick(item.id)">삭제</button>
+                      </template>
+                    </div>
                   </div>
-                  <div class="btn-action-wrap">
-                    <template v-if="item.type === 'invite'">
-                      <button class="btn-accept" @click="handleAcceptClick(item)">수락</button>
-                      <button class="btn-reject" @click="handleRejectClick(item)">거절</button>
-                    </template>
-                    <template v-else>
-                      <button class="btn-delete" @click="deleteNotification(item.id)">삭제</button>
-                    </template>
-                  </div>
-                </div>
+                </template>
                 <div v-if="isLoading" class="loading-indicator">알림을 불러오는 중...</div>
                 <div v-if="notifications.length === 0 && !isLoading" class="no-data">새로운 알림이 없습니다.</div>
               </div>
@@ -59,6 +66,7 @@
     </div>
   </div>
 
+  <!-- 초대 수락 확인 모달 -->
   <div v-if="showAcceptModal" class="modal-overlay" @click.self="closeAcceptModal">
     <div class="modal-content">
       <p class="modal-text">
@@ -71,6 +79,7 @@
     </div>
   </div>
 
+  <!-- 초대 거절 확인 모달 -->
   <div v-if="showRejectModal" class="modal-overlay" @click.self="closeRejectModal">
     <div class="modal-content">
       <p class="modal-text">
@@ -79,6 +88,32 @@
       <div class="modal-actions">
         <button class="btn-modal btn-confirm" @click="confirmRejectInvitation">네</button>
         <button class="btn-modal btn-cancel" @click="closeRejectModal">아니오</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- '모두 읽음' 확인 모달 -->
+  <div v-if="showMarkAllAsReadModal" class="modal-overlay" @click.self="closeMarkAllAsReadModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        모든 알림을 삭제하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmMarkAllAsRead">네</button>
+        <button class="btn-modal btn-cancel" @click="closeMarkAllAsReadModal">아니오</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✨ 삭제 확인 모달 추가 -->
+  <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        이 알림을 삭제하시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmDelete">네</button>
+        <button class="btn-modal btn-cancel" @click="closeDeleteModal">아니오</button>
       </div>
     </div>
   </div>
@@ -110,16 +145,18 @@ const showNotification = ref(false);
 const notificationRef = ref(null);
 const notificationListRef = ref(null);
 
-// 수락 모달 상태
 const showAcceptModal = ref(false);
 const notificationToAccept = ref(null);
 
-// ✨ 거절 모달 상태 관리를 위한 ref 추가
 const showRejectModal = ref(false);
 const notificationToReject = ref(null);
 
+const showMarkAllAsReadModal = ref(false);
 
-// 모달에 표시될 채팅방 이름을 파싱하기 위한 computed 속성
+// ✨ 삭제 모달 상태 관리를 위한 ref 추가
+const showDeleteModal = ref(false);
+const notificationIdToDelete = ref(null);
+
 const invitationRoomName = computed(() => {
   if (!notificationToAccept.value) return '';
   const message = notificationToAccept.value.message;
@@ -127,7 +164,6 @@ const invitationRoomName = computed(() => {
   return match && match[1] ? match[1] : '해당';
 });
 
-// ✨ 거절 모달에 표시될 채팅방 이름을 위한 computed 속성 추가
 const rejectionRoomName = computed(() => {
   if (!notificationToReject.value) return '';
   const message = notificationToReject.value.message;
@@ -174,17 +210,15 @@ function goMain() {
   router.push('/main-page');
 }
 
-// 수락 모달 제어 함수들
+// 수락 관련 함수
 function handleAcceptClick(item) {
   notificationToAccept.value = item;
   showAcceptModal.value = true;
 }
-
 function closeAcceptModal() {
   showAcceptModal.value = false;
   notificationToAccept.value = null;
 }
-
 async function confirmAcceptInvitation() {
   if (notificationToAccept.value) {
     await acceptInvitation(notificationToAccept.value);
@@ -192,19 +226,15 @@ async function confirmAcceptInvitation() {
   closeAcceptModal();
 }
 
-// ✨ 초대 거절 버튼 클릭 시 모달을 여는 함수
+// 거절 관련 함수
 function handleRejectClick(item) {
   notificationToReject.value = item;
   showRejectModal.value = true;
 }
-
-// ✨ 거절 모달을 닫는 함수
 function closeRejectModal() {
   showRejectModal.value = false;
   notificationToReject.value = null;
 }
-
-// ✨ 모달의 '네' 버튼 클릭 시 초대를 최종 거절하는 함수
 async function confirmRejectInvitation() {
   if (notificationToReject.value) {
     await rejectInvitation(notificationToReject.value);
@@ -212,6 +242,42 @@ async function confirmRejectInvitation() {
   closeRejectModal();
 }
 
+// 모두 읽음 관련 함수
+function handleMarkAllAsReadClick() {
+  showMarkAllAsReadModal.value = true;
+}
+function closeMarkAllAsReadModal() {
+  showMarkAllAsReadModal.value = false;
+}
+async function confirmMarkAllAsRead() {
+  await markAllAsRead();
+  closeMarkAllAsReadModal();
+}
+
+// ✨ 삭제 관련 함수 추가
+function handleDeleteClick(id) {
+  notificationIdToDelete.value = id;
+  showDeleteModal.value = true;
+}
+function closeDeleteModal() {
+  showDeleteModal.value = false;
+  notificationIdToDelete.value = null;
+}
+async function confirmDelete() {
+  if (notificationIdToDelete.value) {
+    await deleteNotification(notificationIdToDelete.value);
+  }
+  closeDeleteModal();
+}
+
+
+function handleNotificationClick(item) {
+  if (item.type === 'invite') return;
+  if (item.url) {
+    router.push(item.url);
+    showNotification.value = false;
+  }
+}
 
 let scrollHandler = null;
 
@@ -278,7 +344,6 @@ onBeforeUnmount(() => {
   justify-content: center;
   z-index: 1000;
 }
-
 .modal-content {
   background: white;
   padding: 24px;
@@ -287,20 +352,17 @@ onBeforeUnmount(() => {
   text-align: center;
   width: 320px;
 }
-
 .modal-text {
   font-size: 16px;
   margin: 0 0 20px;
   color: #333;
   line-height: 1.5;
 }
-
 .modal-actions {
   display: flex;
   justify-content: center;
   gap: 12px;
 }
-
 .btn-modal {
   border: none;
   padding: 8px 16px;
@@ -310,7 +372,6 @@ onBeforeUnmount(() => {
   transition: background-color 0.2s;
   min-width: 80px;
 }
-
 .btn-confirm {
   background-color: $main-color;
   color: white;
@@ -318,7 +379,6 @@ onBeforeUnmount(() => {
     background-color: darken($main-color, 10%);
   }
 }
-
 .btn-cancel {
   background-color: #f0f0f0;
   color: #333;
@@ -327,7 +387,7 @@ onBeforeUnmount(() => {
   }
 }
 
-/* ###### Component-Header #######*/
+/* 전체 헤더 스타일 */
 .mainpage-header {
   width: 100%;
   height: 80px;
@@ -399,6 +459,7 @@ onBeforeUnmount(() => {
           width: 40px;
           height: 40px;
           border-radius: 10px;
+          
           .icon-btn {
             display: flex;
             align-items: center;
@@ -406,43 +467,11 @@ onBeforeUnmount(() => {
             font-size: 24px;
             background: white;
             border: none;
-            i {
-              font-size: 24px;
-              transition: color 0.2s;
-            }
-            .bi.bi-bell-fill {
-              width: 20px;
-              height: 20px;
-              fill: white;
-              stroke: $dark-black;
-              stroke-width: 1.5px;
-            }
-            .bi.bi-chat-dots-fill {
-              width: 20px;
-              height: 20px;
-              fill: $dim-black;
-            }
-            .bi.bi-person-fill {
-              width: 24px;
-              height: 24px;
-              fill: $dim-black;
-            }
-            em {
-              width: 20px;
-              height: 20px;
-              position: absolute;
-              top: -15px;
-              right: -10px;
-              background: $orangered;
-              color: white;
-              font-size: 12px;
-              font-weight: normal;
-              border-radius: 30px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
+            .bi.bi-bell-fill { width: 20px; height: 20px; fill: white; stroke: $dark-black; stroke-width: 1.5px; }
+            .bi.bi-chat-dots-fill { width: 20px; height: 20px; fill: $dim-black; }
+            .bi.bi-person-fill { width: 24px; height: 24px; fill: $dim-black; }
           }
+          
           .notification-dropdown {
             position: absolute;
             top: 48px;
@@ -458,34 +487,19 @@ onBeforeUnmount(() => {
             display: flex;
             flex-direction: column;
             animation: fadeIn 0.18s;
+
             .notification-header {
               display: flex;
               align-items: center;
-              justify-content: center;
               border-bottom: 1px solid $dim-gray;
-              padding: 34px 27px;
+              padding: 0 27px;
               height: 80px;
+              flex-shrink: 0;
               h3.title {
                 font-size: 24px;
                 font-weight: normal;
                 color: $dark-black;
-                margin: 0 10px 0 0;
-              }
-              em.badge-count {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 24px;
-                height: 24px;
-                font-size: 16px;
-                font-weight: 400;
-                background: $orangered;
-                color: #fff;
-                border-radius: 7px;
-                margin-left: 4px;
-                margin-top: 3px;
-                font-family: SpoqaHanSansNeo-Regular, serif;
-                font-style: normal;
+                margin: 0;
               }
               .btn-read-all {
                 margin-left: auto;
@@ -498,67 +512,67 @@ onBeforeUnmount(() => {
                 padding: 0;
               }
             }
+            
             .notification-list {
-              flex: 1 1 0%;
-              max-height: 300px;
+              flex: 1;
               overflow-y: auto;
-              &::-webkit-scrollbar {
-                width: 8px;
-              }
-              &::-webkit-scrollbar-thumb {
-                background: #d9d9d9;
-                border-radius: 8px;
-              }
+              display: flex;
+              flex-direction: column;
+              &::-webkit-scrollbar { width: 8px; }
+              &::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 8px; }
+
               .notification-item {
                 display: flex;
-                align-items: flex-start;
-                justify-content: center;
+                align-items: center;
                 min-height: 60px;
-                height: 60px;
+                height: 80px;
                 border-bottom: 1px solid $dim-gray;
-                &:last-child {
-                  border-bottom: none;
+                flex-shrink: 0;
+                box-sizing: border-box;
+                position: relative;
+                
+                &:last-child { border-bottom: none; }
+                
+                &.clickable {
+                  cursor: pointer;
+                  &:hover { background-color: #f8f9fa; }
                 }
+
                 .item-mark {
                   width: 15px;
-                  height: 58px;
+                  height: 70px;
                   background: white;
                   flex-shrink: 0;
                   border: none;
-                  margin-top: 1px;
-                  &.invite {
-                    background: $orangered;
-                  }
+                  &.invite { background: $orangered; }
                 }
+
                 .item-content {
-                  flex: 1 1 0%;
+                  flex: 1;
                   display: flex;
                   flex-direction: column;
                   justify-content: center;
-                  margin-top: 12px;
-                  margin-left: 22px;
+                  margin: 0 12px;
                   p.message {
                     font-size: 16px;
                     font-weight: 500;
                     color: $dark-black;
-                    margin: 0;
-                    line-height: 1.2;
-                    font-family: $secondary-kr;
-                    letter-spacing: 1px;
+                    margin: 0 0 4px 0;
+                    line-height: 1.4;
                   }
                   span.datetime {
                     font-size: 12px;
                     color: $dim-black;
-                    margin-top: 2px;
                     font-weight: normal;
                   }
                 }
+
                 .btn-action-wrap {
+                  position: absolute;
+                  right: 18px;
+                  bottom: 10px;
                   display: flex;
-                  align-items: center;
-                  height: 100%;
-                  margin-top: 15px;
-                  margin-right: 6px;
+                  
                   .btn-delete,
                   .btn-accept,
                   .btn-reject {
@@ -573,8 +587,15 @@ onBeforeUnmount(() => {
                   }
                 }
               }
+
+              .no-data, .loading-indicator {
+                margin: auto;
+                color: #888;
+                font-size: 14px;
+              }
             }
           }
+
           @keyframes fadeIn {
             0% { opacity: 0; transform: translateY(-10px);}
             100% { opacity: 1; transform: translateY(0);}

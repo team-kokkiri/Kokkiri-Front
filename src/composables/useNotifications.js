@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue' // ✨ computed를 import 목록에서 삭제
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -13,14 +13,10 @@ const isLoading = ref(false)
 const hasMore = ref(true)
 const isLogin = ref(false)
 const notificationVersion = ref(0)
-
-const totalUnreadNotifications = computed(() => {
-  return notifications.value.filter(n => !n.isRead).length
-})
+const totalUnreadNotifications = ref(0)
 
 /**
  * 알림 데이터 중앙 관리 composable
- * SSE 실시간 알림, 무한 스크롤, 백엔드 API 연동 포함
  */
 export function useNotifications() {
     const router = useRouter()
@@ -46,7 +42,6 @@ export function useNotifications() {
     function connectSSE() {
         const token = localStorage.getItem('accessToken')
         if (!token) return
-
         if (eventSource) eventSource.close()
         
         eventSource = new EventSourcePolyfill(`${process.env.VUE_APP_API_BASE_URL}/api/notification/connect`, {
@@ -54,19 +49,14 @@ export function useNotifications() {
         })
 
         eventSource.onopen = () => console.log('✅ SSE 연결됨')
-
         eventSource.addEventListener('sse', (event) => {
             try {
                 if (!event.data || event.data.trim().includes('EventStream Created')) return
                 const data = JSON.parse(event.data)
                 const type = data.notificationType?.toUpperCase();
 
-                console.log(data);
                 if (type === 'CHAT') {
-                    if (!hasNewChatMessage.value) {
-                        hasNewChatMessage.value = true;
-                        forceUpdate(); // 상태 변경 후 강제 업데이트 신호
-                    }
+                    if (!hasNewChatMessage.value) { hasNewChatMessage.value = true; forceUpdate(); }
                     return; 
                 }
                 
@@ -76,12 +66,10 @@ export function useNotifications() {
                     message: data.content,
                     datetime: data.actionCreatedAt,
                     invitationId: data.invitationId,
-                    isRead: data.isRead === 'Y'
+                    url: data.url || null
                 })
-                if (data.isRead === 'N') {
-                    totalUnreadNotifications.value += 1
-                    forceUpdate();
-                }
+                totalUnreadNotifications.value += 1
+                forceUpdate();
             } catch (e) {
                 console.error('❌ 알림 파싱 실패:', e, '원본 데이터:', event.data)
             }
@@ -102,19 +90,23 @@ export function useNotifications() {
             })
 
             const { notifications: fetchedData, hasNext, totalUnreadCount } = response.data
-            const hasUnreadChat = fetchedData.some(item => item.notificationType?.toUpperCase() === 'CHAT' && item.isRead === 'N');
+            const hasUnreadChat = fetchedData.some(item => item.notificationType?.toUpperCase() === 'CHAT' && item.delYn === 'N'); // isRead 대신 delYn으로 확인 (필요시)
             if (hasUnreadChat) hasNewChatMessage.value = true;
             
             const nonChatNotifications = fetchedData.filter(item => item.notificationType?.toUpperCase() !== 'CHAT');
             const newNotifications = nonChatNotifications.map(item => ({
-                id: item.id, type: item.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
-                message: item.content, datetime: item.actionCreatedAt, invitationId: item.invitationId, isRead: item.isRead === 'Y'
+                id: item.id,
+                type: item.notificationType?.toLowerCase() === 'invitation' ? 'invite' : 'etc',
+                message: item.content,
+                datetime: item.actionCreatedAt,
+                invitationId: item.invitationId,
+                url: item.url || null
             }))
             
             if (isInitial) {
                 notifications.value = newNotifications
-                const unreadChatCountInPage = fetchedData.filter(item => item.notificationType?.toUpperCase() === 'CHAT' && item.isRead === 'N').length;
-                totalUnreadNotifications.value = Math.max(0, totalUnreadCount - unreadChatCountInPage);
+                // totalUnreadCount는 이제 채팅 알림을 제외한 카운트라고 가정
+                totalUnreadNotifications.value = totalUnreadCount; 
             } else {
                 notifications.value.push(...newNotifications)
             }
@@ -141,20 +133,11 @@ export function useNotifications() {
 
     function markChatAsRead() {
         if (!hasNewChatMessage.value) return;
-
-        // 먼저 UI에서 즉시 빨간 점을 끕니다.
         hasNewChatMessage.value = false;
-
-        // 새로 만든 '채팅 알림 모두 읽음' API를 호출합니다.
         axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read/chat`, {}, {
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-        })
-        .then(() => {
-            console.log('✅ 서버의 채팅 알림들이 성공적으로 읽음 처리되었습니다.');
-        })
-        .catch(error => {
+        }).catch(error => {
             console.error('❌ 채팅 알림 읽음 처리 API 호출에 실패했습니다:', error);
-            // 실패 시 다시 빨간 점을 켤 수도 있습니다.
             hasNewChatMessage.value = true;
         });
     }
@@ -164,18 +147,24 @@ export function useNotifications() {
             await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read-all`, {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             })
-            // 성공적으로 API가 호출되면, 모든 알림의 isRead 상태를 true로 변경
-            notifications.value.forEach(n => n.isRead = true)
-        } catch (error) { console.error('❌ 모든 알림 읽음 처리 실패:', error) }
+            notifications.value = [];
+            totalUnreadNotifications.value = 0;
+            hasMore.value = false;
+            forceUpdate();
+        } catch (error) { console.error('❌ 모든 알림 삭제 처리 실패:', error) }
     }
 
     function _removeNotificationFromState(notificationId) {
+        const notificationToRemove = notifications.value.find(item => item.id === notificationId);
+        if (notificationToRemove) {
+            totalUnreadNotifications.value = Math.max(0, totalUnreadNotifications.value - 1);
+        }
         notifications.value = notifications.value.filter(item => item.id !== notificationId)
     }
 
     async function deleteNotification(notificationId) {
         try {
-            await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/api/notification/${notificationId}`, {
+            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/delete/${notificationId}`, null, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             })
             _removeNotificationFromState(notificationId)
@@ -188,8 +177,10 @@ export function useNotifications() {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             })
             _removeNotificationFromState(notification.id)
-            if (response.data && response.data.roomId) {
-              router.push(`/main-page/chat?roomId=${response.data.roomId}`)
+            
+            if (response.data && response.data.roomId && notification.url) {
+              const finalUrl = notification.url.replace('{chatRoomId}', response.data.roomId);
+              router.push(finalUrl);
             }
         } catch (error) { console.error('❌ 초대 수락 실패:', error) }
     }
@@ -204,44 +195,24 @@ export function useNotifications() {
     }
 
     function cleanup() {
-        if (eventSource) {
-            eventSource.close()
-            eventSource = null
-        }
-        if (reconnectTimeout) {
-            clearTimeout(reconnectTimeout)
-            reconnectTimeout = null 
-        }
+        if (eventSource) { eventSource.close(); eventSource = null; }
+        if (reconnectTimeout) { clearTimeout(reconnectTimeout); reconnectTimeout = null; }
     }
 
     function resetNotifications() {
-        notifications.value = []
-        hasNewChatMessage.value = false
-        totalUnreadNotifications.value = 0
-        lastNotificationId.value = null
-        isLoading.value = false
-        hasMore.value = true
-        isLogin.value = false
-        cleanup()
+        notifications.value = [];
+        hasNewChatMessage.value = false;
+        totalUnreadNotifications.value = 0;
+        lastNotificationId.value = null;
+        isLoading.value = false;
+        hasMore.value = true;
+        isLogin.value = false;
+        cleanup();
     }
 
     return {
-        notifications,
-        hasNewChatMessage,
-        totalUnreadNotifications,
-        isLoading,
-        hasMore,
-        isLogin,
-        notificationVersion,
-        formatLocalDateTime,
-        initializeNotifications,
-        fetchNotifications,
-        markAllAsRead,
-        markChatAsRead,
-        deleteNotification,
-        acceptInvitation,
-        rejectInvitation,
-        cleanup,
-        resetNotifications
+        notifications, hasNewChatMessage, totalUnreadNotifications, isLoading, hasMore, isLogin, notificationVersion,
+        formatLocalDateTime, initializeNotifications, fetchNotifications, markAllAsRead, markChatAsRead,
+        deleteNotification, acceptInvitation, rejectInvitation, cleanup, resetNotifications
     }
 }
