@@ -50,15 +50,18 @@ const boardConfig = {
 // API에서 내가 쓴 글 리스트 불러오기
 const fetchMyWrittenList = async () => {
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/myboards/written`, {
+    const res = await axios.get(`${API_BASE_URL}/api/boards/my/written`, {
       headers: {
         Authorization: `Bearer ${token}`
+      },
+      params: {
+        page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
+        size: 20
       }
     })
     const data = res.data
-    console.log('내가 쓴 글 API 응답:', data)
 
-    myWrittenList.value = data;
+    myWrittenList.value = data.boardListResDtos; // ✅ 이렇게 수정
 
   } catch (err) {
     console.error('내가 쓴 글 목록 가져오기 실패:', err)

@@ -34,7 +34,10 @@ const router = useRouter()
 // 상태 변수들
 const hotBoardList = ref([])            // HOT 게시글 목록
 const currentPage = ref(1)              // 현재 페이지
+const totalPages = ref(1)               // 전체 페이지 수
+const totalElements = ref(0)            // 전체 게시글 수
 const isLastPage = ref(false)           // 마지막 페이지 여부
+// const searchQuery = ref('')             // 검색어 상태
 const token = localStorage.getItem('accessToken')
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -56,14 +59,17 @@ const fetchHotBoardList = async () => {
       },
       params: {
         page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
-        size: 15,                     // HOT 게시판은 더 많이 보여줌
+        size: 20,                     // HOT 게시판은 더 많이 보여줌
       }
     })
     const data = res.data
-    console.log('HOT 게시글 API 응답:', data)
-
-    hotBoardList.value = data;
-
+    
+    //  hotBoardList.value = data;
+    hotBoardList.value = Array.isArray(data.boardListResDtos) ? data.boardListResDtos : []
+    currentPage.value = data.currentPage + 1  // 0부터 시작하는 걸 프론트는 1부터 보여주기 위함
+    totalPages.value = data.totalPages
+    totalElements.value = data.totalElements
+    isLastPage.value = data.isLast
   } catch (err) {
     console.error('HOT 게시글 목록 가져오기 실패:', err)
   }
