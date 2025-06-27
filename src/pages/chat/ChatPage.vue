@@ -44,11 +44,13 @@
             :current-room="currentRoom"
             :input="input"
             :menu-open="menuOpen"
+            :userCount="userCount"
             @update-input="updateInput"
             @send-message="sendMessage"
             @toggle-menu="toggleMenu"
             @open-invite="openInvite"
             @leave-room="leaveRoom"
+            @open-list="openList"
         />
       </div>
     </section>
@@ -70,8 +72,9 @@ import axios from 'axios'
 
 // ✨ useRoute import 추가
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import ChatUserList from "@/components/chat/ChatUserList.vue";
 
-// ============새로 추가한거(구현필요)===============
+// ============새로 추가한거(구현필요 or 확인하고 옮기쇼)===============
 // 유저목록 관련 상태 (새로 추가)
 const userListSearchQuery = ref('')
 // 접속 유저들 목록
@@ -79,9 +82,12 @@ const roomUsers = ref([])
 // 유저 목록 수
 const userCount = ref(5)
 // 채팅창 생성하기!!
+const showUserListView = ref(false)
+
 function createRoom() {
 }
-// 유저목록 열기 (새로 구현)
+
+// 유저목록 열기
 async function openList() {
   if (!activeRoomId.value) {
     console.warn('활성화된 채팅방이 없습니다.');
@@ -96,6 +102,27 @@ async function openList() {
   // 채팅방 유저 목록 가져오기
   await fetchRoomUsers(activeRoomId.value);
 }
+
+
+// 채팅방 유저 목록 가져오기
+async function fetchRoomUsers(roomId) {
+  try {
+    const response = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/users`, {
+      headers: { Authorization: `Bearer ${token.value}` }
+    });
+    roomUsers.value = response.data.map(user => ({
+      id: user.id,
+      nickname: user.nickname,
+      email: user.email,
+      avatar: user.avatar || Avatar
+    }));
+  } catch (error) {
+    console.error("채팅방 유저 목록 로딩 실패:", error);
+    // 실패 시 빈 배열로 설정
+    roomUsers.value = [];
+  }
+}
+
 // ======================================
 
 
