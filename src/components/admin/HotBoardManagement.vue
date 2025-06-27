@@ -180,6 +180,7 @@ function saveCriteria() {
     align-items: center;
     justify-content: space-between;
     padding: 20px 20px;
+
     span {
       font-family: $secondary-kr;
       font-weight: 400;
