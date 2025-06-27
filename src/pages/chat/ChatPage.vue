@@ -23,7 +23,7 @@
         />
 
         <InviteView
-            v-if="showInviteView"
+            v-else-if="showInviteView"
             :room-id="activeRoomId"
             :invited-user-ids="invitedUserIds"
             :search-query="searchQuery"
@@ -33,7 +33,7 @@
         />
 
         <ChatMainArea
-            v-if="!showInviteView"
+            v-else
             :active-room-id="activeRoomId"
             :current-room="currentRoom"
             :input="input"
@@ -75,9 +75,9 @@ const userListSearchQuery = ref('')
 const roomUsers = ref([])
 // 유저 목록 수
 const userCount = ref(5)
-// 채팅창 생성하기!!
+// 유저 리스트 뷰를 보여주는 상태
 const showUserListView = ref(false)
-
+// 채팅창 생성하기!!
 function createRoom() {
 }
 
@@ -115,6 +115,17 @@ async function fetchRoomUsers(roomId) {
     // 실패 시 빈 배열로 설정
     roomUsers.value = [];
   }
+}
+
+// 유저목록 뷰 닫기 (새로 추가)
+function closeUserListView() {
+  showUserListView.value = false;
+  userListSearchQuery.value = '';
+}
+
+// 유저목록 검색 핸들러 (새로 추가)
+function handleUserListSearch(query) {
+  userListSearchQuery.value = query;
 }
 
 // ======================================
