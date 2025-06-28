@@ -86,10 +86,10 @@
           <span>간편 회원가입</span>
         </div>
         <div class="signup-sns-list">
-          <a :href="`http://localhost:9090/oauth2/authorization/kakao?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn kakao">
+          <a :href="`http://localhost:9090/oauth2/authorization/kakao?state=${encodeURIComponent(state)}`" class="sns-btn kakao">
             <img src="../../assets/img/카카오로고.svg" alt="">
           </a>
-          <a :href="`http://localhost:9090/oauth2/authorization/google?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn google">
+          <a :href="`http://localhost:9090/oauth2/authorization/google?state=${encodeURIComponent(state)}`" class="sns-btn google">
             <img src="../../assets/img/구글로고.svg" alt="">
           </a>
         </div>
@@ -112,7 +112,7 @@ const password = ref('');
 const passwordCheck = ref('');
 
 // [추가] 이전 페이지에서 전달받은 state 값을 저장할 변수
-const teamCode = ref('');
+// const teamCode = ref('');
 const state = ref('');
 
 const router = useRouter();
@@ -216,7 +216,7 @@ const onSignup = async () => {
       state: state.value,       // 이 state 값을 통해 백엔드는 Redis에서 teamCode를 찾습니다.
     });
 
-    // 성공 시 이메일 인증 페이지로 바로 이동
+    // [수정] 성공 시 이메일 인증 페이지로 바로 이동
     toast.success('회원가입 정보가 확인되었습니다. 이메일 인증을 진행해주세요.');
 
     // 이메일 인증 코드 발송 요청
