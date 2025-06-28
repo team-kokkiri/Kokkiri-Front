@@ -35,7 +35,6 @@ const emit = defineEmits(['select-menu'])
 const menuItems = [
   { id: 'dashboard', label: '대시보드' },
   { id: 'users', label: '회원관리' },
-  { id: 'posts', label: '게시판관리' }
 ]
 
 // ===== 이벤트 핸들러 =====
