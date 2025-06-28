@@ -59,9 +59,18 @@ const props = defineProps({
 const emit = defineEmits(['permission-change', 'account-restriction'])
 
 // ===== Computed =====
-const isNormalUser = computed(() => props.user.role === 'normal' || !props.user.role)
-const isAdmin = computed(() => props.user.role === 'admin')
-const isRestricted = computed(() => props.user.isRestricted === true)
+const isNormalUser = computed(() => {
+  const role = props.user.role?.toLowerCase()
+  return role === 'user' || role === 'normal' || !role
+})
+const isAdmin = computed(() => {
+  const role = props.user.role?.toLowerCase()
+  return role === 'admin'
+})
+const isRestricted = computed(() => {
+  // isActive가 false이거나 isRestricted가 true인 경우 제한 상태
+  return props.user.isActive === false || props.user.isRestricted === true
+})
 
 // ===== 이벤트 핸들러 =====
 function changePermission(role) {

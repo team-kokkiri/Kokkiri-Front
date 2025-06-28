@@ -11,7 +11,9 @@
     <AdminUsers 
       v-else-if="activeMenu === 'users'"
       :users-data="usersData"
+      :is-loading="isLoading"
       @refresh="handleRefresh"
+      @user-updated="handleUserUpdated"
     />
   </div>
 </template>
@@ -35,14 +37,22 @@ defineProps({
     type: Array,
     default: () => []
   },
+  isLoading: {
+    type: Boolean,
+    default: false
+  }
 })
 
 // ===== Emits =====
-const emit = defineEmits(['refresh'])
+const emit = defineEmits(['refresh', 'user-updated'])
 
 // ===== 이벤트 핸들러 =====
 function handleRefresh() {
   emit('refresh')
+}
+
+function handleUserUpdated(updateData) {
+  emit('user-updated', updateData)
 }
 </script>
 
