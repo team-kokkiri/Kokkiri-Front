@@ -13,7 +13,6 @@
           :active-menu="activeMenu" 
           :dashboard-data="dashboardData"
           :users-data="usersData"
-          :posts-data="postsData"
           @refresh="handleRefresh"
         />
       </div>
@@ -25,25 +24,23 @@
 import { ref, onMounted } from 'vue'
 import AdminSidebar from '@/components/admin/AdminSidebar.vue'
 import AdminMainContent from '@/components/admin/AdminMainContent.vue'
+import axios from 'axios'
 
 // ===== 상태 관리 =====
 const activeMenu = ref('dashboard') // 'dashboard', 'users', 'posts'
+const token = localStorage.getItem('accessToken');
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
 // 대시보드 데이터
 const dashboardData = ref({
-  newUsers: 12,
-  totalUsers: 125,
-  todayPosts: 85,
-  totalFiles: 32
+  newUsers: 0,
+  totalUsers: 0,
+  todayPosts: 0,
+  totalFiles: 0
 })
 
 // 회원 관리 데이터
 const usersData = ref([
-  // TODO: API 연동 후 실제 데이터로 교체
-])
-
-// 게시판 관리 데이터
-const postsData = ref([
   // TODO: API 연동 후 실제 데이터로 교체
 ])
 
@@ -68,25 +65,38 @@ async function loadMenuData(menuName) {
     case 'users':
       await loadUsersData()
       break
-    case 'posts':
-      await loadPostsData()
-      break
   }
 }
 
 async function loadDashboardData() {
-  // TODO: 대시보드 통계 데이터 API 호출
-  console.log('Loading dashboard data...')
+  try {
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }
+    const res = await axios.get(`${API_BASE_URL}/api/admin/dashboard`,
+      config
+    )
+    console.log('대시보드 API 응답:', res.data)
+    // 결과 매핑
+
+    const result = res.data.result
+    dashboardData.value = {
+      newUsers: result.todayNewMemberCount,
+      totalUsers: result.totalMemberCount,
+      todayPosts: result.todayBoardCount,
+      totalFiles: result.todayReportCount
+    }
+    console.log('대시보드 데이터:', dashboardData.value)
+  } catch (err) {
+    console.error('대시보드 데이터 불러오기 실패:', err)
+  }
 }
 
 async function loadUsersData() {
   // TODO: 회원 목록 API 호출
   console.log('Loading users data...')
-}
-
-async function loadPostsData() {
-  // TODO: 게시글 목록 API 호출
-  console.log('Loading posts data...')
 }
 
 // ===== 라이프사이클 =====

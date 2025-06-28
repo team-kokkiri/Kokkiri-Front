@@ -13,13 +13,6 @@
       :users-data="usersData"
       @refresh="handleRefresh"
     />
-    
-    <!-- 게시판관리 뷰 -->
-    <AdminPosts 
-      v-else-if="activeMenu === 'posts'"
-      :posts-data="postsData"
-      @refresh="handleRefresh"
-    />
   </div>
 </template>
 
@@ -27,7 +20,6 @@
 import { defineProps, defineEmits } from 'vue'
 import AdminDashboard from './AdminDashboard.vue'
 import AdminUsers from './AdminUsers.vue'
-import AdminPosts from './AdminPosts.vue'
 
 // ===== Props =====
 defineProps({
@@ -43,10 +35,6 @@ defineProps({
     type: Array,
     default: () => []
   },
-  postsData: {
-    type: Array,
-    default: () => []
-  }
 })
 
 // ===== Emits =====
