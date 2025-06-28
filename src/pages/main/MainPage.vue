@@ -21,7 +21,10 @@
             @logout="handleLogout"
             @activity-navigate="handleActivityNavigate"
         />
-        <MainBodyCenter v-if="route.meta.showCenter"/>
+        <MainBodyCenter 
+          v-if="route.meta.showCenter"
+          @board-item-click="handleBoardItemClick"
+        />
         <MainRight v-if="route.meta.showRight"/>
       </div>
     </div>
@@ -152,6 +155,17 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   cleanup()
 })
+
+// 게시글 상세 페이지 넘ㅇ머가기
+const handleBoardItemClick = ({ boardId, itemId }) => {
+  if (boardId === 4) {
+    router.push(`/main-page/notice-board/${itemId}`)
+  } else if (boardId === 2) {
+    router.push(`/main-page/free-board/${itemId}`)
+  } else if (boardId === 3) {
+    router.push(`/main-page/free-board/${itemId}`)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

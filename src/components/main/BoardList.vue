@@ -2,7 +2,7 @@
   <div class="board-list">
     <div class="board-title-row">
       <h2 class="board-title">{{ boardTitle }}</h2>
-      <span class="board-more">더 보기</span>
+      <span class="board-more" @click="goToBoardPage">더 보기</span>
     </div>
 
     <ul class="board-items">
@@ -21,10 +21,17 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
+import { useRouter } from 'vue-router'
 
-defineProps({
+const router = useRouter()
+
+const props = defineProps({
   boardTitle: {
     type: String,
+    required: true
+  },
+  boardTypeId: {
+    type: Number,
     required: true
   },
   boardItems: {
@@ -35,6 +42,18 @@ defineProps({
 })
 
 defineEmits(['board-item-click'])
+
+function goToBoardPage() {
+  if (props.boardTypeId === 1) {
+    router.push('/main-page/notice')
+  } else if (props.boardTypeId === 2) {
+    router.push('/main-page/free-board')
+  } else if (props.boardTypeId === 3) {
+    router.push('/main-page/hot-board')
+  } else {
+    console.warn('알 수 없는 게시판 타입:', props.boardTypeId)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

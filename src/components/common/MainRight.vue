@@ -71,26 +71,65 @@
 </template>
 
 <script setup>
-  import { useRouter } from 'vue-router'
-  import { ref } from 'vue'
+import axios from 'axios'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+  // const router = useRouter()
+  // const searchText = ref('')
+  // const noticeList = [
+  //   { id: 1, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
+  //   { id: 2, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
+  //   { id: 3, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
+  // ]
+  // const hotList = [
+  //   { id: 1, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
+  //   { id: 2, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
+  //   { id: 3, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
+  // ]
 
   const router = useRouter()
   const searchText = ref('')
-  const noticeList = [
-    { id: 1, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
-    { id: 2, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
-    { id: 3, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
-  ]
-  const hotList = [
-    { id: 1, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
-    { id: 2, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
-    { id: 3, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
-  ]
+  const noticeList = ref([])
+  const hotList = ref([])
+  const token = localStorage.getItem('accessToken');
+  const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
+
+  onMounted(async () => {
+    try {
+      // 공지사항
+      const res = await axios.get(`${API_BASE_URL}/api/boards/preview/4`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      noticeList.value = res.data.map(item => ({
+        id: item.id,
+        title: item.boardTitle,
+        date: item.createdAt?.slice(0, 10) || ''
+      }))
+
+      // HOT 게시판
+      const hotRes = await axios.get(`${API_BASE_URL}/api/boards/preview/3`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      hotList.value = hotRes.data.map(item => ({
+        id: item.id,
+        title: item.boardTitle,
+        date: item.createdAt?.slice(0, 10) || ''
+      }))
+
+      console.log(hotRes.data)
+    } catch (err) {
+      console.error('메인 게시판 데이터 불러오기 실패:', err)
+    }
+  })
 
   function onSearch() {
     //여기다가 검색 관련 내용 넣으면댐
   }
-
   //밑에는 클릭 시 이동 관련.
   function goNoticeDetail(id) {
     router.push({ path: `/main-page/notice/${id}` })
