@@ -1,5 +1,6 @@
 // src/stores/user.js
 import { defineStore } from 'pinia'
+import instance from "@/utils/axios";
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -77,17 +78,13 @@ export const useUserStore = defineStore('user', {
       try {
         this.setToken(token);
 
-        // 로그인 직후 /api/members/me 호출해서 유저 정보 가져오기
-        const response = await fetch(`${process.env.VUE_APP_API_BASE_URL}/api/members/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: 'include', // 쿠키(리프레시 토큰) 전송 위해 필요
+        // axios 사용시!
+        const response = await instance.get('/api/members/me', {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (!response.ok) throw new Error('회원 정보 조회 실패');
-
-        const userInfo = await response.json();
+        // axios는 ok/json() 안써! data만!
+        const userInfo = response.data;
 
         this.setUserInfo({
           email: userInfo.email,
@@ -96,37 +93,50 @@ export const useUserStore = defineStore('user', {
           nickname: userInfo.nickname,
         });
 
-        // email도 localStorage에 저장해도 괜찮으면 저장
-        localStorage.setItem('token', token);
+        localStorage.setItem('accessToken', token);
         localStorage.setItem('email', userInfo.email);
         localStorage.setItem('role', userInfo.role);
         localStorage.setItem('avatar', userInfo.avatar);
         localStorage.setItem('nickname', userInfo.nickname);
-
-        // ---- 여기서 state 로그 출력 ----
-        console.log('Pinia에 저장된 토큰:', this.token);
-        console.log('Pinia에 저장된 유저 정보:', this.userInfo);
-        // 만약 userInfo가 없고 각각 state에 저장한다면 아래처럼
-        console.log('Pinia email:', this.email);
-        console.log('Pinia role:', this.role);
-        console.log('Pinia avatar:', this.avatar);
-        console.log('Pinia nickname:', this.nickname);
 
         return { success: true };
       } catch (error) {
         console.error('Login action error:', error);
         return { success: false, error: error.message };
       }
-    }
-,
+    },
+
+    restoreUser: async function() {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        this.token = token;
+        try {
+          const response = await instance.get('/api/members/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const userInfo = response.data;
+          this.setUserInfo({
+            email: userInfo.email,
+            role: userInfo.role,
+            avatar: userInfo.avatar,
+            nickname: userInfo.nickname,
+          });
+        } catch (err) {
+          this.clearUser({});
+        }
+      } else {
+        this.clearUser({});
+      }
+    },
+
     async logout() {
       try {
         // 서버 로그아웃 API 호출이 있다면 여기에 추가
-        this.clearUser()
+        this.clearUser({})
         return { success: true }
       } catch (error) {
         console.error('Logout action error:', error)
-        this.clearUser()
+        this.clearUser({})
         return { success: false, error: error.message }
       }
     },

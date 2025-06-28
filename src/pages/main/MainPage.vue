@@ -130,25 +130,23 @@ const handleActivityNavigate = (item) => {
 }
 
 // 컴포넌트 마운트 시 알림 시스템 초기화
-onMounted(() => {
-  // 예시: localStorage에서 유저 정보 읽어서 Pinia에 저장
-  const tokenData = {
-    email: localStorage.getItem('email'),
-    role: localStorage.getItem('role'),
-    avatar: localStorage.getItem('avatar'),
-    nickname: localStorage.getItem('nickname'),
+onMounted(async () => {
+  // 1. 구글 로그인 redirect에서 쿼리로 accessToken을 받는 경우 체크
+  const accessToken = route.query.accessToken;
+  if (accessToken) {
+    // accessToken을 Pinia에 저장하고 /api/members/me 호출
+    await userStore.login({ token: accessToken });
+
+    // 쿼리 파라미터를 주소창에서 깔끔하게 제거 (UX!)
+    router.replace({ path: router.currentRoute.value.path, query: {} });
+  } else {
+    //복구용 함수 호출 (localStorage → Pinia → me API 동기화)
+    await userStore.restoreUser();
   }
 
-  // 값이 모두 있으면 Pinia 스토어에 저장
-  if (tokenData.email && tokenData.role && tokenData.nickname) {
-    userStore.setUserInfo(tokenData)
-  }
-
-  console.log('Pinia에 현재 저장된 state:', userStore.$state)
-
-  initializeNotifications()
-
-})
+  console.log('Pinia에 현재 저장된 state:', userStore.$state);
+  initializeNotifications();
+});
 
 // 컴포넌트 언마운트 시 정리
 onBeforeUnmount(() => {
