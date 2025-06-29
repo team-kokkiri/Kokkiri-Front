@@ -19,7 +19,7 @@
 
 <script setup>
 import { computed, defineProps } from 'vue'
-import ProblemSection from '@/components/main/ProblemSection.vue'
+import ProblemSection from '@/components/daily-problem/ProblemSection.vue'
 
 // Props 정의
 const props = defineProps({

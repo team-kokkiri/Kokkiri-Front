@@ -26,6 +26,11 @@ const routes = [
         meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
+        path: 'daily-ranking',
+        component: () => import('@/pages/main/DailyRankingPage.vue'),
+        meta: { showNav: false, showRight: true, showLeft: false, showCenter: false },
+      },
+      {
         path: 'notice',
         component: () => import('@/pages/board/NoticeBoardList.vue'),
         meta: { showNav: false, showLeft: false, showCenter: false },

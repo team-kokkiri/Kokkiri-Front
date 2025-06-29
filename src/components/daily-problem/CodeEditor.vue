@@ -17,10 +17,10 @@
 
 <script setup>
 import { ref, watch, defineProps, defineExpose } from 'vue'
-import CodeEditorHeader from '@/components/main/CodeEditorHeader.vue'
-import CodeInput from '@/components/main/CodeInput.vue'
-import ResultHeader from '@/components/main/ResultHeader.vue'
-import ExecutionResult from '@/components/main/ExecutionResult.vue'
+import CodeEditorHeader from '@/components/daily-problem/CodeEditorHeader.vue'
+import CodeInput from '@/components/daily-problem/CodeInput.vue'
+import ResultHeader from '@/components/daily-problem/ResultHeader.vue'
+import ExecutionResult from '@/components/daily-problem/ExecutionResult.vue'
 
 // Props 정의
 const props = defineProps({

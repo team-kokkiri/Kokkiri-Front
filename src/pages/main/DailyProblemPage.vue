@@ -32,8 +32,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import ProblemDescription from '@/components/main/ProblemDescription.vue'
-import CodeEditor from '@/components/main/CodeEditor.vue'
+import ProblemDescription from '@/components/daily-problem/ProblemDescription.vue'
+import CodeEditor from '@/components/daily-problem/CodeEditor.vue'
 import ActionButton from '@/components/common/ActionButton.vue'
 import { useDailyProblem } from '@/composables/useDailyProblem'
 
