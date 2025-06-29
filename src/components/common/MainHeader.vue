@@ -172,7 +172,7 @@ const rejectionRoomName = computed(() => {
 });
 
 const menuList = [
-  { name: '게시판', path: '' }, { name: '캘린더', path: '/calendar' }, { name: '파티찾기', path: '/party' },
+  { name: '게시판', path: '' }, { name: '캘린더', path: '/calendar' }, { name: '일일문제', path: '/daily-problem' },
   { name: '공지사항', path: '/notice' }, { name: '관리자페이지', path: '/admin' }
 ];
 
