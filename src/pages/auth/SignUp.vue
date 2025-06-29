@@ -86,10 +86,10 @@
           <span>간편 회원가입</span>
         </div>
         <div class="signup-sns-list">
-          <a :href="`http://localhost:9090/oauth2/authorization/kakao?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn kakao">
+          <a :href="`http://localhost:9090/oauth2/authorization/kakao?state=${encodeURIComponent(state)}`" class="sns-btn kakao">
             <img src="../../assets/img/카카오로고.svg" alt="">
           </a>
-          <a :href="`http://localhost:9090/oauth2/authorization/google?teamCode=${encodeURIComponent(teamCode)}`" class="sns-btn google">
+          <a :href="`http://localhost:9090/oauth2/authorization/google?state=${encodeURIComponent(state)}`" class="sns-btn google">
             <img src="../../assets/img/구글로고.svg" alt="">
           </a>
         </div>
@@ -101,55 +101,42 @@
 
 <script setup>
 /*####### 임포트 #######*/
-import {ref, onMounted, onUnmounted, computed} from 'vue';
+import {ref, onMounted, computed, watch, onUnmounted} from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { toast } from "vue3-toastify";
 import axios from '../../utils/axios';
-import {useRoute, useRouter} from 'vue-router';
-
 
 /*####### 변수들 #######*/
 const email = ref('');
 const password = ref('');
 const passwordCheck = ref('');
+
+// [추가] 이전 페이지에서 전달받은 state 값을 저장할 변수
+// const teamCode = ref('');
+const state = ref('');
+
 const router = useRouter();
 const route = useRoute();
-const teamCode = ref('');
-const nickname = ref('');
 
 /* 에러 메시지 변수 */
 const emailError = ref('');
 const passwordCheckError = ref('');
 
-import { watch } from 'vue';
-import {toast} from "vue3-toastify";
+// [수정] onMounted 로직을 state 기반으로 전면 수정
+onMounted(() => {
+  // URL 쿼리 파라미터에서 state 값을 읽어옵니다.
+  const queryState = route.query.state;
 
-onMounted(async () => {
-  const code = route.query.teamCode;
-
-  // teamCode가 쿼리로 넘어왔으면 세션에 저장 시도
-  if (code) {
-    try {
-      await axios.post('/api/team/session', {
-        teamCode: code
-      }, {
-        withCredentials: true
-      });
-      console.log('쿼리로 받은 teamCode를 세션에 저장:', code);
-    } catch (e) {
-      console.error('쿼리 teamCode 세션 저장 실패:', e);
-    }
+  // state 값이 없으면 비정상적인 접근으로 간주하고, 팀 코드 인증 페이지로 리다이렉트합니다.
+  if (!queryState) {
+    toast.error('잘못된 접근입니다. 팀 코드 인증을 다시 진행해주세요.');
+    router.push('/teamcode-verify');
+    return;
   }
 
-  // 세션에서 teamCode 꺼내기
-  try {
-    const res = await axios.get('/api/team/session', {
-      withCredentials: true
-    });
-    teamCode.value = res.data.teamCode;
-    console.log('세션에서 teamCode 가져옴:', teamCode.value);
-  } catch (err) {
-    console.error('세션에서 팀 코드 가져오기 실패:', err);
-    router.push('/teamcode-verify'); // 못 가져오면 다시 인증하게
-  }
+  // 가져온 state 값을 컴포넌트의 state 변수에 저장합니다.
+  state.value = queryState;
+  console.log('페이지에 전달된 state:', state.value);
 });
 
 // 이메일 입력이 바뀔 때 에러 즉시 제거
@@ -222,27 +209,24 @@ const onSignup = async () => {
   }
 
   try {
-    // 1) 회원가입 정보 임시 저장
+    // [수정] 회원가입 요청 시 세션 대신 'state' 값을 함께 전송합니다.
     await axios.post('/api/members/signup', {
       email: email.value,
       password: password.value,
-      nickname: nickname.value,
-    },{
-      withCredentials: true,
+      state: state.value,       // 이 state 값을 통해 백엔드는 Redis에서 teamCode를 찾습니다.
     });
 
-    toast.success('인증이 완료되었습니다.');
-    setTimeout(() => {
-      router.push('/signup'); // teamCode는 세션에서 가져오게 됨
-    }, 1500);
+    // [수정] 성공 시 이메일 인증 페이지로 바로 이동
+    toast.success('회원가입 정보가 확인되었습니다. 이메일 인증을 진행해주세요.');
 
-    // 2) 이메일 인증 코드 발송
+    // 이메일 인증 코드 발송 요청
     await axios.post('/api/email/send', null, {
       params: { email: email.value, type: 'signup' },
     });
 
-    // 3) 인증 페이지로 이동 (email 쿼리 포함)
+    // 인증 페이지로 이동 (email 쿼리 포함)
     router.push({ path: '/email-verify', query: { email: email.value } });
+
   } catch (error) {
     console.error('회원가입 실패:', error);
     if (error.response?.status === 409) {
@@ -252,6 +236,7 @@ const onSignup = async () => {
     }
   }
 };
+
 
 /*##### 비밀번호 정규표현식 (css효과) ######*/
 
@@ -303,8 +288,16 @@ const move = () => {
 };
 
 onMounted(() => {
+  const queryState = route.query.state;
+  if (!queryState) {
+    toast.error('잘못된 접근입니다.');
+    router.push('/teamcode-verify');
+    return;
+  }
+  state.value = queryState;
   reqId = requestAnimationFrame(move);
 });
+
 onUnmounted(() => {
   cancelAnimationFrame(reqId);
 });

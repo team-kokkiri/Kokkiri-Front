@@ -83,19 +83,17 @@ const fetchBoardList = async () => {
       },
       params: {
         page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
-        size: 10
+        size: 20
       }
     })
 
     const data = res.data
 
-    console.log('API 전체 응답:', data);
-
-    boardList.value = data
+    boardList.value = Array.isArray(data.boardListResDtos) ? data.boardListResDtos : []
     currentPage.value = data.currentPage + 1  // 0부터 시작하는 걸 프론트는 1부터 보여주기 위함
     totalPages.value = data.totalPages
     totalElements.value = data.totalElements
-    isLastPage.value = data.last
+    isLastPage.value = data.isLast
   } catch (err) {
     console.error('게시글 목록 가져오기 실패:', err)
     boardList.value = []
@@ -108,7 +106,7 @@ onMounted(async () => {
 })
 
 // 다음 페이지 존재 여부 (임시로 항상 true, 실제로는 API 응답에 따라)
-const hasNextPage = computed(() => true)
+const hasNextPage = computed(() => !isLastPage.value)
 
 // 게시글 상세로 이동하는 함수
 function goToDetail(id) {
