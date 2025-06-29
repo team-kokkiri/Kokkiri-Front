@@ -33,6 +33,7 @@
 <script setup>
 import { computed, defineProps } from 'vue'
 
+// Props 정의
 const props = defineProps({
   result: {
     type: Object,
@@ -40,6 +41,10 @@ const props = defineProps({
   }
 })
 
+/**
+ * 실행 상태에 따른 CSS 클래스를 결정하는 computed
+ * @returns {string} 상태에 맞는 CSS 클래스명
+ */
 const statusClass = computed(() => {
   if (!props.result?.status) return ''
   
@@ -61,6 +66,11 @@ const statusClass = computed(() => {
   }
 })
 
+/**
+ * 영어 상태를 한글로 변환하는 함수
+ * @param {string} status - 영어 상태명
+ * @returns {string} 한글 상태명
+ */
 const getStatusText = (status) => {
   const statusMap = {
     'ACCEPTED': '정답',
@@ -73,6 +83,11 @@ const getStatusText = (status) => {
   return statusMap[status] || status
 }
 
+/**
+ * 바이트 단위를 사람이 읽기 쉬운 단위로 변환하는 함수
+ * @param {number} bytes - 바이트 수
+ * @returns {string} 포맷팅된 메모리 크기 문자열
+ */
 const formatMemory = (bytes) => {
   if (bytes < 1024) return `${bytes}B`
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`

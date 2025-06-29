@@ -12,6 +12,7 @@
 <script setup>
 import { defineProps } from 'vue'
 
+// Props 정의 - 문제의 각 섹션 표시용
 defineProps({
   title: {
     type: String,

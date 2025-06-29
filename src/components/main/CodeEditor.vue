@@ -16,12 +16,13 @@
 </template>
 
 <script setup>
-import { ref, watch, defineProps,defineExpose } from 'vue'
+import { ref, watch, defineProps, defineExpose } from 'vue'
 import CodeEditorHeader from '@/components/main/CodeEditorHeader.vue'
 import CodeInput from '@/components/main/CodeInput.vue'
 import ResultHeader from '@/components/main/ResultHeader.vue'
 import ExecutionResult from '@/components/main/ExecutionResult.vue'
 
+// Props 정의
 const props = defineProps({
   problemId: {
     type: Number,
@@ -29,30 +30,43 @@ const props = defineProps({
   }
 })
 
-// emit은 사용하지 않으므로 제거
-
-const sourceCode = ref(`import java.util.Scanner;
-
-public class Solution {
+// 코드 에디터 상태
+const sourceCode = ref(`public class Main {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String a = sc.next();
-        System.out.println(a);
+        System.out.println("Hello World");
     }
 }`)
 
 const selectedLanguage = ref('JAVA')
 const executionResult = ref(null)
 
-// Watch for changes in problemId to reset the editor
+/**
+ * 문제 ID 변경 시 에디터 상태 초기화
+ */
 watch(() => props.problemId, () => {
   executionResult.value = null
 })
 
-// Expose methods for parent component
+/**
+ * 부모 컴포넌트에서 사용할 수 있는 메소드들을 노출
+ */
 defineExpose({
+  /**
+   * 현재 작성된 코드를 반환
+   * @returns {string} 소스 코드
+   */
   getCode: () => sourceCode.value,
+  
+  /**
+   * 현재 선택된 프로그래밍 언어를 반환
+   * @returns {string} 프로그래밍 언어
+   */
   getLanguage: () => selectedLanguage.value,
+  
+  /**
+   * 실행 결과를 설정
+   * @param {Object} result - 실행 결과 객체
+   */
   setResult: (result) => {
     executionResult.value = result
   }

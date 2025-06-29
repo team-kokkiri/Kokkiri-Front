@@ -1,6 +1,6 @@
 <template>
   <div class="code-editor-header">
-    <span class="file-name">Solution.java(하드코딩, 파일이름 항상 고정)</span>
+    <span class="file-name">Main.java(고정된 파일명)</span>
   </div>
 </template>
 

@@ -13,6 +13,7 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 
+// Props 정의 - 버튼의 모양과 동작 설정
 defineProps({
   text: {
     type: String,
@@ -28,6 +29,7 @@ defineProps({
   }
 })
 
+// Emits 정의 - 버튼 클릭 이벤트
 defineEmits(['click'])
 </script>
 

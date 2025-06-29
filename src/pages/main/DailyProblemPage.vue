@@ -20,11 +20,6 @@
     <div class="problem-footer">
       <div class="action-buttons">
         <ActionButton 
-          text="코드 실행" 
-          @click="handleRunCode"
-          :loading="isRunning"
-        />
-        <ActionButton 
           text="제출하기" 
           @click="handleSubmitCode"
           :loading="isSubmitting"
@@ -42,35 +37,29 @@ import CodeEditor from '@/components/main/CodeEditor.vue'
 import ActionButton from '@/components/common/ActionButton.vue'
 import { useDailyProblem } from '@/composables/useDailyProblem'
 
+// 코드 에디터 컴포넌트 참조
 const codeEditorRef = ref(null)
 
+// 일일 문제 컴포저블 사용
 const { 
   problemData, 
   fetchTodaysProblem,
-  runCode,
   submitCode,
-  isRunning,
   isSubmitting
 } = useDailyProblem()
 
+/**
+ * 컴포넌트 마운트 시 오늘의 문제 데이터 로드
+ */
 onMounted(() => {
   fetchTodaysProblem()
 })
 
-const handleRunCode = async () => {
-  if (!codeEditorRef.value || !problemData.value?.id) return
-  
-  try {
-    const sourceCode = codeEditorRef.value.getCode()
-    const language = codeEditorRef.value.getLanguage()
-    
-    const result = await runCode(sourceCode, language)
-    codeEditorRef.value.setResult(result)
-  } catch (error) {
-    console.error('Failed to run code:', error)
-  }
-}
-
+/**
+ * 코드 제출 버튼 클릭 핸들러
+ * 에디터에서 코드를 가져와 제출하고 결과를 표시
+ * 정답인 경우 문제 데이터를 새로고침하여 랭킹 업데이트
+ */
 const handleSubmitCode = async () => {
   if (!codeEditorRef.value || !problemData.value?.id) return
   
@@ -81,7 +70,7 @@ const handleSubmitCode = async () => {
     const result = await submitCode(sourceCode, language)
     codeEditorRef.value.setResult(result.submission)
     
-    // Refresh problem data to update rankings
+    // 정답인 경우 문제 데이터 새로고침으로 랭킹 업데이트
     if (result.accepted) {
       await fetchTodaysProblem()
     }
