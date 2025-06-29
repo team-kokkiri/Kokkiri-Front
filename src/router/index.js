@@ -67,8 +67,18 @@ const routes = [
         meta: { showLeft: false, showCenter: false },
       },
       {
+        path: 'share-board/:id',
+        component: () => import('@/pages/board/ShareBoardDetail.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
+      {
         path: 'project-board',
         component: () => import('@/pages/board/ProjectBoardList.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
+      {
+        path: 'project-board/:id',
+        component: () => import('@/pages/board/ProjectBoardDetail.vue'),
         meta: { showLeft: false, showCenter: false },
       },
       {
@@ -81,6 +91,11 @@ const routes = [
         component: () => import('@/pages/user/MyCommentedPosts.vue'),
         meta: { showLeft: false, showCenter: false },
       },
+      {
+        path: '/main-page/search',
+        component: () => import('@/pages/board/BoardSearch.vue'),
+        meta: { showLeft: false, showCenter: false },
+      }
     ]
   },
     //oauth2 토큰저장페이지

@@ -27,19 +27,17 @@
             <router-link class="right-board-more" to="/main-page/notice">더 보기</router-link>
           </li>
           <li
-              v-for="(notice, i) in [...noticeList.slice(0, 3), ...Array(3 - noticeList.length).fill({ empty: true })]"
-              :key="notice.id || 'empty-' + i"
-              @click="!notice.empty && goNoticeDetail(notice.id)"
-              class="right-board-item"
-              :class="{ empty: notice.empty }"
-              style="cursor:pointer"
+            v-for="notice in noticeList.slice(0, 3)"
+            :key="notice.id"
+            @click="goNoticeDetail(notice.id)"
+            class="right-board-item"
+            style="cursor:pointer"
           >
-            <span class="right-board-text">
-              {{ notice.empty ? "" : notice.title }}
-            </span>
-                    <span class="right-board-meta">
-              {{ notice.empty ? "" : notice.date }}
-            </span>
+            <span class="right-board-text">{{ notice.title }}</span>
+            <span class="right-board-meta">{{ notice.date }}</span>
+          </li>
+          <li v-if="noticeList.length === 0" class="right-board-item empty">
+            <span class="right-board-text">게시글이 없습니다</span>
           </li>
         </ul>
         <!-- HOT 게시판 -->
@@ -49,19 +47,17 @@
             <router-link class="right-board-more" to="/main-page/hot-board">더 보기</router-link>
           </li>
           <li
-              v-for="(hot, i) in [...hotList.slice(0, 3), ...Array(3 - hotList.length).fill({ empty: true })]"
-              :key="hot.id || 'empty-' + i"
-              @click="!hot.empty && goHotDetail(hot.id)"
-              class="right-board-item"
-              :class="{ empty: hot.empty }"
-              style="cursor:pointer"
+            v-for="hot in hotList.slice(0, 3)"
+            :key="hot.id"
+            @click="goHotDetail(hot.id)"
+            class="right-board-item"
+            style="cursor:pointer"
           >
-            <span class="right-board-text">
-              {{ hot.empty ? "" : hot.title }}
-            </span>
-                    <span class="right-board-meta">
-              {{ hot.empty ? "" : hot.date }}
-            </span>
+            <span class="right-board-text">{{ hot.title }}</span>
+            <span class="right-board-meta">{{ hot.date }}</span>
+          </li>
+          <li v-if="hotList.length === 0" class="right-board-item empty">
+            <span class="right-board-text">게시글이 없습니다</span>
           </li>
         </ul>
       </div>
@@ -72,22 +68,10 @@
 
 <script setup>
 import axios from 'axios'
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
-  // const router = useRouter()
-  // const searchText = ref('')
-  // const noticeList = [
-  //   { id: 1, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
-  //   { id: 2, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
-  //   { id: 3, title: "안녕하세요 한국SW산업협회입니다.", date: "06/04 21:09" },
-  // ]
-  // const hotList = [
-  //   { id: 1, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
-  //   { id: 2, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
-  //   { id: 3, title: "HOT 게시글 예시입니다.", date: "06/04 21:09" },
-  // ]
-
+  const route = useRoute()
   const router = useRouter()
   const searchText = ref('')
   const noticeList = ref([])
@@ -95,47 +79,64 @@ import { useRouter } from 'vue-router'
   const token = localStorage.getItem('accessToken');
   const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
-  onMounted(async () => {
-    try {
-      // 공지사항
-      const res = await axios.get(`${API_BASE_URL}/api/boards/preview/4`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      noticeList.value = res.data.map(item => ({
-        id: item.id,
-        title: item.boardTitle,
-        date: item.createdAt?.slice(0, 10) || ''
-      }))
+onMounted(fetchBoardPreviews)
 
-      // HOT 게시판
-      const hotRes = await axios.get(`${API_BASE_URL}/api/boards/preview/3`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      hotList.value = hotRes.data.map(item => ({
-        id: item.id,
-        title: item.boardTitle,
-        date: item.createdAt?.slice(0, 10) || ''
-      }))
-
-      console.log(hotRes.data)
-    } catch (err) {
-      console.error('메인 게시판 데이터 불러오기 실패:', err)
+watch(
+  () => route.fullPath,
+  async (newPath) => {
+    await fetchBoardPreviews()
+    if (newPath !== '/main-page') {
+      searchText.value = ''
     }
-  })
-
-  function onSearch() {
-    //여기다가 검색 관련 내용 넣으면댐
   }
+)
+
+async function fetchBoardPreviews() {
+  try {
+    // 공지사항
+    const res = await axios.get(`${API_BASE_URL}/api/boards/preview/4`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    noticeList.value = res.data.map(item => ({
+      id: item.id,
+      title: item.boardTitle,
+      date: item.createdAt?.slice(0, 10) || ''
+    }))
+
+    // HOT 게시판
+    const hotRes = await axios.get(`${API_BASE_URL}/api/boards/preview/3`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    hotList.value = hotRes.data.map(item => ({
+      id: item.id,
+      title: item.boardTitle,
+      date: item.createdAt?.slice(0, 10) || ''
+    }))
+  } catch (err) {
+    console.error('메인 게시판 데이터 불러오기 실패:', err)
+  }
+}
+
+  // 전체 검색
+  function onSearch() {
+    if (searchText.value.trim() !== '') {
+      router.push({ 
+        path: '/main-page/search',
+        query: { keyword: searchText.value }
+      });
+    }
+  }
+
   //밑에는 클릭 시 이동 관련.
   function goNoticeDetail(id) {
     router.push({ path: `/main-page/notice/${id}` })
   }
   function goHotDetail(id) {
-    router.push({ path: `/main-page/hot-board/${id}` })
+    router.push({ path: `/main-page/free-board/${id}` })
   }
 </script>
 

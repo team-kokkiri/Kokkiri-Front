@@ -11,7 +11,7 @@
   <div class="board-free-detail" v-else-if="post">
     <!-- 상세 헤딩 -->
     <div class="detail-heading">
-      <h2 class="board-title">자유게시판</h2>
+      <h2 class="board-title">프로젝트 소개</h2>
     </div>
 
     <!-- 게시글 본문 -->
@@ -62,7 +62,7 @@
 
 <script setup>
 import axios from 'axios'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PostHeader from '@/components/board/common/PostHeader.vue'
 import PostContent from '@/components/board/common/PostContent.vue'
@@ -105,16 +105,6 @@ const fetchPost = async () => {
 onMounted(() => {
   fetchPost()
 })
-
-// route.params.id가 바뀌는 경우에도 게시글 다시 로드
-watch(
-  () => route.params.id,
-  (newId, oldId) => {
-    if (newId !== oldId) {
-      fetchPost()
-    }
-  }
-)
 
 // 댓글 등록
 const onSubmitComment = async (commentData) => {
@@ -312,7 +302,7 @@ const onDelete = async (item) => {
           `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
           config
       )
-      await router.push('/main-page/free-board')
+      await router.push('/main-page/project-board')
     } else {
       // 댓글 대댓글 삭제
       await axios.delete(
@@ -338,7 +328,7 @@ const onReport = (item) => {
 
 // 글 목록 이동
 const goToList = () => {
-  router.push('/main-page/free-board')
+  router.push('/main-page/project-board')
 }
 </script>
 

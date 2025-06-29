@@ -24,6 +24,7 @@
         <MainBodyCenter 
           v-if="route.meta.showCenter"
           @board-item-click="handleBoardItemClick"
+          :has-project-posts="hasProjectPosts"
         />
         <MainRight v-if="route.meta.showRight"/>
       </div>
@@ -33,7 +34,7 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import MainHeader from '@/components/common/MainHeader.vue'
@@ -156,7 +157,7 @@ onBeforeUnmount(() => {
   cleanup()
 })
 
-// 게시글 상세 페이지 넘ㅇ머가기
+// 게시글 상세 페이지 넘어가기
 const handleBoardItemClick = ({ boardId, itemId }) => {
   if (boardId === 4) {
     router.push(`/main-page/notice-board/${itemId}`)
@@ -166,6 +167,20 @@ const handleBoardItemClick = ({ boardId, itemId }) => {
     router.push(`/main-page/free-board/${itemId}`)
   }
 }
+
+const hasProjectPosts = ref(true) // 기본값 true로 설정
+
+watch(
+  () => route.fullPath,
+  (newPath) => {
+    if (newPath.startsWith('/main-page/project-board')) {
+      // 예시: 게시글 목록이 비어있는지 판단해 상태 설정 (실제 구현은 API 연동 필요)
+      const projectPostList = [] // 여기를 실제 데이터로 대체
+      hasProjectPosts.value = projectPostList.length > 0
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
