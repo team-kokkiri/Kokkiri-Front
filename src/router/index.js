@@ -21,9 +21,14 @@ const routes = [
         meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
-        path: 'party',
-        component: () => import('@/pages/main/PartyPage.vue'),
+        path: 'daily-problem',
+        component: () => import('@/pages/main/DailyProblemPage.vue'),
         meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
+      },
+      {
+        path: 'daily-ranking',
+        component: () => import('@/pages/main/DailyRankingPage.vue'),
+        meta: { showNav: false, showRight: true, showLeft: false, showCenter: false },
       },
       {
         path: 'notice',
