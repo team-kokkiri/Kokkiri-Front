@@ -90,7 +90,7 @@ const showInviteView = ref(false);
 const inviteSearchQuery = ref('');
 const invitedUserIds = ref([]);
 
-// ✨ 유저 목록 관련 (변수 선언 추가 및 수정)
+// 유저 목록 관련
 const showUserListView = ref(false);
 const roomUsers = ref([]);
 const userListSearchQuery = ref('');
@@ -114,7 +114,7 @@ function createRoom() {
   console.log("새 채팅방 생성 로직 구현 필요");
 }
 
-// ✨ 채팅방 멤버 목록 API 호출 함수
+// 채팅방 멤버 목록 API 호출 함수
 async function fetchChatRoomMembers(roomId, query, pageNum) {
   if (!roomId) return null;
   isMemberLoading.value = true;
@@ -132,7 +132,7 @@ async function fetchChatRoomMembers(roomId, query, pageNum) {
   }
 }
 
-// ✨ 멤버 목록을 더 불러오는 함수 (무한 스크롤)
+//  멤버 목록을 더 불러오는 함수 (무한 스크롤)
 async function fetchMoreMembers() {
   if (isMemberLoading.value || !hasMoreMembers.value) return;
 
@@ -154,7 +154,7 @@ async function fetchMoreMembers() {
   }
 }
 
-// ✨ 유저 목록 보기 (초기화 및 첫 페이지 로딩)
+// 유저 목록 보기 (초기화 및 첫 페이지 로딩)
 async function openList() {
   if (!activeRoomId.value) {
     alert("유저 목록을 보려면 채팅방을 먼저 선택해주세요.");
@@ -174,7 +174,7 @@ async function openList() {
 function closeUserListView() { showUserListView.value = false; }
 function handleUserListSearch(query) { userListSearchQuery.value = query; }
 
-// ✨ 검색어가 변경되면 디바운싱 후 멤버 목록을 다시 불러옴
+// 검색어가 변경되면 디바운싱 후 멤버 목록을 다시 불러옴
 watch(userListSearchQuery, () => {
   clearTimeout(searchDebounceTimer);
   searchDebounceTimer = setTimeout(async () => {

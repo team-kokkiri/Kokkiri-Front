@@ -1,4 +1,4 @@
-import { ref } from 'vue' // ✨ computed를 import 목록에서 삭제
+import { ref } from 'vue'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -233,9 +233,9 @@ export function useNotifications() {
             }
             const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/members`, {
                 headers: { Authorization: `Bearer ${token}` },
-                params: { page, size } // ✨ page와 size를 파라미터로 전달
+                params: { page, size }
             });
-            return response.data; // ✨ 백엔드에서 보낸 PageResponseDto 객체 전체를 반환
+            return response.data;
         } catch (error) {
             console.error(`채팅방(${roomId}) 멤버 조회 실패:`, error);
             return null;

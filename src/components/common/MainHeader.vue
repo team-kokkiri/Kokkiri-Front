@@ -39,7 +39,6 @@
                         <button class="btn-reject" @click.stop="handleRejectClick(item)">거절</button>
                       </template>
                       <template v-else>
-                        <!-- ✨ 삭제 버튼 클릭 시 모달 열도록 변경 -->
                         <button class="btn-delete" @click.stop="handleDeleteClick(item.id)">삭제</button>
                       </template>
                     </div>
@@ -105,7 +104,6 @@
     </div>
   </div>
 
-  <!-- ✨ 삭제 확인 모달 추가 -->
   <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
     <div class="modal-content">
       <p class="modal-text">
@@ -153,7 +151,6 @@ const notificationToReject = ref(null);
 
 const showMarkAllAsReadModal = ref(false);
 
-// ✨ 삭제 모달 상태 관리를 위한 ref 추가
 const showDeleteModal = ref(false);
 const notificationIdToDelete = ref(null);
 
@@ -254,7 +251,6 @@ async function confirmMarkAllAsRead() {
   closeMarkAllAsReadModal();
 }
 
-// ✨ 삭제 관련 함수 추가
 function handleDeleteClick(id) {
   notificationIdToDelete.value = id;
   showDeleteModal.value = true;
