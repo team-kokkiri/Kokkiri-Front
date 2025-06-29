@@ -18,6 +18,7 @@
             :key="board.id"
             :board-title="board.title"
             :board-items="board.items"
+            :board-type-id="board.id"
             @board-item-click="(itemId) => $emit('board-item-click', { boardId: board.id, itemId })"
         />
       </div>
@@ -26,45 +27,65 @@
 </template>
 
 <script setup>
-import { defineEmits } from 'vue'
-import { ref } from 'vue'
+import { defineEmits, ref, onMounted } from 'vue'
+import axios from 'axios'
 import ProjectSlider from './ProjectSlider.vue'
 import BoardList from './BoardList.vue'
 
 defineEmits(['board-item-click'])
 
-const boardList = ref([
-  {
-    id: 1,
-    title: '공지사항',
-    items: [
-      { id: 1, text: '안녕하세요 한국SW산업협회입니다.', meta: '3분전' },
-      { id: 2, text: '대선 및 현충일 수업 관련 공지입니다.', meta: '06/04 21:09' },
-      { id: 3, text: '이스트소프트 KDT 온라인 교육 홈페이지 신청 안내', meta: '06/03 18:05' },
-      { id: 4, text: '금일, 교육생 선발 면접이 진행되오니 7층 복도 및 휴게실에서 큰 소음을 자제해주시기 바랍니다.', meta: '06/01 15:35' }
-    ]
-  },
-  {
-    id: 2,
-    title: '자유게시판',
-    items: [
-      { id: 1, text: '안녕하세요 한국SW산업협회입니다.', meta: '3분전' },
-      { id: 2, text: '대선 및 현충일 수업 관련 공지입니다.', meta: '06/04 21:09' },
-      { id: 3, text: '이스트소프트 KDT 온라인 교육 홈페이지 신청 안내', meta: '06/03 18:05' },
-      { id: 4, text: '금일, 교육생 선발 면접이 진행되오니 7층 복도 및 휴게실에서 큰 소음을 자제해주시기 바랍니다.', meta: '06/01 15:35' }
-    ]
-  },
-  {
-    id: 3,
-    title: 'BEST 게시판',
-    items: [
-      { id: 1, text: '안녕하세요 한국SW산업협회입니다.', meta: '3분전' },
-      { id: 2, text: '대선 및 현충일 수업 관련 공지입니다.', meta: '06/04 21:09' },
-      { id: 3, text: '이스트소프트 KDT 온라인 교육 홈페이지 신청 안내', meta: '06/03 18:05' },
-      { id: 4, text: '금일, 교육생 선발 면접이 진행되오니 7층 복도 및 휴게실에서 큰 소음을 자제해주시기 바랍니다.', meta: '06/01 15:35' }
-    ]
+const boardList = ref([])
+const token = localStorage.getItem('accessToken');
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
+
+const fetchMainBoardData = async () => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/api/boards/main`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = res.data;
+    console.log(data)
+
+    boardList.value = [
+      {
+        id: 1,
+        title: '공지사항',
+        items: data.notice.slice(0, 5).map(item => ({
+          id: item.id,
+          text: item.boardTitle,
+          meta: item.createdAt?.slice(0, 10) || ''
+        }))
+      },
+      {
+        id: 2,
+        title: '자유게시판',
+        items: data.free.slice(0, 5).map(item => ({
+          id: item.id,
+          text: item.boardTitle,
+          meta: item.createdAt?.slice(0, 10) || ''
+        }))
+      },
+      {
+        id: 3,
+        title: 'BEST 게시판',
+        items: data.best.slice(0, 5).map(item => ({
+          id: item.id,
+          text: item.boardTitle,
+          meta: item.createdAt?.slice(0, 10) || ''
+        }))
+      }
+    ];
+  } catch (err) {
+    console.error('메인 게시판 데이터 불러오기 실패:', err);
   }
-])
+};
+
+
+onMounted(fetchMainBoardData)
+
 </script>
 
 <style lang="scss" scoped>

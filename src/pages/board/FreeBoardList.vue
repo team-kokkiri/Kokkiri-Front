@@ -9,6 +9,7 @@
 
       <!-- 글쓰기 폼 컴포넌트 -->
       <ListWriteForm
+          :boardTypeId="1"
           @submit="handleSubmitPost"
           @imageUpload="handleImageUpload"
       />
@@ -94,6 +95,9 @@ const fetchBoardList = async () => {
     totalPages.value = data.totalPages
     totalElements.value = data.totalElements
     isLastPage.value = data.isLast
+
+    console.log('자유게시판 API 응답:', data)
+
   } catch (err) {
     console.error('게시글 목록 가져오기 실패:', err)
     boardList.value = []

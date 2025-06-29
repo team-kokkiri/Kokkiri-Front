@@ -12,6 +12,7 @@
   >
     <template #write-form>
       <ListWriteForm
+          :boardTypeId="2"
           @submit="handleSubmitPost"
           @imageUpload="handleImageUpload"
       />
@@ -43,7 +44,11 @@ const router = useRouter()
 // 상태 변수들
 const shareBoardList = ref([])          // 자료공유 게시글 목록
 const currentPage = ref(1)              // 현재 페이지
+const totalPages = ref(1)               // 전체 페이지 수
+const totalElements = ref(0)            // 전체 게시글 수
 const isLastPage = ref(false)           // 마지막 페이지 여부
+// const searchQuery = ref('')             // 검색어 상태
+
 const token = localStorage.getItem('accessToken')
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -65,13 +70,19 @@ const fetchShareBoardList = async () => {
       },
       params: {
         page: currentPage.value - 1,
-        size: 15
+        size: 20
       }
     })
     const data = res.data
-    console.log('자료공유 게시글 API 응답:', data)
 
-    shareBoardList.value = data;
+    
+    shareBoardList.value = Array.isArray(data.boardListResDtos) ? data.boardListResDtos : []
+    currentPage.value = data.currentPage + 1
+    totalPages.value = data.totalPages
+    totalElements.value = data.totalElements
+    isLastPage.value = data.isLast
+
+    console.log('자료공유 게시글 API 응답:', data)
 
   } catch (err) {
     console.error('자료공유 게시글 목록 가져오기 실패:', err)

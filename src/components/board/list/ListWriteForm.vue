@@ -78,8 +78,11 @@
 import { ref, defineProps, defineEmits } from 'vue'
 
 // Props
-defineProps({
-  // 필요시 부모에서 초기값 받을 수 있음
+const props = defineProps({
+  boardType: {
+    type: Number,
+    required: true
+  }
 })
 
 // Emits
@@ -139,10 +142,43 @@ function handleImageUpload() {
 }
 
 function onFileChange(event) {
-  const files = event.target.files
-  if (files && files.length > 0) {
-    formData.value.attachedImages = Array.from(files)
+  const files = Array.from(event.target.files)
+  if (!files.length) return
+
+  // MIME 타입 기준
+  const allowedImageTypes = ['image/jpeg', 'image/png']
+  const allowedFileTypes = [
+    'application/pdf',
+    'application/vnd.hancom.hwp',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'text/plain',
+    'text/csv',
+    'application/zip'
+  ]
+
+  let filteredFiles = []
+
+  if (props.boardType === 1) {
+    // 자유게시판: 이미지만
+    filteredFiles = files.filter(file => allowedImageTypes.includes(file.type))
+
+    if (filteredFiles.length === 0) {
+      alert('이미지만 첨부할 수 있습니다.')
+      return
+    }
+  } else {
+    // 나머지 게시판: 이미지 + 파일
+    filteredFiles = files.filter(file =>
+      allowedImageTypes.includes(file.type) || allowedFileTypes.includes(file.type)
+    )
   }
+
+  formData.value.attachedImages = filteredFiles
 }
 
 
