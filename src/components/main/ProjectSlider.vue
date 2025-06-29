@@ -4,7 +4,7 @@
       <h2 class="slider-title">프로젝트를 소개합니다!</h2>
     </div>
 
-    <div class="slider-content">
+    <div v-if="Array.isArray(projects) && projects.length > 0" class="slider-content">
       <div class="slider-wrapper">
         <div class="project-cards-container" :style="{ transform: `translateX(-${currentIndex * slideDistance}px)` }">
           <div
@@ -13,7 +13,7 @@
               class="project-card"
           >
             <div class="project-thumbnail">
-              <img :src="project.img" alt="프로젝트 썸네일" />
+              <img :src="project.thumbnail" alt="프로젝트 썸네일" />
             </div>
             <div class="project-info">
               <h3 class="project-title">{{ project.title }}</h3>
@@ -41,12 +41,21 @@
         </button>
       </div>
     </div>
+    <div v-else class="no-projects-message">
+      등록된 프로젝트 소개 글이 없습니다.
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, defineProps } from 'vue'
 
+const props = defineProps({
+  projects: {
+    type: Array,
+    required: true
+  }
+})
 const currentIndex = ref(0)
 const visibleCards = 2;
 const cardGap = 12; // 카드 간격 (px)
@@ -58,39 +67,8 @@ const cardWidth = (containerWidth - (cardGap * (visibleCards - 1))) / visibleCar
 // 슬라이드 거리
 const slideDistance = cardWidth + cardGap;
 
-const projects = ref([
-  {
-    id: 1,
-    title: '프로젝트 A',
-    team: 'Team KOKKIRI',
-    description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    img: require('@/assets/img/마스코트잔디.png')
-  },
-  {
-    id: 2,
-    title: '프로젝트 B',
-    team: 'Team GPT',
-    description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    img: require('@/assets/img/너구리.jpg')
-  },
-  {
-    id: 3,
-    title: '프로젝트 C',
-    team: 'Team CLAUDE',
-    description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    img: require('@/assets/img/너구리2.png')
-  },
-  {
-    id: 4,
-    title: '프로젝트 D',
-    team: 'Team REACT',
-    description: '이 프로젝트는 테스트 용으로\n만들었습니다\n많은관심 부탁드립니다\n테스트 테스트 테스트 테스트',
-    img: require('@/assets/img/고라니.jpg')
-  }
-])
-
 const maxIndex = computed(() => {
-  return Math.max(0, projects.value.length - visibleCards)
+  return Math.max(0, props.projects.length - visibleCards)
 });
 
 const prevSlide = () => {

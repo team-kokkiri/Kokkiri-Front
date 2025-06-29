@@ -9,7 +9,12 @@
       </div>
 
       <!-- 프로젝트 소개 슬라이드 -->
-      <ProjectSlider />
+      <template v-if="hasProjectPosts">
+        <ProjectSlider :projects="projectPosts" />
+      </template>
+      <div v-else class="no-project-message">
+        등록된 프로젝트 소개 글이 없습니다.
+      </div>
 
       <!-- 메인 게시판 목록 -->
       <div class="main-board-list">
@@ -35,6 +40,8 @@ import BoardList from './BoardList.vue'
 defineEmits(['board-item-click'])
 
 const boardList = ref([])
+const hasProjectPosts = ref(true)
+const projectPosts = ref([])
 const token = localStorage.getItem('accessToken');
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -78,6 +85,15 @@ const fetchMainBoardData = async () => {
         }))
       }
     ];
+
+    projectPosts.value = (data.project || []).map(item => ({
+      id: item.id,
+      title: item.boardTitle,
+      description: item.boardContent,
+      thumbnail: `${API_BASE_URL}${item.thumbnailUrl}`
+    }))
+    hasProjectPosts.value = projectPosts.value.length > 0;
+
   } catch (err) {
     console.error('메인 게시판 데이터 불러오기 실패:', err);
   }
@@ -122,4 +138,14 @@ onMounted(fetchMainBoardData)
     }
   }
 }
+
+.no-project-message {
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  background: #f5f5f5;
+  border-radius: 5px;
+}
+
 </style>

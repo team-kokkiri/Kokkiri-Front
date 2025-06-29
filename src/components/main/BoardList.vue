@@ -6,6 +6,9 @@
     </div>
 
     <ul class="board-items">
+      <li v-if="boardItems.length === 0" class="board-item empty">
+        <span class="board-text">게시글이 없습니다.</span>
+      </li>
       <li
           v-for="item in boardItems"
           :key="item.id"
@@ -112,6 +115,12 @@ function goToBoardPage() {
 
       &:hover {
         background-color: #FAFAFA;
+      }
+
+      &.empty {
+        justify-content: center;
+        color: $light-black;
+        cursor: default;
       }
 
       .board-text {

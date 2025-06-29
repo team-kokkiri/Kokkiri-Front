@@ -78,20 +78,30 @@ const questionPosts = computed(() => {
 // API에서 게시글 리스트 불러오기
 const fetchBoardList = async () => {
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/boards/list/1`, {
+    const params = {
+      page: currentPage.value - 1,
+      size: 20,
+    }
+
+    let url = `${API_BASE_URL}/api/boards/list/1`
+
+    // 검색어가 있는 경우 검색 API로 변경
+    if (searchQuery.value.trim()) {
+      url = `${API_BASE_URL}/api/boards/search/1`
+      params.keyword = searchQuery.value.trim()
+    }
+
+    const res = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`
       },
-      params: {
-        page: currentPage.value - 1,  // Spring의 Pageable은 0부터 시작
-        size: 20
-      }
+      params
     })
 
     const data = res.data
 
     boardList.value = Array.isArray(data.boardListResDtos) ? data.boardListResDtos : []
-    currentPage.value = data.currentPage + 1  // 0부터 시작하는 걸 프론트는 1부터 보여주기 위함
+    currentPage.value = data.currentPage + 1
     totalPages.value = data.totalPages
     totalElements.value = data.totalElements
     isLastPage.value = data.isLast
@@ -174,7 +184,8 @@ function handleImageUpload() {
 function handleSearch(query) {
   console.log('검색:', query)
   searchQuery.value = query
-  currentPage.value = 1 // 검색시 첫 페이지로
+  currentPage.value = 1
+  fetchBoardList() // 검색 API 호출 트리거
 }
 
 // 검색 입력 핸들러
