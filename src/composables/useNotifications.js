@@ -14,6 +14,7 @@ const hasMore = ref(true)
 const isLogin = ref(false)
 const notificationVersion = ref(0)
 const totalUnreadNotifications = ref(0)
+const isChatPageActive = ref(false);
 
 /**
  * 알림 데이터 중앙 관리 composable
@@ -131,15 +132,24 @@ export function useNotifications() {
         }
     }
 
-    function markChatAsRead() {
-        if (!hasNewChatMessage.value) return;
+    async function markChatAsRead() {
+        // 이미 빨간 점이 없는 상태면 함수를 실행X
+        if (!hasNewChatMessage.value) {
+            return;
+        }
+        
+        // UI를 먼저 변경하여 사용자에게 즉각적인 피드백
         hasNewChatMessage.value = false;
-        axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read/chat`, {}, {
+
+        try {
+            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read-chat`, {}, {
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-        }).catch(error => {
-            console.error('❌ 채팅 알림 읽음 처리 API 호출에 실패했습니다:', error);
+            });
+
+        } catch (error) {
+            console.error('❌ 채팅 알림 읽음 처리 API 호출 실패:', error);
             hasNewChatMessage.value = true;
-        });
+        }
     }
 
     async function markAllAsRead() {
@@ -172,18 +182,18 @@ export function useNotifications() {
     }
     
     async function acceptInvitation(notification) {
-        try {
-            const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notification.invitationId}/accept`, {}, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-            })
-            _removeNotificationFromState(notification.id)
-            
-            if (response.data && response.data.roomId && notification.url) {
-              const finalUrl = notification.url.replace('{chatRoomId}', response.data.roomId);
-              router.push(finalUrl);
-            }
-        } catch (error) { console.error('❌ 초대 수락 실패:', error) }
-    }
+    try {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notification.invitationId}/accept`, {}, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+        });
+        _removeNotificationFromState(notification.id);
+        
+        // roomId를 받아 채팅방으로 직접 라우팅합니다.
+        if (response.data && response.data.roomId) {
+          router.push({ path: '/main-page/chat', query: { roomId: response.data.roomId } });
+        }
+    } catch (error) { console.error('❌ 초대 수락 실패:', error); }
+}
 
     async function rejectInvitation(notification) {
         try {
@@ -210,9 +220,26 @@ export function useNotifications() {
         cleanup();
     }
 
+    async function fetchChatRoomMembers(roomId) {
+    try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            console.error("인증 토큰이 없습니다.");
+            return []; // 빈 배열 반환
+        }
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/members`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data; // 멤버 목록 배열 반환
+    } catch (error) {
+        console.error(`채팅방(${roomId}) 멤버 조회 실패:`, error);
+        return []; // 에러 발생 시 빈 배열 반환
+    }
+}
+
     return {
         notifications, hasNewChatMessage, totalUnreadNotifications, isLoading, hasMore, isLogin, notificationVersion,
         formatLocalDateTime, initializeNotifications, fetchNotifications, markAllAsRead, markChatAsRead,
-        deleteNotification, acceptInvitation, rejectInvitation, cleanup, resetNotifications
+        deleteNotification, acceptInvitation, rejectInvitation, cleanup, resetNotifications, isChatPageActive, fetchChatRoomMembers
     }
 }

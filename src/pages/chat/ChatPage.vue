@@ -31,7 +31,7 @@
             @send-message="sendMessage"
             @toggle-menu="toggleMenu"
             @open-invite="openInvite"
-            @leave-room="leaveRoom"
+            @leave-room="handleLeaveRoom"
         />
       </div>
     </section>
@@ -43,6 +43,7 @@
 import ChatSidebar from '@/components/chat/ChatSidebar.vue'
 import InviteView from '@/components/chat/InviteView.vue'
 import ChatMainArea from '@/components/chat/ChatMainArea.vue'
+
 import Avatar from '@/assets/img/0.png' // 기본 아바타
 import { ref, computed, onMounted, onUnmounted} from 'vue'
 
@@ -75,8 +76,9 @@ const currentUserEmail = ref('')
 const searchQuery = ref('')
 const invitedUserIds = ref([])
 
-// ✨ route 객체 생성
+// route 객체 생성
 const route = useRoute();
+
 
 // API 기본 URL (환경 변수 사용 권장)
 const VUE_APP_API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
@@ -273,10 +275,7 @@ function openInvite() {
   menuOpen.value = false; 
   showInviteView.value = true; 
 }
-function leaveRoom() { 
-  menuOpen.value = false; 
-  console.log('채팅방 나가기'); 
-}
+
 function handleEscapeKey(event) { 
   if (event.key === 'Escape') { 
     if (showInviteView.value) closeInviteView(); 
@@ -287,7 +286,33 @@ function closeInviteView() { showInviteView.value = false; searchQuery.value = '
 function handleInviteSearch(query) { searchQuery.value = query; }
 function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
 
-// ✨ onMounted 훅 수정
+async function handleLeaveRoom() {
+  if (!activeRoomId.value) {
+    alert("나갈 채팅방이 선택되지 않았습니다.");
+    return;
+  }
+
+  try {
+    await axios.delete(`${VUE_APP_API_BASE_URL}/api/chat/room/group/${activeRoomId.value}/leave`, {
+      headers: { Authorization: `Bearer ${token.value}` }
+    });
+
+    // alert("채팅방에서 나갔습니다.");
+
+    // 성공적으로 나간 후 프론트엔드 상태 업데이트
+    // 1. 채팅방 목록에서 해당 방을 제거합니다.
+    chatRooms.value = chatRooms.value.filter(room => room.roomId !== activeRoomId.value);
+    
+    // 2. 현재 선택된 채팅방을 초기화합니다.
+    activeRoomId.value = null;
+
+  } catch (error) {
+    console.error("채팅방 나가기 실패:", error);
+    alert("채팅방을 나가는 데 실패했습니다.");
+  }
+}
+
+
 onMounted(async () => {
   // 1. 기본 정보 설정
   currentUserEmail.value = localStorage.getItem('email');
@@ -328,6 +353,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  
   disconnectWebSocket();
   document.removeEventListener('keydown', handleEscapeKey);
 });
