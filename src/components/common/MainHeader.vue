@@ -7,7 +7,10 @@
         </div>
         <div class="header-center">
           <div v-for="menu in menuList" :key="menu.name" class="gnb-menu-item" :class="{ active: activeMenu === menu.name }" @click="handleMenuClick(menu)">
-            <span class="menu-text">{{ menu.name }}</span>
+            <div class="menu-content">
+              <img v-if="menu.name === '순위'" src="@/assets/img/crown.png" alt="왕관" class="crown-icon" />
+              <span class="menu-text">{{ menu.name }}</span>
+            </div>
           </div>
         </div>
         <div class="header-right">
@@ -424,28 +427,45 @@ onBeforeUnmount(() => {
         gap: 42px;
         margin-right: 90px;
         .gnb-menu-item {
-          position: relative;
-          display: flex;
-          align-items: center;
-          cursor: pointer;
-          height: 80px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        height: 80px;
+        
+        .menu-content {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+          
+          .crown-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            margin-top: 2px;
+          }
+        
           .menu-text {
             font-size: 16px;
-            font-weight: bold;
+          font-weight: bold;
             color: $dark-black;
-            transition: color 0.2s;
+              transition: color 0.2s;
+              }
+            }
+            
+            &.active {
+              border-bottom: 5px solid $main-color;
+              padding-top: 10px;
+            }
+            
+            &:hover .menu-content .menu-text {
+              color: $main-color;
+            }
+            
+            &.active .menu-content .menu-text {
+              color: $main-color
+            }
           }
-          &.active {
-            border-bottom: 5px solid $main-color;
-            padding-top: 10px;
-          }
-          &:hover .menu-text {
-            color: $main-color;
-          }
-          &.active .menu-text {
-            color: $main-color
-          }
-        }
       }
       .header-right {
         display: flex;

@@ -1,6 +1,6 @@
 <template>
   <div class="code-editor-header">
-    <span class="file-name">Main.java(고정된 파일명)</span>
+    <span class="file-name">Main.java</span>
   </div>
 </template>
 
