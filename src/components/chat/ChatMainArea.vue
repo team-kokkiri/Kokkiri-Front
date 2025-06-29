@@ -59,6 +59,18 @@
         <p>채팅방을 선택하여 대화를 시작하세요.</p>
      </div>
   </div>
+
+  <div v-if="showLeaveModal" class="modal-overlay" @click.self="closeLeaveModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        <strong>'{{ currentRoom.roomName }}'</strong> 채팅방을 나가시겠습니까?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="confirmLeave">네</button>
+        <button class="btn-modal btn-cancel" @click="closeLeaveModal">아니오</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -80,12 +92,16 @@ const emit = defineEmits([
   'toggle-menu',
   'open-invite',
   'leave-room',
-  'open-List'
+  'open-user-list'
 ])
 
 // DOM Refs
 const menuContainer = ref(null)
 const chatContentRef = ref(null)
+
+// 모달 상태 관리를 위한 ref
+const showLeaveModal = ref(false);
+
 
 // Helper 함수들
 function formatDisplayTime(dateTimeStr) {
@@ -103,7 +119,20 @@ function scrollToBottom() {
   })
 }
 
-// 이벤트 핸들러들
+function leaveRoom() {
+  showLeaveModal.value = true; // 이제 모달을 띄우는 역할만 합니다.
+}
+
+function closeLeaveModal() {
+  showLeaveModal.value = false;
+}
+
+function confirmLeave() {
+  emit('leave-room'); // 부모 컴포넌트에 '나가기' 이벤트를 전달
+  closeLeaveModal(); // 모달을 닫습니다.
+}
+
+
 function updateInput(event) {
   emit('update-input', event.target.value)
 }
@@ -120,11 +149,8 @@ function openInvite() {
   emit('open-invite')
 }
 
-function leaveRoom() {
-  emit('leave-room')
-}
 function openList() {
-  emit('open-List')
+  emit('open-user-list') 
 }
 
 // currentRoom의 messages가 변경될 때 스크롤 이동
@@ -363,6 +389,60 @@ onMounted(() => {
       color: $white;
       font-size: 30px;
     }
+  }
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* 다른 요소들보다 위에 표시되도록 설정 */
+}
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 320px;
+}
+.modal-text {
+  font-size: 16px;
+  margin: 0 0 20px;
+  color: #333;
+  line-height: 1.5;
+}
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.btn-modal {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 80px;
+}
+.btn-confirm {
+  background-color: $main-color;
+  color: white;
+  &:hover {
+    background-color: darken($main-color, 10%);
+  }
+}
+.btn-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+  &:hover {
+    background-color: #e0e0e0;
   }
 }
 </style>
