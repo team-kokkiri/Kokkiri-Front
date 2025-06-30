@@ -335,7 +335,7 @@ async function addEvent() {
     await fetchEvents()
   } catch (e) {
     const errMsg = e.response?.data?.message || e.response?.data || e.message
-    alert('등록 실패: ' + errMsg)
+    toast.error('등록 실패: ' + errMsg)
   }
 }
 </script>
