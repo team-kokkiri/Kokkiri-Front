@@ -21,18 +21,21 @@
     </div>
 
     <div class="chat-content" ref="chatContentRef">
+      <!-- 유효한 메시지만 순회하도록 computed 속성 사용 -->
       <div
           class="chat-message"
-          v-for="msg in currentRoom.messages"
+          v-for="msg in validMessages"
           :key="msg.id"
+          :class="{ 'my-message': msg.nickname === currentUserNickname }"
       >
         <img class="avatar" :src="msg.avatar" alt="아바타" />
         <div class="message-info">
           <div class="message-top">
-            <span class="nickname">{{ msg.nickname }}</span>
-            <span class="time">{{ formatDisplayTime(msg.time) }}</span>
+            <!-- 옵셔널 체이닝(?.)을 사용하여 데이터가 없어도 오류가 나지 않도록 합니다. -->
+            <span class="nickname">{{ msg?.nickname }}</span>
           </div>
-          <p class="message-text">{{ msg.text }}</p>
+          <p class="message-text">{{ msg?.text }}</p>
+          <span class="time">{{ formatDisplayTime(msg?.time) }}</span>
         </div>
       </div>
     </div>
@@ -63,7 +66,7 @@
   <div v-if="showLeaveModal" class="modal-overlay" @click.self="closeLeaveModal">
     <div class="modal-content">
       <p class="modal-text">
-        <strong>'{{ currentRoom.roomName }}'</strong> 채팅방을 나가시겠습니까?
+        <strong v-if="currentRoom">'{{ currentRoom.roomName }}'</strong> 채팅방을 나가시겠습니까?
       </p>
       <div class="modal-actions">
         <button class="btn-modal btn-confirm" @click="confirmLeave">네</button>
@@ -74,7 +77,13 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, watch, nextTick, onMounted } from 'vue'
+import { ref, defineProps, defineEmits, watch, nextTick, onMounted, computed } from 'vue'
+
+// NOTE:
+// 1. 이 컴포넌트가 올바르게 동작하려면, 부모 컴포넌트에서 `currentUserNickname` prop으로
+//    현재 로그인한 사용자의 닉네임을 정확히 전달해야 합니다.
+// 2. 부모에서 내려주는 `currentRoom.messages` 배열의 각 메시지 객체(msg)는
+//    `nickname`, `text`, `time` 등의 속성을 포함해야 합니다.
 
 // Props 정의
 const props = defineProps({
@@ -83,6 +92,7 @@ const props = defineProps({
   input: String,
   menuOpen: Boolean,
   userCount: Number,
+  currentUserNickname: String // 현재 사용자 닉네임을 받기 위한 prop
 })
 
 // Emits 정의  
@@ -102,6 +112,15 @@ const chatContentRef = ref(null)
 // 모달 상태 관리를 위한 ref
 const showLeaveModal = ref(false);
 
+// v-if와 v-for를 함께 사용하는 것을 방지하기 위한 computed 속성
+const validMessages = computed(() => {
+  if (!props.currentRoom || !props.currentRoom.messages) {
+    return [];
+  }
+  // 유효한 메시지(msg 객체, nickname, text 속성이 모두 있는 경우)만 필터링합니다.
+  return props.currentRoom.messages.filter(msg => msg && msg.nickname && msg.text !== undefined);
+});
+
 
 // Helper 함수들
 function formatDisplayTime(dateTimeStr) {
@@ -120,7 +139,7 @@ function scrollToBottom() {
 }
 
 function leaveRoom() {
-  showLeaveModal.value = true; // 이제 모달을 띄우는 역할만 합니다.
+  showLeaveModal.value = true;
 }
 
 function closeLeaveModal() {
@@ -128,8 +147,8 @@ function closeLeaveModal() {
 }
 
 function confirmLeave() {
-  emit('leave-room'); // 부모 컴포넌트에 '나가기' 이벤트를 전달
-  closeLeaveModal(); // 모달을 닫습니다.
+  emit('leave-room');
+  closeLeaveModal();
 }
 
 
@@ -153,17 +172,21 @@ function openList() {
   emit('open-user-list') 
 }
 
-// currentRoom의 messages가 변경될 때 스크롤 이동
-watch(() => props.currentRoom?.messages, () => {
-  scrollToBottom()
-}, { deep: true })
+// currentRoom 데이터가 변경될 때 로그를 출력하여 디버깅을 돕습니다.
+watch(() => props.currentRoom, (newRoom) => {
+  console.log("[ChatMainArea] currentRoom 데이터 변경:", newRoom);
+  if (newRoom && newRoom.messages) {
+    console.log("[ChatMainArea] 수신된 메시지 목록:", newRoom.messages);
+  }
+  scrollToBottom();
+}, { deep: true });
 
-// activeRoomId가 변경될 때와 컴포넌트가 다시 마운트될 때도 스크롤 이동
+
+// activeRoomId가 변경될 때도 스크롤을 맨 아래로 이동시킵니다.
 watch(() => props.activeRoomId, () => {
   scrollToBottom()
 })
 
-// showInviteView에서 돌아올 때를 감지하기 위해 컴포넌트 마운트 시에도 스크롤
 onMounted(() => {
   scrollToBottom()
 })
@@ -296,12 +319,14 @@ onMounted(() => {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 15px; // 메시지 간격 조정
 
   .chat-message {
     display: flex;
-    gap: 21px;
-    align-items: flex-start;
+    gap: 12px;
+    align-items: flex-end; // 시간 때문에 하단 정렬로 변경
+    max-width: 80%; // 메시지 최대 너비 설정
+    align-self: flex-start; // 기본은 왼쪽 정렬
 
     .avatar {
       width: 50px;
@@ -312,25 +337,18 @@ onMounted(() => {
     }
 
     .message-info {
-      flex: 1;
-
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start; // 기본은 텍스트 왼쪽 정렬
+      
       .message-top {
-        display: flex;
-        align-items: center;
-        gap: 13px;
         margin-bottom: 7px;
 
         .nickname {
           font-family: $secondary-kr;
           font-weight: 500;
-          font-size: 18px;
+          font-size: 16px; 
           color: $dark-black;
-        }
-
-        .time {
-          font-family: $primary-kr;
-          font-size: 12px;
-          color: $silver-black;
         }
       }
 
@@ -340,6 +358,34 @@ onMounted(() => {
         color: $dark-black;
         margin: 0;
         word-wrap: break-word;
+        padding: 10px 14px;
+        border-radius: 18px;
+        background-color: #f1f3f5; 
+        line-height: 1.5;
+      }
+      
+      .time {
+        font-family: $primary-kr;
+        font-size: 12px;
+        color: $silver-black;
+        margin-top: 5px; // 메시지 버블과의 간격
+      }
+    }
+    
+    // --- 내가 보낸 메시지에 대한 스타일 ---
+    &.my-message {
+      align-self: flex-end; 
+      flex-direction: row-reverse; 
+
+      .message-info {
+        align-items: flex-end;
+        .message-top {
+          // 닉네임은 보통 본인 메시지에서는 숨기지만, 일단 유지
+        }
+        .message-text {
+          background-color: $main-color; 
+          color: $white;
+        }
       }
     }
   }
@@ -401,7 +447,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* 다른 요소들보다 위에 표시되도록 설정 */
+  z-index: 1000;
 }
 .modal-content {
   background: white;

@@ -121,9 +121,30 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, defineProps, defineEmits } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+// --- 오류 해결을 위한 코드 추가 ---
 import { useNotifications } from '@/composables/useNotifications';
+// ------------------------------------
+
+// --- 경고 해결을 위한 코드 추가 ---
+const props = defineProps({
+  notifications: Array,
+  totalUnreadNotifications: Number,
+  isLoading: Boolean,
+  hasMore: Boolean,
+  hasNewChatMessage: Boolean,
+});
+
+const emit = defineEmits([
+  'deleteNotification',
+  'markAllAsRead',
+  'acceptInvitation',
+  'rejectInvitation',
+  'fetchMoreNotifications',
+  'markChatAsRead',
+]);
+// ------------------------------------
 
 const {
   notifications,
@@ -138,7 +159,8 @@ const {
   deleteNotification,
   acceptInvitation,
   rejectInvitation
-} = useNotifications();
+} = useNotifications(props, emit);
+
 
 const router = useRouter();
 const route = useRoute();
@@ -254,6 +276,7 @@ async function confirmMarkAllAsRead() {
   closeMarkAllAsReadModal();
 }
 
+// 삭제 관련 함수
 function handleDeleteClick(id) {
   notificationIdToDelete.value = id;
   showDeleteModal.value = true;
