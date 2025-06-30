@@ -22,6 +22,11 @@
             <span class="nickname">{{ user.nickname }}</span>
             <span class="email">{{ user.email }}</span>
           </div>
+          <!-- 본인 여부에 따라 분기 처리 -->
+          <div class="user-action">
+            <span v-if="user.email === userStore.email" class="me-badge">나</span>
+            <button v-else class="btn-chat" @click="startChat(user)">채팅하기</button>
+          </div>
         </div>
         <div v-if="isLoading" class="loading-indicator">
           <span>멤버를 불러오는 중...</span>
@@ -45,7 +50,12 @@
 
 <script setup>
 import { computed, defineProps, defineEmits, ref, onMounted, onUnmounted } from 'vue'
-import defaultAvatar from '@/assets/img/0.png'; // 기본 아바타 이미지
+import defaultAvatar from '@/assets/img/0.png';
+// 1. Pinia 스토어를 가져옵니다.
+import { useUserStore } from '@/stores/user'
+
+// 2. 스토어 인스턴스를 생성합니다.
+const userStore = useUserStore()
 
 // Props
 const props = defineProps({
@@ -59,42 +69,42 @@ const props = defineProps({
 const emit = defineEmits([
   'back',
   'search',
-  'load-more'
+  'load-more',
+  'start-private-chat' // 3. 새 이벤트를 정의합니다.
 ]);
 
-const scrollContainerRef = ref(null); // 스크롤 컨테이너의 ref
+const scrollContainerRef = ref(null);
 
-// 검색 필터링된 사용자 목록
 const filteredUsers = computed(() => {
   if (!props.searchQuery) return props.users;
   const query = props.searchQuery.toLowerCase();
   return props.users.filter(user =>
       user.nickname.toLowerCase().includes(query)
-      // email 검색이 필요하면 추가: || user.email.toLowerCase().includes(query)
   );
 });
 
 function goBack() { emit('back') }
 function handleSearchInput(event) { emit('search', event.target.value) }
 
-// 스크롤 이벤트 핸들러
+// 4. 채팅 시작 이벤트를 발생시키는 함수를 추가합니다.
+function startChat(user) {
+  emit('start-private-chat', user);
+}
+
 const handleScroll = () => {
   const container = scrollContainerRef.value;
   if (container) {
     const isNearBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
-    // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 이벤트를 발생시킵니다.
     if (isNearBottom && !props.isLoading && props.hasMore) {
       emit('load-more');
     }
   }
 };
 
-// 컴포넌트가 마운트될 때 스크롤 이벤트 리스너를 추가
 onMounted(() => {
   scrollContainerRef.value?.addEventListener('scroll', handleScroll);
 });
 
-// 컴포넌트가 언마운트될 때 리스너를 제거하여 메모리 누수를 방지
 onUnmounted(() => {
   scrollContainerRef.value?.removeEventListener('scroll', handleScroll);
 });
@@ -113,7 +123,6 @@ onUnmounted(() => {
   flex-direction: column;
   position: relative;
 
-  // 헤더
   .user-list-header {
     height: 72px;
     padding: 16px;
@@ -123,14 +132,12 @@ onUnmounted(() => {
     align-items: center;
     position: relative;
 
-    .header-left {
-      .user-list-title {
-        font-family: $secondary-kr;
-        font-weight: 500;
-        font-size: 18px;
-        line-height: 1.25;
-        color: $dark-black;
-      }
+    .header-left .user-list-title {
+      font-family: $secondary-kr;
+      font-weight: 500;
+      font-size: 18px;
+      line-height: 1.25;
+      color: $dark-black;
     }
 
     .btn-back {
@@ -155,14 +162,12 @@ onUnmounted(() => {
     }
   }
 
-  // 메인 컨텐츠 영역
   .user-list-content-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 
-    // 유저 리스트
     .user-list {
       flex: 1;
       padding: 20px;
@@ -175,9 +180,9 @@ onUnmounted(() => {
       .user-item {
         display: flex;
         align-items: center;
-        gap: 30px;
+        gap: 15px; // 간격 조정
         padding: 0;
-        width: 754px;
+        width: 100%;
         height: 50px;
 
         .avatar {
@@ -189,7 +194,7 @@ onUnmounted(() => {
         }
 
         .user-info {
-          flex: 1;
+          flex-grow: 1;
           display: flex;
           flex-direction: column;
           gap: 4px;
@@ -198,7 +203,6 @@ onUnmounted(() => {
             font-family: $secondary-kr;
             font-weight: 500;
             font-size: 18px;
-            line-height: 1.25;
             color: $dark-black;
           }
 
@@ -206,33 +210,56 @@ onUnmounted(() => {
             font-family: $primary-kr;
             font-weight: 400;
             font-size: 14px;
-            line-height: 1.2;
             color: $dark-black;
           }
         }
+        
+        // --- 스타일 추가 ---
+        .user-action {
+          flex-shrink: 0;
+          margin-left: auto; // 오른쪽으로 밀어내기
+          padding-right: 10px;
+
+          .me-badge {
+            font-family: $primary-kr;
+            font-size: 14px;
+            color: $main-color;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background-color: rgba($main-color, 0.1);
+          }
+
+          .btn-chat {
+            padding: 6px 12px;
+            background-color: $main-color;
+            color: $white;
+            border: none;
+            border-radius: 6px;
+            font-family: $secondary-kr;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+
+            &:hover {
+              background-color: darken($main-color, 10%);
+            }
+          }
+        }
+        // ------------------
       }
 
-      // 스크롤바 스타일링
-      &::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: $light-gray;
-      }
-
+      &::-webkit-scrollbar { width: 6px; }
+      &::-webkit-scrollbar-track { background: $light-gray; }
       &::-webkit-scrollbar-thumb {
         background: $silver-black;
         border-radius: 3px;
-
-        &:hover {
-          background: darken($silver-black, 20%);
-        }
+        &:hover { background: darken($silver-black, 20%); }
       }
     }
   }
 
-  // 검색창 (하단 고정)
   .user-list-search {
     height: 60px;
     border-top: 1px solid $dim-gray;
@@ -254,9 +281,7 @@ onUnmounted(() => {
       color: $dark-black;
       outline: none;
 
-      &::placeholder {
-        color: #686868;
-      }
+      &::placeholder { color: #686868; }
     }
 
     .search-icon {

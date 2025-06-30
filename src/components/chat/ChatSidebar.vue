@@ -88,7 +88,7 @@ const props = defineProps({
   }
 })
 
-// 'add-and-select-room' 이벤트를 새로 정의합니다.
+// 부모에게 보낼 이벤트를 정의합니다.
 const emit = defineEmits(['select', 'load-more', 'room-created', 'add-and-select-room'])
 
 function openCreateRoomModal() {
@@ -100,7 +100,7 @@ function closeCreateRoomModal() {
   isModalOpen.value = false;
 }
 
-// 이벤트 처리 방식을 단일 이벤트로 개선합니다.
+// 그룹 채팅방 생성 로직
 async function handleCreateRoom() {
   const roomName = newRoomName.value.trim();
   if (!roomName) {
@@ -130,15 +130,10 @@ async function handleCreateRoom() {
 
     if (newRoom && newRoom.roomId && newRoom.roomName) {
       alert(`'${newRoom.roomName}' 채팅방이 성공적으로 개설되었습니다.`);
-      
-      // 새 방의 정보 전체를 담아 하나의 이벤트를 발생시킵니다.
       emit('add-and-select-room', newRoom);
-
     } else {
       console.error("서버로부터 받은 데이터 형식이 올바르지 않습니다:", response.data);
       alert("채팅방이 개설되었으나, 응답 데이터에 문제가 있습니다. 목록을 새로고침합니다.");
-      
-      // 기존 방식(fallback): 목록 갱신만 시도합니다.
       emit('room-created'); 
     }
 
@@ -158,10 +153,12 @@ async function handleCreateRoom() {
   }
 }
 
+// 기존 채팅방 클릭 시 이벤트를 발생시키는 함수
 function selectRoom(id) {
-  emit('select', id)
+  emit('select', id);
 }
 
+// 무한 스크롤 로직
 function handleScroll(event) {
   const { scrollTop, scrollHeight, clientHeight } = event.target
   if (props.isLoading || !props.hasMore) return
@@ -170,6 +167,7 @@ function handleScroll(event) {
   }
 }
 
+// 시간 포맷팅 함수
 function formatDisplayTime(dateTimeString) {
   if (!dateTimeString) return '';
   const now = new Date();

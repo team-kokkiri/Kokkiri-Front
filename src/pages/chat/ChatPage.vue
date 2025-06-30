@@ -8,7 +8,7 @@
             :is-loading="isLoading"
             :has-more="hasMore"
             @room-created="fetchChatRoomList"
-            @select="selectAndEnterRoom" 
+            @select="selectRoom"
             @load-more="fetchMoreChatRooms"
             @add-and-select-room="handleRoomCreation" 
         />
@@ -358,11 +358,26 @@ function handleInviteSearch(query) { inviteSearchQuery.value = query; }
 function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
 
 function handleRoomCreation(newRoom) {
-  // 1. 목록의 맨 앞에 새 채팅방을 추가하여 즉시 UI에 반영합니다.
-  chatRooms.value.unshift(newRoom);
+  // 1. 혹시 모를 중복을 방지합니다.
+  const roomExists = chatRooms.value.some(room => room.roomId === newRoom.roomId);
+  if (roomExists) {
+    // 이미 방이 있다면 선택만 합니다.
+    selectRoom(newRoom.roomId);
+    return;
+  }
 
-  // 2. 새로 만든 채팅방을 활성 상태로 만듭니다.
-  activeRoomId.value = newRoom.roomId;
+  // 2. 새 채팅방 객체를 목록 맨 앞에 추가합니다. (UI 즉시 반응)
+  //    (서버 DTO에 messages 필드가 없다면 빈 배열을 추가해줍니다.)
+  const roomToAdd = { ...newRoom, messages: [] };
+  chatRooms.value.unshift(roomToAdd);
+
+  // 3. 새로 생성된 방을 웹소켓에 구독합니다.
+  if (stompClient.value?.connected) {
+    subscribeToRooms([roomToAdd]);
+  }
+
+  // 4. 기존의 방 선택/입장 로직을 재사용합니다.
+  selectRoom(newRoom.roomId);
 }
 
 
