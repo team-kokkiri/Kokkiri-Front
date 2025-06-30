@@ -27,6 +27,22 @@
           required
         ></textarea>
       </div>
+      
+      <!-- 이미지 미리보기창 -->
+      <div v-if="(existingImages && existingImages.length > 0) || (formData.attachedImages && formData.attachedImages.length > 0)" class="image-preview-container">
+        <!-- 기존 이미지들 -->
+        <div v-for="(image, index) in existingImages" :key="'existing-' + index" class="image-preview-item" @click="removeExistingImage(index)">
+          <img :src="resolveImageUrl(image.fileUrl || image)" alt="기존 이미지" class="preview-image" />
+        </div>
+        <!-- 새로 추가된 이미지들 -->
+        <div v-for="(file, index) in formData.attachedImages" :key="'new-' + index" class="image-preview-item" @click="removeNewImage(index)">
+          <img :src="getImagePreviewUrl(file)" alt="새 이미지" class="preview-image" />
+        </div>
+        <!-- 이미지 추가 버튼 -->
+        <div class="image-add-item" @click="handleImageUpload">
+          <img src="@/assets/img/imgPlus.jpg" alt="이미지 추가" class="add-image-icon" />
+        </div>
+      </div>
 
       <!-- 푸터 (버튼들) -->
       <div class="form-footer">
@@ -83,6 +99,12 @@ const formData = ref({
   attachedImages: []
 })
 
+// 기존 이미지 URL 목록
+const existingImages = ref([])
+
+// 삭제된 기존 이미지 URL 목록 (서버에 삭제 요청할 때 사용)
+const deletedImages = ref([])
+
 // 파일 입력 참조
 const fileInputRef = ref(null)
 
@@ -94,6 +116,14 @@ onMounted(() => {
       boardContent: props.post.boardContent || '',
       questionYn: props.post.questionYn || false,
       attachedImages: []
+    }
+    
+    // 기존 이미지 설정 - files 배열이 있으면 사용, 없으면 fileUrls 사용
+    if (props.post.files && props.post.files.length > 0) {
+      existingImages.value = [...props.post.files]
+    } else if (props.post.fileUrls && props.post.fileUrls.length > 0) {
+      // 기존 fileUrls만 있는 경우 (호환성)
+      existingImages.value = props.post.fileUrls.map(url => ({ fileUrl: url }))
     }
   }
 })
@@ -111,7 +141,9 @@ function handleSubmit() {
     boardTitle: formData.value.boardTitle,
     boardContent: formData.value.boardContent,
     questionYn: formData.value.questionYn,
-    attachedImages: formData.value.attachedImages
+    attachedImages: formData.value.attachedImages, // 새로 추가된 이미지
+    existingImages: existingImages.value, // 남아있는 기존 이미지
+    deletedImages: deletedImages.value // 삭제된 기존 이미지
   })
 }
 
@@ -126,10 +158,46 @@ function handleImageUpload() {
 }
 
 function onFileChange(event) {
-  const files = event.target.files
-  if (files && files.length > 0) {
-    formData.value.attachedImages = Array.from(files)
+  const files = Array.from(event.target.files)
+  if (!files.length) return
+
+  // 이미지 파일만 필터링
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
+  const filteredFiles = files.filter(file => allowedImageTypes.includes(file.type))
+
+  if (filteredFiles.length === 0) {
+    alert('이미지 파일만 첨부할 수 있습니다.')
+    return
   }
+
+  // 기존 이미지에 새 이미지 추가
+  formData.value.attachedImages = [...formData.value.attachedImages, ...filteredFiles]
+  
+  // 파일 입력 초기화
+  event.target.value = ''
+}
+
+// 이미지 미리보기 URL 생성 (새 이미지용)
+function getImagePreviewUrl(file) {
+  return URL.createObjectURL(file)
+}
+
+// 이미지 URL 해결 (기존 이미지용)
+function resolveImageUrl(url) {
+  const baseUrl = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090'
+  return `${baseUrl}${url}`
+}
+
+// 기존 이미지 삭제
+function removeExistingImage(index) {
+  const deletedImage = existingImages.value[index]
+  deletedImages.value.push(deletedImage)
+  existingImages.value.splice(index, 1)
+}
+
+// 새로 추가된 이미지 삭제
+function removeNewImage(index) {
+  formData.value.attachedImages.splice(index, 1)
 }
 </script>
 
@@ -294,6 +362,64 @@ function onFileChange(event) {
             color: white;
             font-size: 20px;
           }
+        }
+      }
+    }
+    
+    // 이미지 미리보기창 스타일
+    .image-preview-container {
+      height: 121px;
+      border-top: 1px solid #dddddd;
+      padding: 16px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      overflow-x: auto;
+      background: #fff;
+      
+      .image-preview-item {
+        position: relative;
+        width: 85px;
+        height: 85px;
+        flex-shrink: 0;
+        border: 1px solid #dddddd;
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+        
+        &:hover {
+          opacity: 0.8;
+        }
+        
+        .preview-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+      }
+      
+      .image-add-item {
+        width: 85px;
+        height: 85px;
+        flex-shrink: 0;
+        border: 1px solid #dddddd;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        
+        &:hover {
+          background: #e9ecef;
+        }
+        
+        .add-image-icon {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          opacity: 0.7;
         }
       }
     }
