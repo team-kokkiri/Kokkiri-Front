@@ -10,10 +10,6 @@ defineEmits(['like', 'scrap'])
       <i class="bi bi-hand-thumbs-up"></i>
       공감
     </button>
-    <button class="btn-scrap" @click="$emit('scrap')">
-      <i class="bi bi-star"></i>
-      스크랩
-    </button>
   </div>
 </template>
 
