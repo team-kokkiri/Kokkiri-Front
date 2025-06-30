@@ -7,9 +7,10 @@
             :active-room-id="activeRoomId"
             :is-loading="isLoading"
             :has-more="hasMore"
-            @select="selectRoom"
-            @create="createRoom"
+            @room-created="fetchChatRoomList"
+            @select="selectAndEnterRoom" 
             @load-more="fetchMoreChatRooms"
+            @add-and-select-room="handleRoomCreation" 
         />
 
         <ChatUserList
@@ -108,11 +109,6 @@ const currentRoom = computed(() =>
     chatRooms.value.find(room => room.roomId === activeRoomId.value)
 );
 
-// ===== 함수 =====
-
-function createRoom() {
-  console.log("새 채팅방 생성 로직 구현 필요");
-}
 
 // 채팅방 멤버 목록 API 호출 함수
 async function fetchChatRoomMembers(roomId, query, pageNum) {
@@ -360,6 +356,14 @@ function handleEscapeKey(event) {
 function closeInviteView() { showInviteView.value = false; inviteSearchQuery.value = ''; }
 function handleInviteSearch(query) { inviteSearchQuery.value = query; }
 function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
+
+function handleRoomCreation(newRoom) {
+  // 1. 목록의 맨 앞에 새 채팅방을 추가하여 즉시 UI에 반영합니다.
+  chatRooms.value.unshift(newRoom);
+
+  // 2. 새로 만든 채팅방을 활성 상태로 만듭니다.
+  activeRoomId.value = newRoom.roomId;
+}
 
 
 // ===== 생명주기 훅 =====
