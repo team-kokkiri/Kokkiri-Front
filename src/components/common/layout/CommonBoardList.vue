@@ -7,7 +7,6 @@
         :config="config"
         @click="handleItemClick"
     />
-
     <!-- 게시글이 없을 때 -->
     <div v-if="items.length === 0" class="empty-state">
       <p>{{ config.emptyMessage || '게시물이 없습니다.' }}</p>

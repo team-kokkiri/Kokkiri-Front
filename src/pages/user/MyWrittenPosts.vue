@@ -68,9 +68,16 @@ const fetchMyWrittenList = async () => {
       let boardId
       const boardTypeMap = {
         '자유게시판': 1,
+        '자료공유 게시판': 2,
         '공지사항': 4,
         '프로젝트 소개': 5
       }
+      // ↓ 이 부분 추가!
+      console.log(
+          '[매핑체크]', item.boardType,
+          '→', boardTypeMap[item.boardType?.trim()],
+          'boardId:', boardId
+      )
       boardId = boardTypeMap[item.boardType?.trim()] || null
 
       return {
@@ -83,11 +90,10 @@ const fetchMyWrittenList = async () => {
           : item.thumbnailUrl || null,
         boardType: item.boardType,
         createdAt: item.createdAt,
-        writer: item.writer
+        writer: item.writer,
       }
-
     })
-
+    console.log('최종 myWrittenList.value:', myWrittenList.value)
     console.log(data)
   } catch (err) {
     console.error('내가 쓴 글 목록 가져오기 실패:', err)
@@ -104,7 +110,7 @@ const hasNextPage = computed(() => !isLastPage.value)
 
 // 게시글 상세로 이동하는 함수
 function goToDetail(item) {
-  console.log('Clicked:', item.boardId, item.id)
+  console.log('Clicked:', item.boardId, item.id, item)
 
   if (item.boardId === 1) {
     router.push(`/main-page/free-board/${item.id}`)
@@ -112,6 +118,8 @@ function goToDetail(item) {
     router.push(`/main-page/notice-board/${item.id}`)
   } else if (item.boardId === 5) {
     router.push(`/main-page/project-board/${item.id}`)
+  } else if (item.boardId === 2) {
+    router.push(`/main-page/share-board/${item.id}`)
   }
 }
 
