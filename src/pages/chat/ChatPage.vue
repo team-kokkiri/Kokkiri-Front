@@ -22,6 +22,7 @@
             @back="closeUserListView"
             @search="handleUserListSearch"
             @load-more="fetchMoreMembers"
+            @navigate-to-room="handleNavigation"
         />
 
         <InviteView
@@ -378,6 +379,28 @@ function handleRoomCreation(newRoom) {
 
   // 4. 기존의 방 선택/입장 로직을 재사용합니다.
   selectRoom(newRoom.roomId);
+}
+
+async function handleNavigation(roomId) {
+  try {
+    // 1:1 채팅방이 추가되었으므로, 전체 채팅방 목록을 다시 불러옵니다.
+    // (기존에 작성하신 fetchChatRooms 함수를 재사용합니다)
+    page.value = 0;
+    hasMore.value = true;
+    chatRooms.value = [];
+    await fetchChatRooms();
+
+    // 목록을 다시 불러온 후, 받은 roomId로 채팅방을 선택하고 입장합니다.
+    await selectRoom(roomId);
+    
+    // 유저 목록 뷰를 닫습니다.
+    closeUserListView();
+
+  } catch (error) {
+    console.error("채팅방 이동에 실패했습니다:", error);
+    // 만약의 경우를 대비해 직접 라우팅을 시도할 수도 있습니다.
+    // router.push({ path: '/chat', query: { roomId: roomId } });
+  }
 }
 
 
