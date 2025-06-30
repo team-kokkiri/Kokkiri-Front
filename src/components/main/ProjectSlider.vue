@@ -8,9 +8,10 @@
       <div class="slider-wrapper">
         <div class="project-cards-container" :style="{ transform: `translateX(-${currentIndex * slideDistance}px)` }">
           <div
-              v-for="project in projects"
-              :key="project.id"
-              class="project-card"
+            v-for="project in projects"
+            :key="project.id"
+            class="project-card"
+            @click="goToProjectDetail(project.id)"
           >
             <div class="project-thumbnail">
               <img :src="project.thumbnail" alt="프로젝트 썸네일" />
@@ -49,6 +50,13 @@
 
 <script setup>
 import { ref, computed, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const currentIndex = ref(0)
+const visibleCards = 2;
+const cardGap = 12; // 카드 간격 (px)
+const containerWidth = 600; // 전체 컨테이너 너비 (px)
 
 const props = defineProps({
   projects: {
@@ -56,10 +64,6 @@ const props = defineProps({
     required: true
   }
 })
-const currentIndex = ref(0)
-const visibleCards = 2;
-const cardGap = 12; // 카드 간격 (px)
-const containerWidth = 600; // 전체 컨테이너 너비 (px)
 
 // 정확한 카드 너비 계산
 const cardWidth = (containerWidth - (cardGap * (visibleCards - 1))) / visibleCards;
@@ -81,6 +85,11 @@ const nextSlide = () => {
   if (currentIndex.value < maxIndex.value) {
     currentIndex.value++
   }
+}
+
+// 프로젝트 상세 페이지 이동
+const goToProjectDetail = (projectId) => {
+  router.push(`/main-page/project-board/${projectId}`)
 }
 </script>
 
@@ -130,6 +139,7 @@ const nextSlide = () => {
     }
 
     .project-card {
+      cursor: pointer;
       flex: 0 0 294px;
       margin: 0;
       background: white;
