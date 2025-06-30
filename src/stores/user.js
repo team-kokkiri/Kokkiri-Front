@@ -4,6 +4,7 @@ import instance from "@/utils/axios";
 
 export const useUserStore = defineStore('user', {
   state: () => ({
+    id: null,
     email: null,
     role: null,
     avatar: null,
@@ -15,13 +16,14 @@ export const useUserStore = defineStore('user', {
 
   getters: {
     currentUser: (state) => ({
+      id: state.id,
       email: state.email,
       role: state.role,
       avatar: state.avatar,
       lastLoginAt: state.lastLoginAt
     }),
-    isAdmin: (state) => state.role === 'admin',
-    isUser: (state) => state.role === 'user',
+    isAdmin: (state) => String(state.role).toLowerCase() === 'admin',
+    isUser: (state) => String(state.role).toLowerCase() === 'user',
     hasToken: (state) => !!state.token,
     displayName: (state) => {
       if(state.nickname) return state.nickname;
@@ -33,6 +35,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     setUserInfo(tokenData) {
       console.log('setUserInfo called', tokenData);
+      this.id = tokenData.id
       this.email = tokenData.email
       this.role = tokenData.role
       this.avatar = tokenData.avatar
@@ -78,15 +81,15 @@ export const useUserStore = defineStore('user', {
       try {
         this.setToken(token);
 
-        // axios 사용시!
+        // axios 사용시
         const response = await instance.get('/api/members/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // axios는 ok/json() 안써! data만!
         const userInfo = response.data;
 
         this.setUserInfo({
+          id: userInfo.id,
           email: userInfo.email,
           role: userInfo.role,
           avatar: userInfo.avatar || userInfo.avatarUrl || null,
@@ -94,6 +97,7 @@ export const useUserStore = defineStore('user', {
         });
 
         localStorage.setItem('accessToken', token);
+        localStorage.setItem('id', userInfo.id);
         localStorage.setItem('email', userInfo.email);
         localStorage.setItem('role', userInfo.role);
         localStorage.setItem('avatar', userInfo.avatar);
@@ -116,6 +120,7 @@ export const useUserStore = defineStore('user', {
           });
           const userInfo = response.data;
           this.setUserInfo({
+            id: userInfo.id,
             email: userInfo.email,
             role: userInfo.role,
             avatar: userInfo.avatar,
