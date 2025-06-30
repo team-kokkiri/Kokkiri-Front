@@ -286,6 +286,10 @@ function confirmReport() {
 
   .report-wrapper {
     position: relative;
+
+    .btn-report {
+      margin-bottom: 5px;
+    }
   }
 
   .modal-overlay {
@@ -345,5 +349,4 @@ function confirmReport() {
       padding: 6px 12px;
     }
   }
-  
 </style>

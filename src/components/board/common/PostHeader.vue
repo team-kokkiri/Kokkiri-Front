@@ -245,4 +245,8 @@ function confirmReport() {
     padding: 6px 12px;
   }
 }
+
+.btn-report {
+  margin-bottom: 1.5px;
+}
 </style>
