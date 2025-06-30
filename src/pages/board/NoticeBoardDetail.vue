@@ -11,7 +11,7 @@
   <div class="board-free-detail" v-else-if="post">
     <!-- 상세 헤딩 -->
     <div class="detail-heading">
-      <h2 class="board-title">자유게시판</h2>
+      <h2 class="board-title">공지사항</h2>
     </div>
 
     <!-- 게시글 본문 -->
@@ -62,7 +62,7 @@
 
 <script setup>
 import axios from 'axios'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PostHeader from '@/components/board/common/PostHeader.vue'
 import PostContent from '@/components/board/common/PostContent.vue'
@@ -105,16 +105,6 @@ const fetchPost = async () => {
 onMounted(() => {
   fetchPost()
 })
-
-// route.params.id가 바뀌는 경우에도 게시글 다시 로드
-watch(
-  () => route.params.id,
-  (newId, oldId) => {
-    if (newId !== oldId) {
-      fetchPost()
-    }
-  }
-)
 
 // 댓글 등록
 const onSubmitComment = async (commentData) => {
@@ -159,22 +149,11 @@ const onSubmitEdit = async (editData) => {
     // FormData 생성
     const formData = new FormData()
     
-    // 기존 이미지에서 파일 ID 추출
-    const keepFileIds = []
-    if (editData.existingImages && editData.existingImages.length > 0) {
-      editData.existingImages.forEach(image => {
-        // image 객체에서 id를 추출 (백엔드에서 files 배열로 제공하는 경우)
-        if (image.id) {
-          keepFileIds.push(image.id)
-        }
-      })
-    }
-    
     // board 데이터를 JSON으로 변환하여 Blob으로 추가
     const boardData = {
       boardTitle: editData.boardTitle,
       boardContent: editData.boardContent,
-      keepFileIds: keepFileIds // 유지할 기존 파일 ID들
+      keepFileIds: [] // 기존 파일 유지 ID들 (필요시 구현)
     }
     
     // JSON을 Blob으로 변환하고 Content-Type 지정
@@ -323,7 +302,7 @@ const onDelete = async (item) => {
           `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
           config
       )
-      await router.push('/main-page/free-board')
+      await router.push('/main-page/notice')
     } else {
       // 댓글 대댓글 삭제
       await axios.delete(
@@ -349,7 +328,7 @@ const onReport = (item) => {
 
 // 글 목록 이동
 const goToList = () => {
-  router.push('/main-page/free-board')
+  router.push('/main-page/notice')
 }
 </script>
 

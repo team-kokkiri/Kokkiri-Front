@@ -1,7 +1,9 @@
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, computed } from 'vue'
+import { VueperSlides, VueperSlide } from 'vueperslides'
+import 'vueperslides/dist/vueperslides.css'
 
-defineProps({
+const props = defineProps({
   post: {
     type: Object,
     required: true
@@ -12,27 +14,52 @@ defineProps({
 function isImage(url) {
   return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url)
 }
-
 function resolveImageUrl(url) {
   const baseUrl = process.env.VUE_APP_API_BASE_URL
   return `${baseUrl}${url}`
 }
+
+// 이미지와 파일을 분리
+const imageUrls = computed(() =>
+    (props.post.fileUrls || []).filter(isImage)
+)
+const fileUrls = computed(() =>
+    (props.post.fileUrls || []).filter(url => !isImage(url))
+)
 </script>
 
 <template>
   <div class="post-title-area">
     <h3 class="title">{{ post.title || post.boardTitle }}</h3>
 
-    <!-- 첨부파일 -->
-    <div v-if="post.fileUrls && post.fileUrls.length" class="file-list">
-      <div v-for="(url, idx) in post.fileUrls" :key="idx" class="file-item">
-        <img
-          v-if="isImage(url)"
-          :src="resolveImageUrl(url)"
-          alt="첨부파일"
-          class="file-image"
-        />
-        <a v-else :href="url" target="_blank" rel="noopener" class="file-link">
+    <!-- 이미지 슬라이드 -->
+    <div v-if="imageUrls.length" class="file-list">
+      <VueperSlides
+          class="no-shadow"
+          :arrows="true"
+          :bullets="true"
+          fixed-height="350px"
+          style="max-width: 800px; height: 500px; margin: 0 auto;"
+      >
+        <VueperSlide
+            v-for="(url, idx) in imageUrls"
+            :key="idx"
+        >
+          <template #content>
+            <img
+                :src="resolveImageUrl(url)"
+                alt=""
+                class="slide-img-custom"
+            />
+          </template>
+        </VueperSlide>
+      </VueperSlides>
+    </div>
+
+    <!-- 이미지가 아닌 파일 링크 -->
+    <div v-if="fileUrls.length" class="file-list">
+      <div v-for="(url, idx) in fileUrls" :key="idx" class="file-item">
+        <a :href="resolveImageUrl(url)" target="_blank" rel="noopener" class="file-link">
           첨부파일 {{ idx + 1 }}
         </a>
       </div>
@@ -57,7 +84,6 @@ function resolveImageUrl(url) {
     line-height: 1.2;
     margin: 15px 0;
   }
-
   .file-list {
     margin-bottom: 15px;
     overflow-x: auto;
@@ -67,11 +93,8 @@ function resolveImageUrl(url) {
       margin-bottom: 10px;
 
       .file-image {
-        max-width: 100%;
-        max-height: 400px; /* or 원하는 높이 값 */
-        width: auto;
-        height: auto;
-        border-radius: 5px;
+        width: 100%;
+        height: 100%;
         object-fit: contain; /* 이미지 비율 유지하면서 박스에 맞게 조정 */
         display: block;
         margin: 10px auto; /* add vertical spacing */
@@ -103,4 +126,33 @@ function resolveImageUrl(url) {
     }
   }
 }
+// Vueper Slides 슬라이더 내부까지 강제로 적용
+::v-deep .vueperslides__arrow {
+  color: #fff !important;
+  background: none;
+  border: none;
+  font-size: 12px;
+}
+::v-deep .vueperslides__arrow--disabled {
+  opacity: 0.3;
+}
+::v-deep .vueperslides__bullet .default {
+  background-color: transparent !important;
+  border: 2px solid #fff !important;
+}
+::v-deep .vueperslides__bullet--active .default {
+  background-color: #fff !important;
+  border: 2px solid #fff !important;
+}
+
+::v-deep .slide-img-custom {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000; /* 원하는 배경색 */
+  border-radius: 5px;
+  display: block;
+  margin: 0 auto;
+}
+
 </style>

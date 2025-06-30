@@ -7,7 +7,6 @@ import FindPassword from "@/pages/auth/FindPassword.vue";
 import MainPage from "@/pages/main/MainPage.vue";
 import ResetPassword from "@/pages/auth/ResetPassword.vue";
 import TeamCodeVerify from "@/pages/auth/TeamCodeVerify.vue";
-import CalendarPage from "@/pages/main/CalendarPage.vue";
 
 const routes = [
   {
@@ -17,7 +16,7 @@ const routes = [
     children: [
       {
         path: 'calendar',
-        component: CalendarPage,
+        component: () => import('@/pages/main/CalendarPage.vue'),
         meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },
       },
       {
@@ -34,6 +33,11 @@ const routes = [
         path: 'notice',
         component: () => import('@/pages/board/NoticeBoardList.vue'),
         meta: { showNav: false, showLeft: false, showCenter: false },
+      },
+      {
+        path: 'notice/:id',
+        component: () => import('@/pages/board/NoticeBoardDetail.vue'),
+        meta: { showLeft: false, showCenter: false },
       },
       {
         path: 'admin',

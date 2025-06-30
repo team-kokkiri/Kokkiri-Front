@@ -160,7 +160,7 @@ onBeforeUnmount(() => {
 // 게시글 상세 페이지 넘어가기
 const handleBoardItemClick = ({ boardId, itemId }) => {
   if (boardId === 4) {
-    router.push(`/main-page/notice-board/${itemId}`)
+    router.push(`/main-page/notice/${itemId}`)
   } else if (boardId === 2) {
     router.push(`/main-page/free-board/${itemId}`)
   } else if (boardId === 3) {

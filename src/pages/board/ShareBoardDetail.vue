@@ -3,6 +3,7 @@
   <PostEditForm 
     v-if="postEditVisible && post"
     :post="post"
+    :boardType="2"
     @submit="onSubmitEdit"
     @cancel="onCancelEdit"
   />
@@ -149,11 +150,22 @@ const onSubmitEdit = async (editData) => {
     // FormData 생성
     const formData = new FormData()
     
+    // 기존 파일에서 ID 추출
+    const keepFileIds = []
+    if (editData.existingImages && editData.existingImages.length > 0) {
+      editData.existingImages.forEach(file => {
+        // file 객체에서 id를 추출
+        if (file.id) {
+          keepFileIds.push(file.id)
+        }
+      })
+    }
+    
     // board 데이터를 JSON으로 변환하여 Blob으로 추가
     const boardData = {
       boardTitle: editData.boardTitle,
       boardContent: editData.boardContent,
-      keepFileIds: [] // 기존 파일 유지 ID들 (필요시 구현)
+      keepFileIds: keepFileIds // 유지할 기존 파일 ID들
     }
     
     // JSON을 Blob으로 변환하고 Content-Type 지정

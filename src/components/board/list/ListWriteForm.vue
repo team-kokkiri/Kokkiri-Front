@@ -44,11 +44,19 @@
             v-model="formData.boardContent"
         ></textarea>
       </div>
+      
+      <!-- 이미지 미리보기창 -->
+      <div v-if="formData.attachedImages && formData.attachedImages.length > 0" class="image-preview-container">
+        <div class="image-preview-item" v-for="(file, index) in formData.attachedImages" :key="index" @click="removeImage(index)">
+          <img :src="getImagePreviewUrl(file)" alt="미리보기" class="preview-image" />
+        </div>
+        <div class="image-add-item" @click="handleImageUpload">
+          <img src="@/assets/img/imgPlus.jpg" alt="이미지 추가" class="add-image-icon" />
+        </div>
+      </div>
       <div class="form-footer">
         <div class="form-actions-left">
-          <button type="button" class="btn-upload-image" @click="handleImageUpload">
-            <i class="bi bi-image"></i>
-          </button>
+          <img src="@/assets/img/attach.png" alt="" @click="handleImageUpload">
           <input
             ref="fileInputRef"
             type="file"
@@ -79,7 +87,7 @@ import { ref, defineProps, defineEmits } from 'vue'
 
 // Props
 const props = defineProps({
-  boardType: {
+  boardTypeId: {
     type: Number,
     required: true
   }
@@ -142,6 +150,8 @@ function handleImageUpload() {
 }
 
 function onFileChange(event) {
+
+  console.log('📌 boardTypeId:', props.boardTypeId)
   const files = Array.from(event.target.files)
   if (!files.length) return
 
@@ -163,10 +173,9 @@ function onFileChange(event) {
 
   let filteredFiles = []
 
-  if (props.boardType === 1) {
+  if (props.boardTypeId === 1) {
     // 자유게시판: 이미지만
     filteredFiles = files.filter(file => allowedImageTypes.includes(file.type))
-
     if (filteredFiles.length === 0) {
       alert('이미지만 첨부할 수 있습니다.')
       return
@@ -178,7 +187,21 @@ function onFileChange(event) {
     )
   }
 
-  formData.value.attachedImages = filteredFiles
+  // 기존 이미지에 새 이미지 추가
+  formData.value.attachedImages = [...formData.value.attachedImages, ...filteredFiles]
+  
+  // 파일 입력 초기화
+  event.target.value = ''
+}
+
+// 이미지 미리보기 URL 생성
+function getImagePreviewUrl(file) {
+  return URL.createObjectURL(file)
+}
+
+// 이미지 삭제
+function removeImage(index) {
+  formData.value.attachedImages.splice(index, 1)
 }
 
 
@@ -285,24 +308,10 @@ function onFileChange(event) {
         display: flex;
         gap: 8px;
 
-        .btn-upload-image {
-          display: flex;
-          align-items: center;
+        img {
           height: 40px;
           width: 40px;
-          border: none;
-          background: none;
-          padding: 10px;
           cursor: pointer;
-
-          .bi-image {
-            font-size: 20px;
-            color: $silver-black;
-          }
-
-          &:hover {
-            background: #f8f9fa;
-          }
         }
       }
 
@@ -347,6 +356,64 @@ function onFileChange(event) {
             color: white;
             font-size: 20px;
           }
+        }
+      }
+    }
+    
+    // 이미지 미리보기창 스타일
+    .image-preview-container {
+      height: 121px;
+      border-top: 1px solid $dim-gray;
+      padding: 16px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      overflow-x: auto;
+      background: #fff;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.8;
+      }
+      
+      .image-preview-item {
+        position: relative;
+        width: 85px;
+        height: 85px;
+        flex-shrink: 0;
+        border: 1px solid $dim-gray;
+        border-radius: 4px;
+        overflow: hidden;
+        
+        .preview-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+      }
+      
+      .image-add-item {
+        width: 85px;
+        height: 85px;
+        flex-shrink: 0;
+        border: 1px solid $dim-gray;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        
+        &:hover {
+          background: #e9ecef;
+        }
+        
+        .add-image-icon {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          opacity: 0.7;
         }
       }
     }
