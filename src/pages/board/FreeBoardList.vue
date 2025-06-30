@@ -127,18 +127,6 @@ function goToDetail(id) {
   router.push(`/main-page/free-board/${id}`)
 }
 
-// 검색 필터링된 리스트 반환
-// const filteredBoardList = () => {
-//   if (!searchQuery.value.trim()) return boardList.value
-
-//   const query = searchQuery.value.trim().toLowerCase()
-//   return boardList.value.filter(item =>
-//     item.boardTitle.toLowerCase().includes(query) ||
-//     item.boardContent.toLowerCase().includes(query) ||
-//     item.writer.toLowerCase().includes(query)
-//   )
-// }
-
 // 글쓰기 폼 제출 핸들러
 async function handleSubmitPost(formData) {
   try {

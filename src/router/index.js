@@ -35,6 +35,11 @@ const routes = [
         meta: { showNav: false, showLeft: false, showCenter: false },
       },
       {
+        path: 'notice/:id',
+        component: () => import('@/pages/board/NoticeBoardDetail.vue'),
+        meta: { showLeft: false, showCenter: false },
+      },
+      {
         path: 'admin',
         component: () => import('@/pages/admin/AdminPage.vue'),
         meta: { showNav: false, showRight: false, showLeft: false, showCenter: false },

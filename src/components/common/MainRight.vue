@@ -5,7 +5,7 @@
       <!-- 검색 박스 (메인페이지 루트에서만 보임) -->
       <form
           class="board-search-box"
-          v-if="$route.path === '/main-page'"
+          v-if="$route.path === '/main-page' || $route.path === '/main-page/search'"
           @submit.prevent="onSearch"
       >
         <input
