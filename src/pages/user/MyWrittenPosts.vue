@@ -115,7 +115,7 @@ function goToDetail(item) {
   if (item.boardId === 1) {
     router.push(`/main-page/free-board/${item.id}`)
   } else if (item.boardId === 4) {
-    router.push(`/main-page/notice-board/${item.id}`)
+    router.push(`/main-page/notice/${item.id}`)
   } else if (item.boardId === 5) {
     router.push(`/main-page/project-board/${item.id}`)
   } else if (item.boardId === 2) {

@@ -302,7 +302,7 @@ const onDelete = async (item) => {
           `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
           config
       )
-      await router.push('/main-page/notice-board')
+      await router.push('/main-page/notice')
     } else {
       // 댓글 대댓글 삭제
       await axios.delete(
@@ -328,7 +328,7 @@ const onReport = (item) => {
 
 // 글 목록 이동
 const goToList = () => {
-  router.push('/main-page/notice-board')
+  router.push('/main-page/notice')
 }
 </script>
 

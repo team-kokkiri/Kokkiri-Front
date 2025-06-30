@@ -88,7 +88,7 @@ const hasNextPage = computed(() => !isLastPage.value)
 function goToDetail({ id, boardType }) {
   const routeMap = {
     '자유게시판': 'free-board',
-    '공지사항': 'notice-board',
+    '공지사항': 'notice',
     '자료공유 게시판': 'share-board',
     '프로젝트 소개': 'project-board',
     'HOT 게시판': 'hot-board'
