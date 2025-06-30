@@ -2,7 +2,7 @@
   <div class="post-edit-form">
     <!-- 섹션 타이틀 -->
     <div class="section-title">
-      <h2 class="board-title">자유게시판</h2>
+      <h2 class="board-title">{{ getBoardTypeName() }}</h2>
     </div>
 
     <!-- 수정 폼 -->
@@ -28,19 +28,27 @@
         ></textarea>
       </div>
       
-      <!-- 이미지 미리보기창 -->
+      <!-- 파일 미리보기창 -->
       <div v-if="(existingImages && existingImages.length > 0) || (formData.attachedImages && formData.attachedImages.length > 0)" class="image-preview-container">
-        <!-- 기존 이미지들 -->
-        <div v-for="(image, index) in existingImages" :key="'existing-' + index" class="image-preview-item" @click="removeExistingImage(index)">
-          <img :src="resolveImageUrl(image.fileUrl || image)" alt="기존 이미지" class="preview-image" />
+        <!-- 기존 파일들 -->
+        <div v-for="(file, index) in existingImages" :key="'existing-' + index" class="image-preview-item" @click="removeExistingImage(index)">
+          <img v-if="isImageFile(file.fileUrl || file)" :src="resolveImageUrl(file.fileUrl || file)" alt="기존 파일" class="preview-image" />
+          <div v-else class="file-icon">
+            <i class="bi bi-file-earmark"></i>
+            <span class="file-name">{{ getFileName(file) }}</span>
+          </div>
         </div>
-        <!-- 새로 추가된 이미지들 -->
+        <!-- 새로 추가된 파일들 -->
         <div v-for="(file, index) in formData.attachedImages" :key="'new-' + index" class="image-preview-item" @click="removeNewImage(index)">
-          <img :src="getImagePreviewUrl(file)" alt="새 이미지" class="preview-image" />
+          <img v-if="isImageFileType(file.type)" :src="getImagePreviewUrl(file)" alt="새 파일" class="preview-image" />
+          <div v-else class="file-icon">
+            <i class="bi bi-file-earmark"></i>
+            <span class="file-name">{{ file.name }}</span>
+          </div>
         </div>
-        <!-- 이미지 추가 버튼 -->
+        <!-- 파일 추가 버튼 -->
         <div class="image-add-item" @click="handleImageUpload">
-          <img src="@/assets/img/imgPlus.jpg" alt="이미지 추가" class="add-image-icon" />
+          <img src="@/assets/img/imgPlus.jpg" alt="파일 추가" class="add-image-icon" />
         </div>
       </div>
 
@@ -83,6 +91,10 @@ const props = defineProps({
   post: {
     type: Object,
     required: true
+  },
+  boardType: {
+    type: Number,
+    default: 1 // 기본값은 자유게시판
   }
 })
 
@@ -159,17 +171,23 @@ function onFileChange(event) {
   const files = Array.from(event.target.files)
   if (!files.length) return
 
-  // 이미지 파일만 필터링
-  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
-  const filteredFiles = files.filter(file => allowedImageTypes.includes(file.type))
+  // 자유게시판(1)은 이미지만, 다른 게시판은 모든 파일 허용
+  if (props.boardType === 1) {
+    // 이미지 파일만 필터링
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
+    const filteredFiles = files.filter(file => allowedImageTypes.includes(file.type))
 
-  if (filteredFiles.length === 0) {
-    alert('이미지 파일만 첨부할 수 있습니다.')
-    return
+    if (filteredFiles.length === 0) {
+      alert('이미지 파일만 첨부할 수 있습니다.')
+      return
+    }
+    
+    // 기존 파일에 새 파일 추가
+    formData.value.attachedImages = [...formData.value.attachedImages, ...filteredFiles]
+  } else {
+    // 모든 파일 허용 (자료공유, 공지사항 등)
+    formData.value.attachedImages = [...formData.value.attachedImages, ...files]
   }
-
-  // 기존 이미지에 새 이미지 추가
-  formData.value.attachedImages = [...formData.value.attachedImages, ...filteredFiles]
   
   // 파일 입력 초기화
   event.target.value = ''
@@ -196,6 +214,44 @@ function removeExistingImage(index) {
 // 새로 추가된 이미지 삭제
 function removeNewImage(index) {
   formData.value.attachedImages.splice(index, 1)
+}
+
+// 파일이 이미지인지 확인 (URL 기반)
+function isImageFile(fileUrl) {
+  if (typeof fileUrl === 'object' && fileUrl.fileType) {
+    return fileUrl.fileType.startsWith('image/')
+  }
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']
+  const url = fileUrl.toLowerCase()
+  return imageExtensions.some(ext => url.includes(ext))
+}
+
+// 파일이 이미지인지 확인 (MIME 타입 기반)
+function isImageFileType(mimeType) {
+  return mimeType && mimeType.startsWith('image/')
+}
+
+// 파일명 추출
+function getFileName(file) {
+  if (typeof file === 'object' && file.originalName) {
+    return file.originalName
+  }
+  // URL에서 파일명 추출
+  const url = file.fileUrl || file
+  const parts = url.split('/')
+  return parts[parts.length - 1]
+}
+
+// 게시판 타입명 반환
+function getBoardTypeName() {
+  const boardTypeNames = {
+    1: '자유게시판',
+    2: '자료공유',
+    3: 'BEST',
+    4: '공지사항',
+    5: '프로젝트 소개'
+  }
+  return boardTypeNames[props.boardType] || '게시판'
 }
 </script>
 
@@ -381,6 +437,36 @@ function removeNewImage(index) {
           height: 100%;
           object-fit: cover;
           display: block;
+        }
+        
+        .file-icon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #f8f9fa;
+          
+          .bi-file-earmark {
+            font-size: 30px;
+            color: #6c757d;
+            margin-bottom: 4px;
+          }
+          
+          .file-name {
+            font-size: 10px;
+            color: #495057;
+            text-align: center;
+            word-break: break-all;
+            padding: 0 4px;
+            max-height: 30px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
         }
       }
       
