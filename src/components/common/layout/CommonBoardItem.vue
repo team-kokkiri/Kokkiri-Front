@@ -135,10 +135,12 @@ function formatDate(dateString) {
 }
 
 function resolveImageUrl(url) {
-  if (!url) {
+  
+  const baseUrl = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
+
+  if (!url || url === 'null' || url === '') {
     return 마스코트이미지
   }
-  const baseUrl = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
   if (url.includes('\\') || url.includes('C:')) {
     const fileName = url.split('\\').pop() || url.split('/').pop();
     return `${baseUrl}/api/files/${fileName}`;
