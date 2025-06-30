@@ -47,9 +47,7 @@
       <!-- 푸터 (버튼들) -->
       <div class="form-footer">
         <div class="form-actions-left">
-          <button type="button" class="btn-upload-image" @click="handleImageUpload">
-            <i class="bi bi-image"></i>
-          </button>
+          <img src="@/assets/img/attach.png" alt="" @click="handleImageUpload">
           <input
             ref="fileInputRef"
             type="file"
@@ -287,29 +285,16 @@ function removeNewImage(index) {
 
     .form-footer {
       height: 40px;
-      padding-left: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid #dddddd;
 
       .form-actions-left {
-        .btn-upload-image {
-          width: 20px;
-          height: 20px;
-          border: none;
-          background: none;
+        img {
+          width: 40px;
+          height: 40px;
           cursor: pointer;
-          padding: 0;
-
-          .bi-image {
-            font-size: 20px;
-            color: #777777;
-          }
-
-          &:hover {
-            opacity: 0.7;
-          }
         }
       }
 

@@ -56,9 +56,7 @@
       </div>
       <div class="form-footer">
         <div class="form-actions-left">
-          <button type="button" class="btn-upload-image" @click="handleImageUpload">
-            <i class="bi bi-image"></i>
-          </button>
+          <img src="@/assets/img/attach.png" alt="" @click="handleImageUpload">
           <input
             ref="fileInputRef"
             type="file"
@@ -309,20 +307,10 @@ function removeImage(index) {
         display: flex;
         gap: 8px;
 
-        .btn-upload-image {
-          display: flex;
-          align-items: center;
+        img {
           height: 40px;
           width: 40px;
-          border: none;
-          background: none;
-          padding: 10px;
           cursor: pointer;
-
-          .bi-image {
-            font-size: 20px;
-            color: $silver-black;
-          }
         }
       }
 
