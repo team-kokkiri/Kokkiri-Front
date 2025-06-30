@@ -38,14 +38,6 @@ import BoardPageLayout from '@/components/common/layout/BoardPageLayout.vue'
 import CommonBoardList from '@/components/common/layout/CommonBoardList.vue'
 import ListWriteForm from "@/components/board/list/ListWriteForm.vue";
 
-// 
-// const props = defineProps({
-//   boardType: {
-//     type: Number,
-//     required: true
-//   }
-// })
-
 // 라우터 인스턴스 생성
 const router = useRouter()
 
