@@ -31,8 +31,8 @@
       <!-- 이미지 미리보기창 -->
       <div v-if="(existingImages && existingImages.length > 0) || (formData.attachedImages && formData.attachedImages.length > 0)" class="image-preview-container">
         <!-- 기존 이미지들 -->
-        <div v-for="(imageUrl, index) in existingImages" :key="'existing-' + index" class="image-preview-item" @click="removeExistingImage(index)">
-          <img :src="resolveImageUrl(imageUrl)" alt="기존 이미지" class="preview-image" />
+        <div v-for="(image, index) in existingImages" :key="'existing-' + index" class="image-preview-item" @click="removeExistingImage(index)">
+          <img :src="resolveImageUrl(image.fileUrl || image)" alt="기존 이미지" class="preview-image" />
         </div>
         <!-- 새로 추가된 이미지들 -->
         <div v-for="(file, index) in formData.attachedImages" :key="'new-' + index" class="image-preview-item" @click="removeNewImage(index)">
@@ -118,9 +118,12 @@ onMounted(() => {
       attachedImages: []
     }
     
-    // 기존 이미지 URL 설정
-    if (props.post.fileUrls && props.post.fileUrls.length > 0) {
-      existingImages.value = [...props.post.fileUrls]
+    // 기존 이미지 설정 - files 배열이 있으면 사용, 없으면 fileUrls 사용
+    if (props.post.files && props.post.files.length > 0) {
+      existingImages.value = [...props.post.files]
+    } else if (props.post.fileUrls && props.post.fileUrls.length > 0) {
+      // 기존 fileUrls만 있는 경우 (호환성)
+      existingImages.value = props.post.fileUrls.map(url => ({ fileUrl: url }))
     }
   }
 })
@@ -187,8 +190,8 @@ function resolveImageUrl(url) {
 
 // 기존 이미지 삭제
 function removeExistingImage(index) {
-  const deletedImageUrl = existingImages.value[index]
-  deletedImages.value.push(deletedImageUrl)
+  const deletedImage = existingImages.value[index]
+  deletedImages.value.push(deletedImage)
   existingImages.value.splice(index, 1)
 }
 
