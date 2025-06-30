@@ -21,17 +21,13 @@
             <span class="email">{{ user.email }}</span>
           </div>
 
-          <button
-              class="btn-invite"
-              @click="handleInvite(user)"
-              :disabled="getUserStatus(user) !== 'invitable' || isLoading"
-              :class="{ 'disabled-status': getUserStatus(user) !== 'invitable' }"
-          >
-            <span v-if="getUserStatus(user) === 'self'">본인</span>
-            <span v-else-if="getUserStatus(user) === 'participating'">참여중</span>
-            <span v-else-if="getUserStatus(user) === 'invited'">초대됨</span>
-            <span v-else>초대</span>
-          </button>
+          <!-- HTML 구조를 개선하여 상태별로 다른 요소를 렌더링합니다. -->
+          <div class="user-action">
+            <span v-if="getUserStatus(user) === 'self'" class="status-badge self">본인</span>
+            <span v-else-if="getUserStatus(user) === 'participating'" class="status-badge participating">참여중</span>
+            <span v-else-if="getUserStatus(user) === 'invited'" class="status-badge invited">초대됨</span>
+            <button v-else class="btn-invite" @click="handleInvite(user)" :disabled="isLoading">초대</button>
+          </div>
         </div>
         
         <p v-if="isLoading" class="loading-indicator">
@@ -91,7 +87,6 @@ const props = defineProps({
   invitedUserIds: { type: Array, required: true, default: () => [] },
   searchQuery: { type: String, default: '' },
   currentUser: { type: Object, required: true },
-  participantIds: { type: Array, required: true, default: () => [] }
 });
 
 // Emits
@@ -110,9 +105,12 @@ const searchResults = ref([]);
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
 
 // 스크롤 페이징을 위한 상태 변수 추가
-const scrollContainer = ref(null); // 스크롤 DOM 엘리먼트
-const lastMemberId = ref(null);    // 마지막으로 로드된 멤버의 ID (커서 역할)
-const hasMoreMembers = ref(true); // 더 불러올 멤버가 있는지 여부
+const scrollContainer = ref(null);
+const lastMemberId = ref(null);
+const hasMoreMembers = ref(true);
+
+// 컴포넌트 내부에서 현재 참여자 ID 목록을 관리합니다.
+const localParticipantIds = ref([]);
 
 // invitedUserIds prop이 변경될 때 locallyInvitedUserIds 업데이트
 watch(() => props.invitedUserIds, (newVal) => {
@@ -124,7 +122,7 @@ const userListToDisplay = computed(() => {
   return localSearchQuery.value.trim() ? searchResults.value : props.users;
 });
 
-// 멤버 데이터 로딩 함수
+// 멤버 데이터 로딩 함수 (검색용)
 async function fetchMembers() {
   const keyword = localSearchQuery.value.trim();
   if (!keyword || isLoading.value || !hasMoreMembers.value) {
@@ -137,26 +135,19 @@ async function fetchMembers() {
       params: {
         keyword: keyword,
         size: 10,
-        // lastId 파라미터를 API 요청에 추가
         lastId: lastMemberId.value 
       },
       headers: { 'Authorization': `Bearer ${accessToken.value}` }
     });
     
-    // API 응답에 hasNext와 같은 필드가 있다고 가정합니다. 없다면, 불러온 데이터 수로 판단합니다.
-    const fetchedUsers = response.data.content || response.data; // API 응답 구조에 따라 조정
+    const fetchedUsers = response.data.content || response.data;
     const hasNext = response.data.hasNext === undefined ? fetchedUsers.length === 10 : response.data.hasNext;
 
-    // 본인 제외 필터링
-    const newUsers = props.currentUser?.memberId
-      ? fetchedUsers.filter(user => user.memberId !== props.currentUser.memberId)
-      : fetchedUsers;
-
-    searchResults.value.push(...newUsers); // 기존 결과에 추가
+    searchResults.value.push(...fetchedUsers);
     hasMoreMembers.value = hasNext;
 
-    if (newUsers.length > 0) {
-      lastMemberId.value = newUsers[newUsers.length - 1].memberId; // 마지막 ID 업데이트
+    if (fetchedUsers.length > 0) {
+      lastMemberId.value = fetchedUsers[fetchedUsers.length - 1].memberId;
     }
   } catch (error) {
     console.error('멤버 검색 API 호출 오류:', error);
@@ -167,12 +158,27 @@ async function fetchMembers() {
   }
 }
 
+// 현재 채팅방의 참여자 목록을 불러오는 함수
+async function fetchCurrentParticipants() {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/chat/room/${props.roomId}/members`, {
+      params: { page: 0, size: 200 },
+      headers: { 'Authorization': `Bearer ${accessToken.value}` }
+    });
+    if (response.data && response.data.content) {
+      localParticipantIds.value = response.data.content.map(p => p.memberId);
+    }
+  } catch (error) {
+    console.error("현재 참여자 목록을 불러오는 데 실패했습니다:", error);
+    showMessage("참여자 정보를 불러오는 데 실패했습니다.", "error");
+  }
+}
+
 // 새로운 검색 시작 함수
 async function startNewSearch() {
   const keyword = localSearchQuery.value.trim();
   emit('search', keyword);
   
-  // 검색어가 없으면, 검색 결과 초기화 후 종료
   if (!keyword) {
     searchResults.value = [];
     lastMemberId.value = null;
@@ -180,12 +186,10 @@ async function startNewSearch() {
     return;
   }
 
-  // 상태 초기화
   searchResults.value = [];
   lastMemberId.value = null;
   hasMoreMembers.value = true;
 
-  // 첫 페이지 로드
   await fetchMembers();
 }
 
@@ -193,20 +197,33 @@ async function startNewSearch() {
 function handleScroll() {
   const container = scrollContainer.value;
   if (container) {
-    // 스크롤이 맨 아래 근처에 도달했는지 확인 (100px 버퍼)
     const isNearBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
     if (isNearBottom && !isLoading.value && hasMoreMembers.value) {
-      fetchMembers(); // 추가 데이터 로드
+      fetchMembers();
     }
   }
 }
 
-// 사용자 상태 판별
+// 사용자 상태 판별 함수
 function getUserStatus(user) {
-  if (!props.currentUser || props.currentUser.memberId === null) return 'invitable';
-  if (user.memberId === props.currentUser.memberId) return 'self';
-  if (props.participantIds.includes(user.memberId)) return 'participating';
-  if (props.invitedUserIds.includes(user.memberId) || locallyInvitedUserIds.value.includes(user.memberId)) return 'invited';
+  if (!user || user.memberId === undefined || user.memberId === null) {
+    return 'invitable'; 
+  }
+
+  if (props.currentUser && user.memberId === props.currentUser.memberId) {
+    return 'self';
+  }
+  
+  if (localParticipantIds.value.includes(user.memberId)) {
+    return 'participating';
+  }
+
+  const isAlreadyInvited = (props.invitedUserIds.includes(user.memberId)) ||
+                           (locallyInvitedUserIds.value.includes(user.memberId));
+  if (isAlreadyInvited) {
+    return 'invited';
+  }
+
   return 'invitable';
 }
 
@@ -234,7 +251,8 @@ function cancelInvite() {
   selectedUserForInvite.value = null;
 }
 
-// 초대 확정 
+// --- 로직 수정 ---
+// 초대 확정 함수 (에러 메시지 처리 개선)
 async function confirmInvite() {
   const user = selectedUserForInvite.value;
   if (!user || user.memberId === undefined) {
@@ -255,15 +273,33 @@ async function confirmInvite() {
     emit('invite', user.memberId);
   } catch (error) {
     console.error('초대 API 호출 중 오류 발생:', error);
-    const errorData = error.response?.data;
-    const errorMessage = errorData?.message || '초대에 실패했습니다.';
+    
+    let errorMessage = '초대에 실패했습니다. 다시 시도해주세요.'; // 기본 에러 메시지
+    
+    // 서버가 구체적인 에러 메시지를 보냈는지 확인하고 사용합니다.
+    if (error.response && error.response.data) {
+        // 백엔드 응답이 { error_message: '...' } 형식일 경우
+        if (typeof error.response.data === 'object' && error.response.data.error_message) {
+            errorMessage = error.response.data.error_message;
+        }
+        // 백엔드 응답이 { message: '...' } 형식일 경우 (호환성 유지)
+        else if (typeof error.response.data === 'object' && error.response.data.message) {
+            errorMessage = error.response.data.message;
+        } 
+        // 백엔드 응답이 단순 문자열일 경우
+        else if (typeof error.response.data === 'string' && error.response.data.trim() !== '') {
+            errorMessage = error.response.data;
+        }
+        console.log("서버로부터 받은 에러 응답:", error.response.data); // 디버깅용 로그
+    }
+
+    showMessage(errorMessage, 'error');
+
+    // "이미" 라는 메시지를 받았다면, UI 상태를 즉시 업데이트합니다.
     if (errorMessage.includes("이미")) {
-      showMessage(errorMessage, 'error');
       if (!locallyInvitedUserIds.value.includes(user.memberId)) {
         locallyInvitedUserIds.value.push(user.memberId);
       }
-    } else {
-      showMessage(errorMessage, 'error');
     }
   } finally {
     isLoading.value = false;
@@ -273,21 +309,21 @@ async function confirmInvite() {
 }
 
 // 생명주기 훅
-onMounted(() => {
+onMounted(async () => {
   accessToken.value = localStorage.getItem('accessToken');
   if (!accessToken.value) {
     console.error("로그인 정보가 없습니다.");
+    return;
   }
-  // 스크롤 이벤트 리스너 추가 (template ref가 연결된 후)
-  // watchEffect 등을 사용해 scrollContainer.value 가 유효할 때 리스너를 추가할 수도 있습니다.
-  // 여기서는 onMounted에서 바로 추가합니다.
+  
+  await fetchCurrentParticipants();
+
   if(scrollContainer.value) {
       scrollContainer.value.addEventListener('scroll', handleScroll);
   }
 });
 
 onBeforeUnmount(() => {
-  // 컴포넌트 파괴 전 이벤트 리스너 제거
   if(scrollContainer.value) {
       scrollContainer.value.removeEventListener('scroll', handleScroll);
   }
@@ -306,11 +342,6 @@ onBeforeUnmount(() => {
     color: #888;
 }
 
-.btn-invite.disabled-status {
-  background-color: #a0a0a0;
-  cursor: default;
-}
-
 .search-icon {
   cursor: pointer;
 }
@@ -319,7 +350,7 @@ $dim-gray: #ccc;
 $white: #fff;
 $black: #000;
 $dark-black: #333;
-$main-color: #4CAF50;
+$main-color: #5a7dff; // 파란색 계열로 변경
 $silver-black: #888;
 $light-gray: #f0f0f0;
 $danger-color: #f44336;
@@ -451,27 +482,54 @@ $secondary-kr: 'Noto Sans KR', sans-serif;
         }
       }
 
-      .btn-invite {
-        width: 65px;
-        height: 36px;
-        background-color: $main-color;
-        border: none;
-        border-radius: 15px;
-        cursor: pointer;
-        font-family: $primary-kr;
-        font-weight: 700;
-        font-size: 16px;
-        color: $white;
+      .user-action {
+        width: 80px;
+        text-align: center;
         flex-shrink: 0;
-        transition: background-color 0.2s ease;
+        margin-left: auto;
 
-        &:hover:not(:disabled) {
-          background-color: darken($main-color, 10%);
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 36px;
+          padding: 0 14px;
+          border-radius: 18px;
+          font-size: 14px;
+          font-weight: 500;
+          
+          &.self {
+            background-color: #e7f5ff;
+            color: #1c7ed6;
+          }
+          &.participating, &.invited {
+            background-color: #f1f3f5;
+            color: #868e96;
+            cursor: default;
+          }
         }
 
-        &:disabled {
-          background-color: $silver-black;
-          cursor: not-allowed;
+        .btn-invite {
+          width: 80px;
+          height: 36px;
+          background-color: $main-color;
+          border: none;
+          border-radius: 18px;
+          cursor: pointer;
+          font-family: $primary-kr;
+          font-weight: 700;
+          font-size: 14px;
+          color: $white;
+          transition: background-color 0.2s ease;
+
+          &:hover:not(:disabled) {
+            background-color: darken($main-color, 10%);
+          }
+
+          &:disabled {
+            background-color: lighten($main-color, 20%);
+            cursor: wait;
+          }
         }
       }
     }
@@ -499,7 +557,7 @@ $secondary-kr: 'Noto Sans KR', sans-serif;
     color: $white;
     z-index: 10;
     
-    &.success { background-color: $main-color; }
+    &.success { background-color: #28a745; }
     &.error { background-color: $danger-color; }
 }
 
