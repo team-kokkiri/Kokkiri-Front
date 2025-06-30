@@ -31,7 +31,8 @@
                        :key="item.id"
                        @click="handleNotificationClick(item)"
                        :class="{ 'clickable': item.url && item.type !== 'invite' }">
-                    <div class="item-mark" :class="{ 'invite': item.type === 'invite' }"></div>
+                    <!-- 'invite' 타입일 때만 item-mark를 표시하도록 v-if 추가 -->
+                    <div v-if="item.type === 'invite'" class="item-mark invite"></div>
                     <div class="item-content">
                       <p class="message">{{ item.message }}</p>
                       <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
@@ -123,11 +124,8 @@
 <script setup>
 import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, defineProps, defineEmits } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-// --- 오류 해결을 위한 코드 추가 ---
 import { useNotifications } from '@/composables/useNotifications';
-// ------------------------------------
 
-// --- 경고 해결을 위한 코드 추가 ---
 const props = defineProps({
   notifications: Array,
   totalUnreadNotifications: Number,
@@ -144,7 +142,6 @@ const emit = defineEmits([
   'fetchMoreNotifications',
   'markChatAsRead',
 ]);
-// ------------------------------------
 
 const {
   notifications,
@@ -158,7 +155,8 @@ const {
   markAllAsRead,
   deleteNotification,
   acceptInvitation,
-  rejectInvitation
+  rejectInvitation,
+  handleNotificationClick,
 } = useNotifications(props, emit);
 
 
@@ -292,14 +290,6 @@ async function confirmDelete() {
   closeDeleteModal();
 }
 
-
-function handleNotificationClick(item) {
-  if (item.type === 'invite') return;
-  if (item.url) {
-    router.push(item.url);
-    showNotification.value = false;
-  }
-}
 
 let scrollHandler = null;
 
@@ -580,10 +570,9 @@ onBeforeUnmount(() => {
                 .item-mark {
                   width: 15px;
                   height: 70px;
-                  background: white;
+                  background: $orangered;
                   flex-shrink: 0;
                   border: none;
-                  &.invite { background: $orangered; }
                 }
 
                 .item-content {
