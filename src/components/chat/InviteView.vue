@@ -52,9 +52,8 @@
           class="invite-input"
           placeholder="초대할 사람을 닉네임, 이메일로 검색하세요"
           v-model="localSearchQuery"
-          @keyup.enter="startNewSearch"
       />
-      <i class="bi bi-search search-icon" @click="startNewSearch"></i>
+      <i class="bi bi-search search-icon"></i>
     </div>
 
     <div v-if="isModalVisible" class="modal-overlay" @click.self="cancelInvite">
@@ -104,10 +103,11 @@ const accessToken = ref(null);
 const searchResults = ref([]);
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
 
-// 스크롤 페이징을 위한 상태 변수 추가
+// 스크롤 페이징 및 디바운싱을 위한 상태 변수 추가
 const scrollContainer = ref(null);
 const lastMemberId = ref(null);
 const hasMoreMembers = ref(true);
+let debounceTimer = null; // 디바운스 타이머
 
 // 컴포넌트 내부에서 현재 참여자 ID 목록을 관리합니다.
 const localParticipantIds = ref([]);
@@ -122,9 +122,19 @@ const userListToDisplay = computed(() => {
   return localSearchQuery.value.trim() ? searchResults.value : props.users;
 });
 
+// --- 로직 수정 ---
+// 디바운싱을 적용하여 검색어를 감지합니다.
+watch(localSearchQuery, (newQuery) => {
+  // 이전 타이머가 있으면 취소합니다.
+  clearTimeout(debounceTimer);
+  // 새 타이머를 설정합니다. 사용자가 타이핑을 멈추면 500ms 후에 검색이 실행됩니다.
+  debounceTimer = setTimeout(() => {
+    startNewSearch(newQuery);
+  }, 500); 
+});
+
 // 멤버 데이터 로딩 함수 (검색용)
-async function fetchMembers() {
-  const keyword = localSearchQuery.value.trim();
+async function fetchMembers(keyword) {
   if (!keyword || isLoading.value || !hasMoreMembers.value) {
     return;
   }
@@ -175,8 +185,8 @@ async function fetchCurrentParticipants() {
 }
 
 // 새로운 검색 시작 함수
-async function startNewSearch() {
-  const keyword = localSearchQuery.value.trim();
+async function startNewSearch(query) {
+  const keyword = query.trim();
   emit('search', keyword);
   
   if (!keyword) {
@@ -190,7 +200,7 @@ async function startNewSearch() {
   lastMemberId.value = null;
   hasMoreMembers.value = true;
 
-  await fetchMembers();
+  await fetchMembers(keyword);
 }
 
 // 스크롤 이벤트 핸들러
@@ -199,7 +209,7 @@ function handleScroll() {
   if (container) {
     const isNearBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
     if (isNearBottom && !isLoading.value && hasMoreMembers.value) {
-      fetchMembers();
+      fetchMembers(localSearchQuery.value.trim());
     }
   }
 }
@@ -251,8 +261,7 @@ function cancelInvite() {
   selectedUserForInvite.value = null;
 }
 
-// --- 로직 수정 ---
-// 초대 확정 함수 (에러 메시지 처리 개선)
+// 초대 확정 함수
 async function confirmInvite() {
   const user = selectedUserForInvite.value;
   if (!user || user.memberId === undefined) {
@@ -274,28 +283,23 @@ async function confirmInvite() {
   } catch (error) {
     console.error('초대 API 호출 중 오류 발생:', error);
     
-    let errorMessage = '초대에 실패했습니다. 다시 시도해주세요.'; // 기본 에러 메시지
+    let errorMessage = '초대에 실패했습니다. 다시 시도해주세요.'; 
     
-    // 서버가 구체적인 에러 메시지를 보냈는지 확인하고 사용합니다.
     if (error.response && error.response.data) {
-        // 백엔드 응답이 { error_message: '...' } 형식일 경우
         if (typeof error.response.data === 'object' && error.response.data.error_message) {
             errorMessage = error.response.data.error_message;
         }
-        // 백엔드 응답이 { message: '...' } 형식일 경우 (호환성 유지)
         else if (typeof error.response.data === 'object' && error.response.data.message) {
             errorMessage = error.response.data.message;
         } 
-        // 백엔드 응답이 단순 문자열일 경우
         else if (typeof error.response.data === 'string' && error.response.data.trim() !== '') {
             errorMessage = error.response.data;
         }
-        console.log("서버로부터 받은 에러 응답:", error.response.data); // 디버깅용 로그
+        console.log("서버로부터 받은 에러 응답:", error.response.data);
     }
 
     showMessage(errorMessage, 'error');
 
-    // "이미" 라는 메시지를 받았다면, UI 상태를 즉시 업데이트합니다.
     if (errorMessage.includes("이미")) {
       if (!locallyInvitedUserIds.value.includes(user.memberId)) {
         locallyInvitedUserIds.value.push(user.memberId);
@@ -327,6 +331,7 @@ onBeforeUnmount(() => {
   if(scrollContainer.value) {
       scrollContainer.value.removeEventListener('scroll', handleScroll);
   }
+  clearTimeout(debounceTimer); // 컴포넌트 파괴 시 타이머 정리
 });
 </script>
 
