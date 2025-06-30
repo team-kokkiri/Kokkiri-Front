@@ -11,18 +11,20 @@
     </div>
 
     <!-- 유저 목록 영역 -->
-    <div class="user-list-content-area">
+    <div class="user-list-content-area" ref="scrollContainerRef">
       <div class="user-list">
         <div
             class="user-item"
             v-for="user in filteredUsers"
-            :key="user.id"
-        >
-          <img class="avatar" :src="user.avatar" :alt="user.nickname" />
+            :key="user.memberId" >
+          <img class="avatar" :src="user.avatarUrl || defaultAvatar" :alt="user.nickname" />
           <div class="user-info">
             <span class="nickname">{{ user.nickname }}</span>
             <span class="email">{{ user.email }}</span>
           </div>
+        </div>
+        <div v-if="isLoading" class="loading-indicator">
+          <span>멤버를 불러오는 중...</span>
         </div>
       </div>
     </div>
@@ -42,52 +44,60 @@
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits } from 'vue'
+import { computed, defineProps, defineEmits, ref, onMounted, onUnmounted } from 'vue'
+import defaultAvatar from '@/assets/img/0.png'; // 기본 아바타 이미지
 
 // Props
 const props = defineProps({
-  // 채팅방에 참여중인 사용자 목록
-  users: {
-    type: Array,
-    required: true,
-    default: () => []
-  },
-  // 검색어 (상위 컴포넌트에서 관리)
-  searchQuery: {
-    type: String,
-    default: ''
-  }
+  users: { type: Array, required: true },
+  searchQuery: { type: String, default: '' },
+  isLoading: { type: Boolean, default: false },
+  hasMore: { type: Boolean, default: true }
 })
 
 // Emits
 const emit = defineEmits([
-  'back',           // 뒤로가기
-  'search'          // 검색어 변경
-])
+  'back',
+  'search',
+  'load-more'
+]);
+
+const scrollContainerRef = ref(null); // 스크롤 컨테이너의 ref
 
 // 검색 필터링된 사용자 목록
 const filteredUsers = computed(() => {
-  if (!props.searchQuery) {
-    return props.users
-  }
-
-  const query = props.searchQuery.toLowerCase()
+  if (!props.searchQuery) return props.users;
+  const query = props.searchQuery.toLowerCase();
   return props.users.filter(user =>
-      user.nickname.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query)
-  )
-})
+      user.nickname.toLowerCase().includes(query)
+      // email 검색이 필요하면 추가: || user.email.toLowerCase().includes(query)
+  );
+});
 
-// 뒤로가기 버튼 클릭
-function goBack() {
-  emit('back')
-}
+function goBack() { emit('back') }
+function handleSearchInput(event) { emit('search', event.target.value) }
 
-// 검색창 입력 처리
-function handleSearchInput(event) {
-  emit('search', event.target.value)
-}
+// 스크롤 이벤트 핸들러
+const handleScroll = () => {
+  const container = scrollContainerRef.value;
+  if (container) {
+    const isNearBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+    // 로딩 중이 아니고, 더 불러올 데이터가 있을 때만 이벤트를 발생시킵니다.
+    if (isNearBottom && !props.isLoading && props.hasMore) {
+      emit('load-more');
+    }
+  }
+};
 
+// 컴포넌트가 마운트될 때 스크롤 이벤트 리스너를 추가
+onMounted(() => {
+  scrollContainerRef.value?.addEventListener('scroll', handleScroll);
+});
+
+// 컴포넌트가 언마운트될 때 리스너를 제거하여 메모리 누수를 방지
+onUnmounted(() => {
+  scrollContainerRef.value?.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -257,5 +267,13 @@ function handleSearchInput(event) {
       flex-shrink: 0;
     }
   }
+}
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-size: 14px;
+  color: #888;
 }
 </style>

@@ -1,4 +1,4 @@
-import { ref } from 'vue' // ✨ computed를 import 목록에서 삭제
+import { ref } from 'vue'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -220,22 +220,28 @@ export function useNotifications() {
         cleanup();
     }
 
-    async function fetchChatRoomMembers(roomId) {
-    try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            console.error("인증 토큰이 없습니다.");
-            return []; // 빈 배열 반환
+    async function fetchChatRoomMembers(roomId, page = 0, size = 20) {
+        if (!roomId) {
+            console.error("채팅방 ID가 없어 멤버를 조회할 수 없습니다.");
+            return null; // Page 객체 구조를 위해 null 반환
         }
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/members`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return response.data; // 멤버 목록 배열 반환
-    } catch (error) {
-        console.error(`채팅방(${roomId}) 멤버 조회 실패:`, error);
-        return []; // 에러 발생 시 빈 배열 반환
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                console.error("인증 토큰이 없습니다.");
+                return null;
+            }
+            const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/members`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { page, size }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`채팅방(${roomId}) 멤버 조회 실패:`, error);
+            return null;
+        }
     }
-}
+
 
     return {
         notifications, hasNewChatMessage, totalUnreadNotifications, isLoading, hasMore, isLogin, notificationVersion,

@@ -2,10 +2,9 @@
   <div class="page-container">
     <section class="chat-room">
       <div class="chat-room-inner">
-        <!-- 1. 채팅 사이드바 컴포넌트 -->
         <ChatSidebar
-            :chatRooms="chatRooms"
-            :activeRoomId="activeRoomId"
+            :chat-rooms="chatRooms"
+            :active-room-id="activeRoomId"
             :is-loading="isLoading"
             :has-more="hasMore"
             @select="selectRoom"
@@ -13,20 +12,22 @@
             @load-more="fetchMoreChatRooms"
         />
 
-        <!-- 2. 유저목록 뷰 컴포넌트 (조건부 렌더링) -->
         <ChatUserList
             v-if="showUserListView"
             :users="roomUsers"
-            :searchQuery="userListSearchQuery"
+            :search-query="userListSearchQuery"
+            :is-loading="isMemberLoading"
+            :has-more="hasMoreMembers"
             @back="closeUserListView"
             @search="handleUserListSearch"
+            @load-more="fetchMoreMembers"
         />
 
         <InviteView
             v-else-if="showInviteView"
             :room-id="activeRoomId"
             :invited-user-ids="invitedUserIds"
-            :search-query="searchQuery"
+            :search-query="inviteSearchQuery"
             @back="closeInviteView"
             @invite="handleUserInvite"
             @search="handleInviteSearch"
@@ -44,7 +45,7 @@
             @toggle-menu="toggleMenu"
             @open-invite="openInvite"
             @leave-room="handleLeaveRoom"
-            @open-list="openList"
+            @open-user-list="openList"
         />
       </div>
     </section>
@@ -52,155 +53,196 @@
 </template>
 
 <script setup>
-// 4개 컴포넌트 임포트
-import ChatSidebar from '@/components/chat/ChatSidebar.vue'
-import InviteView from '@/components/chat/InviteView.vue'
-import ChatMainArea from '@/components/chat/ChatMainArea.vue'
+// 컴포넌트 임포트
+import ChatSidebar from '@/components/chat/ChatSidebar.vue';
+import InviteView from '@/components/chat/InviteView.vue';
+import ChatMainArea from '@/components/chat/ChatMainArea.vue';
+import ChatUserList from '@/components/chat/ChatUserList.vue';
 
-import Avatar from '@/assets/img/0.png' // 기본 아바타
-import { ref, computed, onMounted, onUnmounted} from 'vue'
-
-// Stomp 및 통신 라이브러리 import
-import SockJS from 'sockjs-client'
-import Stomp from 'webstomp-client'
-import axios from 'axios'
-
-// ✨ useRoute import 추가
-import { onBeforeRouteLeave, useRoute } from 'vue-router'
-import ChatUserList from "@/components/chat/ChatUserList.vue";
-
-// ============새로 추가한거(구현필요 or 확인하고 옮기쇼)===============
-// 유저목록 관련 상태 (새로 추가)
-const userListSearchQuery = ref('')
-// 접속 유저들 목록
-const roomUsers = ref([])
-// 유저 목록 수
-const userCount = ref(5)
-// 유저 리스트 뷰를 보여주는 상태
-const showUserListView = ref(false)
-// 채팅창 생성하기!!
-function createRoom() {
-}
-
-// 유저목록 열기
-async function openList() {
-  if (!activeRoomId.value) {
-    console.warn('활성화된 채팅방이 없습니다.');
-    return;
-  }
-
-  menuOpen.value = false;
-  showInviteView.value = false;
-  showUserListView.value = true;
-  userListSearchQuery.value = '';
-
-  // 채팅방 유저 목록 가져오기
-  await fetchRoomUsers(activeRoomId.value);
-}
-
-
-// 채팅방 유저 목록 가져오기
-async function fetchRoomUsers(roomId) {
-  try {
-    const response = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/users`, {
-      headers: { Authorization: `Bearer ${token.value}` }
-    });
-    roomUsers.value = response.data.map(user => ({
-      id: user.id,
-      nickname: user.nickname,
-      email: user.email,
-      avatar: user.avatar || Avatar
-    }));
-  } catch (error) {
-    console.error("채팅방 유저 목록 로딩 실패:", error);
-    // 실패 시 빈 배열로 설정
-    roomUsers.value = [];
-  }
-}
-
-// 유저목록 뷰 닫기 (새로 추가)
-function closeUserListView() {
-  showUserListView.value = false;
-  userListSearchQuery.value = '';
-}
-
-// 유저목록 검색 핸들러 (새로 추가)
-function handleUserListSearch(query) {
-  userListSearchQuery.value = query;
-}
-
-// ======================================
-
+// 유틸 및 라이브러리 임포트
+import Avatar from '@/assets/img/0.png';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'; // ✨ watch 임포트 추가
+import SockJS from 'sockjs-client';
+import Stomp from 'webstomp-client';
+import axios from 'axios';
+import { onBeforeRouteLeave, useRoute } from 'vue-router';
 
 // ===== 상태(State) 관리 =====
-const chatRooms = ref([])
-const activeRoomId = ref(null)
-const input = ref('')
-const menuOpen = ref(false)
-const showInviteView = ref(false)
 
-// 페이징 상태 관리 변수 추가
-const page = ref(0)
-const isLoading = ref(false)
-const hasMore = ref(true)
+// 채팅방 및 메시지 관련
+const chatRooms = ref([]);
+const activeRoomId = ref(null);
+const input = ref('');
+const menuOpen = ref(false);
 
-// Stomp 관련 상태
-const stompClient = ref(null)
-const token = ref(null)
-const currentUserEmail = ref('')
+// 채팅방 목록 페이징 관련
+const page = ref(0);
+const isLoading = ref(false);
+const hasMore = ref(true);
 
-// 초대 관련 상태
-const searchQuery = ref('')
-const invitedUserIds = ref([])
+// Stomp 및 인증 관련
+const stompClient = ref(null);
+const token = ref(null);
+const currentUserEmail = ref('');
 
-// route 객체 생성
+// 초대 관련
+const showInviteView = ref(false);
+const inviteSearchQuery = ref('');
+const invitedUserIds = ref([]);
+
+// 유저 목록 관련
+const showUserListView = ref(false);
+const roomUsers = ref([]);
+const userListSearchQuery = ref('');
+const userCount = ref(0);
+const memberPage = ref(0);
+const isMemberLoading = ref(false);
+const hasMoreMembers = ref(true);
+let searchDebounceTimer = null;
+
 const route = useRoute();
-
-
-// API 기본 URL (환경 변수 사용 권장)
 const VUE_APP_API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:9090';
 
 // ===== Computed 속성 =====
 const currentRoom = computed(() =>
     chatRooms.value.find(room => room.roomId === activeRoomId.value)
-)
+);
 
-// ===== 채팅 및 WebSocket 관련 함수 =====
+// ===== 함수 =====
+
+function createRoom() {
+  console.log("새 채팅방 생성 로직 구현 필요");
+}
+
+// 채팅방 멤버 목록 API 호출 함수
+async function fetchChatRoomMembers(roomId, query, pageNum) {
+  if (!roomId) return null;
+  isMemberLoading.value = true;
+  try {
+    const response = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/members`, {
+      headers: { Authorization: `Bearer ${token.value}` },
+      params: { nickname: query, page: pageNum, size: 20 }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("채팅방 유저 목록 로딩 실패:", error);
+    return null;
+  } finally {
+    isMemberLoading.value = false;
+  }
+}
+
+//  멤버 목록을 더 불러오는 함수 (무한 스크롤)
+async function fetchMoreMembers() {
+  if (isMemberLoading.value || !hasMoreMembers.value) return;
+
+  const data = await fetchChatRoomMembers(activeRoomId.value, userListSearchQuery.value, memberPage.value);
+
+  if (data && data.content) {
+    if (memberPage.value === 0) {
+      roomUsers.value = data.content.map(user => ({ ...user, avatar: user.avatarUrl || Avatar }));
+    } else {
+      roomUsers.value.push(...data.content.map(user => ({ ...user, avatar: user.avatarUrl || Avatar })));
+    }
+    hasMoreMembers.value = !data.last;
+    userCount.value = data.totalElements;
+    if (hasMoreMembers.value) {
+      memberPage.value++;
+    }
+  } else {
+    hasMoreMembers.value = false;
+  }
+}
+
+// 유저 목록 보기 (초기화 및 첫 페이지 로딩)
+async function openList() {
+  if (!activeRoomId.value) {
+    alert("유저 목록을 보려면 채팅방을 먼저 선택해주세요.");
+    return;
+  }
+  menuOpen.value = false;
+  
+  userListSearchQuery.value = '';
+  memberPage.value = 0;
+  hasMoreMembers.value = true;
+  roomUsers.value = [];
+  
+  showUserListView.value = true;
+  await fetchMoreMembers();
+}
+
+function closeUserListView() { showUserListView.value = false; }
+function handleUserListSearch(query) { userListSearchQuery.value = query; }
+
+// 검색어가 변경되면 디바운싱 후 멤버 목록을 다시 불러옴
+watch(userListSearchQuery, () => {
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(async () => {
+    memberPage.value = 0;
+    hasMoreMembers.value = true;
+    roomUsers.value = [];
+    await fetchMoreMembers();
+  }, 300);
+});
+
+async function selectRoom(roomId) {
+  if (activeRoomId.value === roomId) return;
+  
+  activeRoomId.value = roomId;
+  showInviteView.value = false;
+  showUserListView.value = false;
+  inviteSearchQuery.value = '';
+  userListSearchQuery.value = '';
+
+  const room = chatRooms.value.find(r => r.roomId === roomId);
+  if (room) {
+    if (room.unReadCount > 0) {
+      room.unReadCount = 0;
+      await sendReadStatus(roomId);
+    }
+    if (room.messages.length === 0) {
+      await fetchMessageHistory(roomId);
+    }
+    // 방을 선택할 때마다 멤버 수를 다시 불러옵니다.
+    const memberData = await fetchChatRoomMembers(roomId, '', 0);
+    if(memberData) userCount.value = memberData.totalElements;
+  }
+}
+
+async function handleLeaveRoom() {
+  if (!activeRoomId.value) return;
+  
+  try {
+    await axios.delete(`${VUE_APP_API_BASE_URL}/api/chat/room/group/${activeRoomId.value}/leave`, {
+      headers: { Authorization: `Bearer ${token.value}` }
+    });
+    const leftRoomId = activeRoomId.value;
+    chatRooms.value = chatRooms.value.filter(room => room.roomId !== leftRoomId);
+    activeRoomId.value = null;
+  } catch (error) {
+    console.error("채팅방 나가기 실패:", error);
+    alert("채팅방을 나가는 데 실패했습니다.");
+  }
+}
+
 async function fetchChatRooms() {
   if (isLoading.value || !hasMore.value) return;
-
   isLoading.value = true;
   try {
     const response = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/myRooms`, {
       headers: { Authorization: `Bearer ${token.value}` },
-      params: {
-        page: page.value,
-        size: 20
-      }
+      params: { page: page.value, size: 20 }
     });
-    
     const data = response.data;
     const newRooms = data.content.map(room => ({
-      roomId: room.roomId,
-      avatar: Avatar,
-      roomName: room.roomName,
-      lastMessageTime: room.lastMessageTime,
-      lastMessage: room.lastMessage,
-      unReadCount: room.unReadCount,
-      messages: []
+      roomId: room.roomId, avatar: Avatar, roomName: room.roomName,
+      lastMessageTime: room.lastMessageTime, lastMessage: room.lastMessage,
+      unReadCount: room.unReadCount, messages: []
     }));
-
     chatRooms.value.push(...newRooms);
     hasMore.value = !data.last;
-    
-    if (hasMore.value) {
-      page.value++;
-    }
-    
-    if (stompClient.value && stompClient.value.connected) {
-      subscribeToRooms(newRooms);
-    }
-
+    if (hasMore.value) page.value++;
+    if (stompClient.value?.connected) subscribeToRooms(newRooms);
   } catch (error) {
     console.error("채팅방 목록 로딩 실패:", error);
   } finally {
@@ -208,9 +250,7 @@ async function fetchChatRooms() {
   }
 }
 
-function fetchMoreChatRooms() {
-  fetchChatRooms();
-}
+function fetchMoreChatRooms() { fetchChatRooms(); }
 
 async function fetchMessageHistory(roomId) {
   try {
@@ -220,48 +260,34 @@ async function fetchMessageHistory(roomId) {
     const room = chatRooms.value.find(r => r.roomId === roomId);
     if (room) {
       room.messages = res.data.map(msg => ({
-        id: msg.id,
-        avatar: Avatar,
-        nickname: msg.senderEmail,
-        time: msg.createdTime,
-        text: msg.message
+        id: msg.id, avatar: Avatar, nickname: msg.senderEmail, time: msg.createdTime, text: msg.message
       }));
     }
-  } catch (error) {
-    console.error("메시지 내역 로딩 실패:", error);
-  }
+  } catch (error) { console.error("메시지 내역 로딩 실패:", error); }
 }
 
 function subscribeToRooms(roomsToSubscribe) {
   if (!stompClient.value?.connected) return;
-
   roomsToSubscribe.forEach(chat => {
     stompClient.value.subscribe(`/topic/${chat.roomId}`, 
       (message) => handleIncomingMessage(JSON.parse(message.body)),
-      { 
-        id: `sub-${chat.roomId}`,
-        Authorization: `Bearer ${token.value}`
-      }
+      { id: `sub-${chat.roomId}`, Authorization: `Bearer ${token.value}` }
     );
   });
 }
 
 function connectWebSocket() {
-  if (stompClient.value && stompClient.value.connected) return;
-
+  if (stompClient.value?.connected) return;
   const sockJs = new SockJS(`${VUE_APP_API_BASE_URL}/connect`);
   stompClient.value = Stomp.over(sockJs);
   stompClient.value.debug = () => {};
-
   stompClient.value.connect({ Authorization: `Bearer ${token.value}` }, () => {
     subscribeToRooms(chatRooms.value);
   });
 }
 
 function disconnectWebSocket() {
-  if (stompClient.value && stompClient.value.connected) {
-    stompClient.value.disconnect();
-  }
+  if (stompClient.value?.connected) stompClient.value.disconnect();
 }
 
 function sendMessage() {
@@ -276,7 +302,6 @@ function sendMessage() {
 function handleIncomingMessage(msg) {
   const { roomId, senderEmail, message, createdTime } = msg;
   const chatIndex = chatRooms.value.findIndex(c => c.roomId === roomId);
-  
   if (chatIndex !== -1) {
     const chat = chatRooms.value[chatIndex];
     chat.lastMessage = message;
@@ -293,14 +318,9 @@ function handleIncomingMessage(msg) {
     chatRooms.value.splice(chatIndex, 1);
     chatRooms.value.unshift(chat);
   }
-
   if (roomId === activeRoomId.value) {
     currentRoom.value.messages.push({
-      id: Date.now(),
-      avatar: Avatar,
-      nickname: senderEmail,
-      time: createdTime,
-      text: message
+      id: Date.now(), avatar: Avatar, nickname: senderEmail, time: createdTime, text: message
     });
   }
 }
@@ -311,36 +331,13 @@ async function sendReadStatus(roomId) {
     await axios.post(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}/read`, {}, {
         headers: { Authorization: `Bearer ${token.value}` }
     });
-    console.log(`✅ [Room ID: ${roomId}] 읽음 상태 전송 성공`);
-    
-  } catch (error) {
-    console.error(`❌ [Room ID: ${roomId}] 읽음 상태 전송 실패:`, error);
-  }
+  } catch (error) { console.error(`❌ [Room ID: ${roomId}] 읽음 상태 전송 실패:`, error); }
 }
 
 onBeforeRouteLeave((to, from, next) => {
-  if (activeRoomId.value) {
-    sendReadStatus(activeRoomId.value);
-  }
+  if (activeRoomId.value) sendReadStatus(activeRoomId.value);
   next();
 });
-
-async function selectRoom(roomId) {
-  if (activeRoomId.value === roomId) return;
-  activeRoomId.value = roomId;
-  showInviteView.value = false;
-  searchQuery.value = '';
-  const room = chatRooms.value.find(r => r.roomId === roomId);
-  if (room) {
-    if (room.unReadCount > 0) {
-      room.unReadCount = 0;
-      sendReadStatus(roomId);
-    }
-    if (room.messages.length === 0) {
-      await fetchMessageHistory(roomId);
-    }
-  }
-}
 
 function updateInput(newValue) { input.value = newValue; }
 function toggleMenu() { menuOpen.value = !menuOpen.value; }
@@ -355,43 +352,18 @@ function openInvite() {
 
 function handleEscapeKey(event) { 
   if (event.key === 'Escape') { 
-    if (showInviteView.value) closeInviteView(); 
+    if (showUserListView.value) closeUserListView();
+    else if (showInviteView.value) closeInviteView(); 
     else if (menuOpen.value) menuOpen.value = false; 
   } 
 }
-function closeInviteView() { showInviteView.value = false; searchQuery.value = ''; }
-function handleInviteSearch(query) { searchQuery.value = query; }
+function closeInviteView() { showInviteView.value = false; inviteSearchQuery.value = ''; }
+function handleInviteSearch(query) { inviteSearchQuery.value = query; }
 function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
 
-async function handleLeaveRoom() {
-  if (!activeRoomId.value) {
-    alert("나갈 채팅방이 선택되지 않았습니다.");
-    return;
-  }
 
-  try {
-    await axios.delete(`${VUE_APP_API_BASE_URL}/api/chat/room/group/${activeRoomId.value}/leave`, {
-      headers: { Authorization: `Bearer ${token.value}` }
-    });
-
-    // alert("채팅방에서 나갔습니다.");
-
-    // 성공적으로 나간 후 프론트엔드 상태 업데이트
-    // 1. 채팅방 목록에서 해당 방을 제거합니다.
-    chatRooms.value = chatRooms.value.filter(room => room.roomId !== activeRoomId.value);
-    
-    // 2. 현재 선택된 채팅방을 초기화합니다.
-    activeRoomId.value = null;
-
-  } catch (error) {
-    console.error("채팅방 나가기 실패:", error);
-    alert("채팅방을 나가는 데 실패했습니다.");
-  }
-}
-
-
+// ===== 생명주기 훅 =====
 onMounted(async () => {
-  // 1. 기본 정보 설정
   currentUserEmail.value = localStorage.getItem('email');
   token.value = localStorage.getItem('accessToken');
   if (!token.value || !currentUserEmail.value) { 
@@ -399,38 +371,24 @@ onMounted(async () => {
     return; 
   }
 
-  // 2. 채팅방 목록을 먼저 모두 불러옵니다.
   await fetchChatRooms();
+  if (chatRooms.value.length > 0) connectWebSocket(); 
 
-  // 3. 웹소켓 연결
-  if (chatRooms.value.length > 0) { 
-    connectWebSocket(); 
-  }
-
-  // 4. ✨ URL에서 roomId를 확인하고 해당 채팅방을 자동으로 선택합니다.
   const targetRoomId = route.query.roomId;
   if (targetRoomId) {
-    // URL의 쿼리 파라미터는 문자열이므로 숫자로 변환합니다.
     const roomIdAsNumber = parseInt(targetRoomId, 10);
-    
-    // 불러온 채팅 목록에 해당 ID가 있는지 확인합니다.
     const roomExists = chatRooms.value.some(room => room.roomId === roomIdAsNumber);
-
     if (roomExists) {
-      console.log(`URL에서 채팅방 ID(${roomIdAsNumber})를 감지하여 자동으로 선택합니다.`);
-      // selectRoom 함수를 호출하여 채팅방을 활성화합니다.
       await selectRoom(roomIdAsNumber);
     } else {
       console.warn(`URL의 채팅방 ID(${roomIdAsNumber})가 현재 사용자의 채팅 목록에 없습니다.`);
     }
   }
 
-  // 5. 키보드 이벤트 리스너 추가
   document.addEventListener('keydown', handleEscapeKey);
 });
 
 onUnmounted(() => {
-  
   disconnectWebSocket();
   document.removeEventListener('keydown', handleEscapeKey);
 });

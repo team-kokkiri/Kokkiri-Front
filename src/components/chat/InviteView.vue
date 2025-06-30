@@ -15,7 +15,7 @@
             class="invite-user-item"
             v-for="user in userListToDisplay"
             :key="user.memberId" >
-          <img class="avatar" :src="user.avatar || 'https://placehold.co/50x50/cccccc/000000?text=👤'" :alt="user.nickname" />
+          <img class="avatar" :src="user.avatarUrl || defaultAvatar" :alt="user.nickname" />
           <div class="user-info">
             <span class="nickname">{{ user.nickname }}</span>
             <span class="email">{{ user.email }}</span>
@@ -82,6 +82,7 @@
 <script setup>
 import { computed, defineProps, defineEmits, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
+import defaultAvatar from '@/assets/img/0.png';
 
 // Props
 const props = defineProps({
