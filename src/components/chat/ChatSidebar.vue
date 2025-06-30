@@ -25,7 +25,14 @@
         @click="selectRoom(room.roomId)"
       >
         <div class="chat-room-top">
-          <span class="nickname">{{ room.roomName }}</span>
+          <!-- 제목과 인원수를 묶는 래퍼 추가 -->
+          <div class="title-wrapper">
+            <span class="nickname">{{ room.roomName }}</span>
+            <!-- 그룹 채팅(isGroupChat === 'Y')이고 인원수가 있을 경우에만 표시 -->
+            <span v-if="room.isGroupChat === 'Y' && room.userCount > 0" class="user-count">
+              {{ room.userCount }}
+            </span>
+          </div>
           <span class="time">{{ formatDisplayTime(room.lastMessageTime) }}</span>
         </div>
         <div class="chat-room-bottom">
@@ -88,7 +95,6 @@ const props = defineProps({
   }
 })
 
-// 부모에게 보낼 이벤트를 정의합니다.
 const emit = defineEmits(['select', 'load-more', 'room-created', 'add-and-select-room'])
 
 function openCreateRoomModal() {
@@ -100,7 +106,6 @@ function closeCreateRoomModal() {
   isModalOpen.value = false;
 }
 
-// 그룹 채팅방 생성 로직
 async function handleCreateRoom() {
   const roomName = newRoomName.value.trim();
   if (!roomName) {
@@ -153,12 +158,10 @@ async function handleCreateRoom() {
   }
 }
 
-// 기존 채팅방 클릭 시 이벤트를 발생시키는 함수
 function selectRoom(id) {
   emit('select', id);
 }
 
-// 무한 스크롤 로직
 function handleScroll(event) {
   const { scrollTop, scrollHeight, clientHeight } = event.target
   if (props.isLoading || !props.hasMore) return
@@ -167,7 +170,6 @@ function handleScroll(event) {
   }
 }
 
-// 시간 포맷팅 함수
 function formatDisplayTime(dateTimeString) {
   if (!dateTimeString) return '';
   const now = new Date();
@@ -261,7 +263,7 @@ $light-gray: #f0f0f0;
   &:hover { background-color: rgba($main-color, 0.05); }
   &.active {
     background-color: $main-color;
-    .nickname, .time, .preview { color: $white !important; }
+    .nickname, .time, .preview, .user-count { color: $white !important; }
   }
 }
 .chat-room-top {
@@ -269,20 +271,41 @@ $light-gray: #f0f0f0;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
-}
-.nickname {
-  font-family: $secondary-kr;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 1.25;
-  color: $dark-black;
-}
-.time {
-  font-family: $primary-kr;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 1.2;
-  color: $silver-black;
+  
+  .title-wrapper {
+    display: flex;
+    align-items: baseline; // 닉네임과 숫자 baseline 정렬
+    gap: 6px;
+    overflow: hidden; // 긴 닉네임이 레이아웃을 깨지 않도록
+  }
+  
+  .nickname {
+    font-family: $secondary-kr;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.25;
+    color: $dark-black;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-count {
+    font-family: $primary-kr;
+    font-size: 13px;
+    font-weight: 500;
+    color: $silver-black;
+    flex-shrink: 0; // 숫자가 줄어들지 않도록
+  }
+
+  .time {
+    font-family: $primary-kr;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1.2;
+    color: $silver-black;
+    flex-shrink: 0; // 시간이 줄어들지 않도록
+  }
 }
 .chat-room-bottom {
   display: flex;

@@ -240,7 +240,7 @@ async function fetchChatRooms() {
     const newRooms = data.content.map(room => ({
       roomId: room.roomId, avatar: Avatar, roomName: room.roomName,
       lastMessageTime: room.lastMessageTime, lastMessage: room.lastMessage,
-      unReadCount: room.unReadCount, messages: []
+      unReadCount: room.unReadCount, messages: [], isGroupChat: room.isGroupChat, userCount: room.userCount
     }));
     chatRooms.value.push(...newRooms);
     hasMore.value = !data.last;
