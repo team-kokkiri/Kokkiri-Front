@@ -4,7 +4,6 @@
       <h2 class="chat-title">채팅목록</h2>
     </div>
 
-    <!-- 채팅방 만들기 버튼 (모달 열기) -->
     <div class="create-chat-wrapper">
       <div class="create-chat-button" @click="openCreateRoomModal">
         <i class="bi bi-plus-lg"></i>
@@ -12,7 +11,6 @@
       </div>
     </div>
 
-    <!-- 채팅방 목록 -->
     <div
       class="chat-room-list"
       v-if="chatRooms && chatRooms.length > 0"
@@ -25,10 +23,8 @@
         @click="selectRoom(room.roomId)"
       >
         <div class="chat-room-top">
-          <!-- 제목과 인원수를 묶는 래퍼 추가 -->
           <div class="title-wrapper">
             <span class="nickname">{{ room.roomName }}</span>
-            <!-- 그룹 채팅(isGroupChat === 'Y')이고 인원수가 있을 경우에만 표시 -->
             <span v-if="room.isGroupChat === 'Y' && room.userCount > 0" class="user-count">
               {{ room.userCount }}
             </span>
@@ -46,7 +42,6 @@
         채팅 목록을 불러오는 중...
       </div>
     </div>
-    <!-- 채팅방이 없을 때 메시지 -->
     <div v-else-if="!isLoading" class="empty-chat-message">
       <p>대화중인 채팅방이 없습니다.</p>
       <p>상단의 버튼을 눌러 새 채팅을 시작하세요.</p>
