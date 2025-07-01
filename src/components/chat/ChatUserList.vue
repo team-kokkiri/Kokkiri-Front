@@ -17,7 +17,7 @@
             class="user-item"
             v-for="user in filteredUsers"
             :key="user.memberId" >
-          <img class="avatar" :src="user.avatarUrl || defaultAvatar" :alt="user.nickname" />
+          <img class="avatar" :src="getProfileImageUrl(user.avatar || user.avatarUrl)" :alt="user.nickname" @error="handleImageError" />
           <div class="user-info">
             <span class="nickname">{{ user.nickname }}</span>
             <span class="email">{{ user.email || '이메일 정보 없음' }}</span>
@@ -63,7 +63,7 @@
 
 <script setup>
 import { computed, defineProps, defineEmits, ref, onMounted, onUnmounted } from 'vue'
-import defaultAvatar from '@/assets/img/0.png';
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 import { useUserStore } from '@/stores/user'
 import axios from '../../utils/axios' // axios 인스턴스 가져오기
 

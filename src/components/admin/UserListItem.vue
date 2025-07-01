@@ -3,8 +3,8 @@
     <div class="user-avatar">
       <div class="avatar-circle">
         <img
-            v-if="user.profileImage"
-            :src="user.profileImage"
+            v-if="user.profileImage || user.avatar"
+            :src="getProfileImageUrl(user.avatar || user.profileImage)"
             :alt="`${user.name} 프로필`"
             class="avatar-image"
             @error="handleImageError"
@@ -43,6 +43,7 @@
 
 <script setup>
 import { computed, defineProps, defineEmits, ref } from 'vue'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 
 // ===== Props =====
 const props = defineProps({
@@ -105,10 +106,7 @@ function getStatusText(user) {
   return '정상'
 }
 
-function handleImageError(event) {
-  // 이미지 로드 실패 시 기본 아바타로 대체
-  event.target.style.display = 'none'
-}
+// 이미지 에러 처리는 공통 함수 사용
 
 // ===== 이벤트 핸들러 =====
 async function handleManage() {

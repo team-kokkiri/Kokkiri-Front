@@ -2,7 +2,12 @@
   <div class="user-profile-card">
     <div class="profile-avatar">
       <div class="avatar-circle">
-        <!-- TODO: 실제 아바타 이미지가 있다면 img 태그로 교체 -->
+        <img 
+          :src="getProfileImageUrl(user.avatar)" 
+          :alt="user.name + ' 프로필'"
+          @error="handleImageError"
+          class="avatar-image"
+        />
       </div>
     </div>
     
@@ -15,6 +20,7 @@
 
 <script setup>
 import { defineProps } from 'vue'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 
 // ===== Props =====
 defineProps({
@@ -45,10 +51,16 @@ defineProps({
       height: 100px;
       border-radius: 50%;
       background: $light-gray;
-      // TODO: 실제 아바타 이미지 적용 시 background-image 사용
-      // background-image: url(...);
-      // background-size: cover;
-      // background-position: center;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
     }
   }
 

@@ -3,7 +3,7 @@
     <!-- 대댓글 프로필 -->
     <div class="comment-profile">
       <div class="profile-info">
-        <img class="avatar" :src="reply.avatar || defaultAvatar" alt="아바타" />
+        <img class="avatar" :src="getProfileImageUrl(getCurrentUserAvatar())" alt="아바타" @error="handleImageError" />
         <span class="nickname">{{ reply.memberNickname }}</span>
       </div>
       <div class="comment-actions">
@@ -65,7 +65,7 @@
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue'
-import defaultAvatar from '@/assets/img/0.png'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 import EditForm from './EditForm.vue'
 import ReplyList from './ReplyList.vue'
 import axios from '@/utils/axios'
@@ -102,9 +102,24 @@ const emit = defineEmits([
   'close-reply'
 ])
 
+// 디버깅: reply 데이터 구조 확인
+console.log('ReplyItem - reply 데이터:', props.reply)
+console.log('ReplyItem - reply.memberAvatar:', props.reply.memberAvatar)
+console.log('ReplyItem - reply.avatar:', props.reply.avatar)
+
 const router = useRouter();
 const userStore = useUserStore();
 const isChatModalOpen = ref(false);
+
+// 현재 사용자의 아바타를 가져오는 함수 (임시 해결방안)
+const getCurrentUserAvatar = () => {
+  // 대댓글 작성자가 현재 로그인한 사용자인 경우 userStore의 avatar 사용
+  if (props.reply.memberNickname === userStore.displayName || props.reply.memberNickname === userStore.nickname) {
+    return userStore.avatar
+  }
+  // 다른 사용자인 경우 기본 이미지 사용
+  return props.reply.memberAvatar || props.reply.avatar || null
+}
 
 // 모달 열기 함수 (디버깅 코드 추가)
 function openChatModal() {

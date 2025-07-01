@@ -33,7 +33,7 @@
 <script setup>
 import { computed, defineEmits } from 'vue'
 import { useUserStore } from '@/stores/user'
-import defaultProfileImage from '@/assets/img/0.png'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 
 const userStore = useUserStore()
 
@@ -44,17 +44,10 @@ const nickname = computed(() => {
   return userStore.nickname || '익명'
 })
 
-//  avatarUrl 처리 (백엔드 주소 포함)
+//  avatarUrl 처리 (공통 함수 사용)
 const avatarUrl = computed(() => {
-  if (!userStore.avatar) return defaultProfileImage
-  return userStore.avatar.startsWith('/images')
-      ? `http://localhost:9090${userStore.avatar}`
-      : userStore.avatar
+  return getProfileImageUrl(userStore.avatar)
 })
-
-const handleImageError = (event) => {
-  event.target.src = defaultProfileImage
-}
 
 </script>
 
