@@ -140,7 +140,7 @@ const isChatModalOpen = ref(false);
 
 // 모달 열기 함수
 function openChatModal() {
-  if (userStore.memberId == props.comment.memberId) {
+  if (userStore.memberId === props.comment.memberId) {
     alert("자기 자신과는 채팅할 수 없습니다.");
     return;
   }
