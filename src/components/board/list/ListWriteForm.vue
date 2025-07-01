@@ -79,7 +79,7 @@
         </div>
       </div>
     </form>
-    
+
     <!-- 글 작성 확인 모달 -->
     <WriteConfirmModal
       :visible="showWriteConfirmModal"
@@ -142,6 +142,18 @@ function handleSubmit() {
 
 // 글 작성 확인 처리
 function confirmWrite() {
+
+  // 프로젝트 소개 게시판일 경우 이미지 필수 첨부 체크
+  if (props.boardTypeId === 5) {
+    const hasImage = formData.value.attachedImages.some(file =>
+      file.type && file.type.startsWith('image')
+    )
+    if (!hasImage) {
+      alert('프로젝트 소개 게시판은 이미지 1개 이상 첨부해야 합니다.')
+      return
+    }
+  }
+
   // 부모 컴포넌트로 데이터 전달
   emit('submit', {
     boardTitle: formData.value.boardTitle,

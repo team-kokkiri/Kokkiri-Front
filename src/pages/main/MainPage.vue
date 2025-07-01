@@ -158,14 +158,19 @@ onBeforeUnmount(() => {
 })
 
 // 게시글 상세 페이지 넘어가기
-const handleBoardItemClick = ({ boardId, itemId }) => {
-  if (boardId === 4) {
-    router.push(`/main-page/notice/${itemId}`)
-  } else if (boardId === 2) {
-    router.push(`/main-page/free-board/${itemId}`)
-  } else if (boardId === 3) {
-    router.push(`/main-page/free-board/${itemId}`)
-  }
+const handleBoardItemClick = ({ boardType, itemId }) => {
+  console.log(itemId)
+  if (boardType === '공지사항') {
+    router.push(`/main-page/notice/${itemId.itemId}`)
+  } else if (boardType === '자유게시판') {
+    router.push(`/main-page/free-board/${itemId.itemId}`)
+  } else if (boardType === '자료공유 게시판') {
+    router.push(`/main-page/share-board/${itemId.itemId}`)
+  } else if (boardType === '프로젝트 소개') {
+      router.push(`/main-page/project-board/${itemId.itemId}`)
+  } else {
+      router.push(``)
+  } 
 }
 
 const hasProjectPosts = ref(true) // 기본값 true로 설정

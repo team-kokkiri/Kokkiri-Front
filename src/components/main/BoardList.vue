@@ -13,7 +13,8 @@
           v-for="item in boardItems"
           :key="item.id"
           class="board-item"
-          @click="$emit('board-item-click', item.id)"
+          @click="$emit('board-item-click', { itemId: item.id, boardType: item.boardType })"
+          
       >
         <span class="board-text">{{ item.text }}</span>
         <span class="board-meta">{{ item.meta }}</span>
