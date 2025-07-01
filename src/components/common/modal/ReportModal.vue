@@ -4,7 +4,7 @@
       <div class="modal-content">
         <div class="image-section">
           <img 
-            src="@/assets/img/마스코트신고.png" 
+            src="../../../assets/img/마스코트신고.png"
             alt="신고 마스코트"
             class="mascot-image"
           />

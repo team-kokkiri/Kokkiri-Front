@@ -4,22 +4,21 @@
       <div class="modal-content">
         <div class="image-section">
           <img 
-            src="@/assets/img/마스코트인증메일.png"
-            alt="발송 중 마스코트"
+            src="../../../assets/img/웃는마스코트.png"
+            alt="성공 마스코트"
             class="mascot-image"
           />
         </div>
         <div class="message-section">
-          <p class="sending-message">
-            인증 메일을 발송중입니다<span class="dots">
-              <span class="dot">. </span>
-              <span class="dot">. </span>
-              <span class="dot">. </span>
-            </span>
-          </p>
-          <br>
-          <p class="sub-message">잠시만 기다려주세요!</p>
+          <p class="success-message">{{ message }}</p>
         </div>
+      </div>
+      <!-- Progress Bar -->
+      <div v-if="autoClose" class="progress-bar">
+        <div
+            class="progress-fill"
+            :style="{ animationDuration: `${autoCloseDelay}ms` }"
+        ></div>
       </div>
     </div>
   </div>
@@ -27,7 +26,7 @@
 
 <script>
 export default {
-  name: 'LoadingModal',
+  name: 'SuccessModal',
   props: {
     visible: {
       type: Boolean,
@@ -35,18 +34,33 @@ export default {
     },
     message: {
       type: String,
-      default: '인증 메일을 발송중입니다'
+      default: '인증이 완료되었습니다.'
     },
-    subMessage: {
-      type: String,
-      default: '잠시만 기다려주세요!'
+    autoClose: {
+      type: Boolean,
+      default: true
+    },
+    autoCloseDelay: {
+      type: Number,
+      default: 3000
     }
   },
   emits: ['close'],
+  watch: {
+    visible(newVal) {
+      if (newVal && this.autoClose) {
+        this.scheduleAutoClose()
+      }
+    }
+  },
   methods: {
     closeModal() {
-      // 로딩 중일 때는 클릭으로 닫기 비활성화
-      // this.$emit('close')
+      this.$emit('close')
+    },
+    scheduleAutoClose() {
+      setTimeout(() => {
+        this.closeModal()
+      }, this.autoCloseDelay)
     }
   }
 }
@@ -78,6 +92,33 @@ export default {
   overflow: hidden;
 }
 
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #f0f0f0;
+  z-index: 1;
+}
+
+.progress-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #45a049);
+  animation: progressDecrease linear forwards;
+  transform-origin: left;
+}
+
+@keyframes progressDecrease {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 .modal-content {
   width: 100%;
   height: 100%;
@@ -102,61 +143,18 @@ export default {
 .message-section {
   height: 109px;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 5px 5px 30px;
-  text-align: center;
 }
 
-.sending-message {
+.success-message {
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 700;
   font-size: 24px;
-  line-height: 0.75;
+  line-height: 1.252;
   color: #333333;
-  margin: 0 0 8px 0;
-}
-
-.sub-message {
-  font-family: 'Spoqa Han Sans Neo', sans-serif;
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 0.75;
-  color: #777777;
+  text-align: center;
   margin: 0;
-}
-
-.dots {
-  display: inline-block;
-}
-
-.dot {
-  opacity: 0;
-  animation: dotBlink 1.5s infinite;
-}
-
-.dot:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.dot:nth-child(2) {
-  animation-delay: 0.5s;
-}
-
-.dot:nth-child(3) {
-  animation-delay: 1s;
-}
-
-@keyframes dotBlink {
-  0%, 20% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
 }
 </style>

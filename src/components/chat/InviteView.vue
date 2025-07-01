@@ -56,21 +56,13 @@
       <i class="bi bi-search search-icon"></i>
     </div>
 
-    <div v-if="isModalVisible" class="modal-overlay" @click.self="cancelInvite">
-      <div class="modal-content">
-        <p class="modal-text">
-          <strong>{{ selectedUserForInvite?.nickname }}</strong>님을 초대하시겠습니까?
-        </p>
-        <div class="modal-actions">
-          <button class="btn-modal btn-cancel" @click="cancelInvite" :disabled="isLoading">
-            아니오
-          </button>
-          <button class="btn-modal btn-confirm" @click="confirmInvite" :disabled="isLoading">
-            {{ isLoading ? '초대 중...' : '네' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ChatUserInviteModal
+      :visible="isModalVisible"
+      :target-user-nickname="selectedUserForInvite?.nickname || ''"
+      @confirm="confirmInvite"
+      @cancel="cancelInvite"
+      @close="cancelInvite"
+    />
   </div>
 </template>
 
@@ -78,6 +70,7 @@
 import { computed, defineProps, defineEmits, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 import defaultAvatar from '@/assets/img/0.png';
+import ChatUserInviteModal from '@/components/common/modal/ChatUserInviteModal.vue';
 
 // Props
 const props = defineProps({
@@ -355,7 +348,7 @@ $dim-gray: #ccc;
 $white: #fff;
 $black: #000;
 $dark-black: #333;
-$main-color: #5a7dff; // 파란색 계열로 변경
+$main-color: #2196F3; // 파란색 계열로 변경
 $silver-black: #888;
 $light-gray: #f0f0f0;
 $danger-color: #f44336;
@@ -591,80 +584,7 @@ $secondary-kr: 'Noto Sans KR', sans-serif;
   }
 }
 
-.modal-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
 
-.modal-content {
-  background: $white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  width: 350px;
-  text-align: center;
-  font-family: $secondary-kr;
-
-  .modal-text {
-    font-size: 18px;
-    color: $dark-black;
-    margin-bottom: 25px;
-
-    strong {
-      font-weight: 700;
-      color: $main-color;
-    }
-  }
-
-  .modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-
-    .btn-modal {
-      width: 100px;
-      height: 40px;
-      border-radius: 8px;
-      border: 1px solid $dim-gray;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &.btn-cancel {
-        background-color: $white;
-        color: $dark-black;
-
-        &:hover:not(:disabled) {
-          background-color: $light-gray;
-        }
-      }
-
-      &.btn-confirm {
-        background-color: $main-color;
-        color: $white;
-        border-color: $main-color;
-
-        &:hover:not(:disabled) {
-          background-color: darken($main-color, 10%);
-        }
-      }
-      
-      &:disabled {
-        opacity: 0.7;
-        cursor: wait;
-      }
-    }
-  }
-}
 
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
 </style>

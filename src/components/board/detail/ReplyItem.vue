@@ -71,8 +71,8 @@ import ReplyList from './ReplyList.vue'
 import axios from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import ReportModal from '@/components/common/ReportModal.vue'
-import ChatInviteModal from '@/components/common/ChatInviteModal.vue'
+import ReportModal from '@/components/common/modal/ReportModal.vue'
+import ChatInviteModal from '@/components/common/modal/ChatInviteModal.vue'
 
 const props = defineProps({
   reply: {

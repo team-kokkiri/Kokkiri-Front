@@ -53,7 +53,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
 import axios from '../../utils/axios';
-import LoadingModal from '@/components/common/LoadingModal.vue';
+import LoadingModal from '@/components/common/modal/LoadingModal.vue';
 import { useLoadingModal } from '@/composables/useModal.js';
 
 const email = ref('');
