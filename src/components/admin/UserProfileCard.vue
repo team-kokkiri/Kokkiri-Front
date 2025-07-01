@@ -4,7 +4,7 @@
       <div class="avatar-circle">
         <img 
           :src="getProfileImageUrl(user.avatar)" 
-          :alt="user.name + ' 프로필'"
+          :alt="user.nickname + ' 프로필'"
           @error="handleImageError"
           class="avatar-image"
         />
@@ -12,7 +12,7 @@
     </div>
     
     <div class="profile-info">
-      <div class="user-name">{{ user.name }}</div>
+      <div class="user-name">{{ user.nickname }}</div>
       <div class="user-email">{{ user.email }}</div>
     </div>
   </div>
@@ -28,7 +28,7 @@ defineProps({
     type: Object,
     required: true,
     validator: (user) => {
-      return user && user.name && user.email
+      return user && user.nickname && user.email
     }
   }
 })
