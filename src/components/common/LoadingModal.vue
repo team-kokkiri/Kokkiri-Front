@@ -60,7 +60,10 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 25vh;
   z-index: 1000;
 }
 
@@ -73,10 +76,6 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: absolute;
-  top: 25%;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .modal-content {

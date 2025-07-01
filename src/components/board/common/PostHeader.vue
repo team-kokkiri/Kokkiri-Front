@@ -80,7 +80,7 @@ function handleReportSuccess() {
 const isChatModalOpen = ref(false)
 
 function openChatModal() {
-  if (userStore.nickname == props.post.writer) {
+  if (userStore.nickname === props.post.writer) {
     alert("자기 자신과는 채팅할 수 없습니다.")
     return
   }
@@ -92,6 +92,7 @@ function closeChatModal() {
 }
 
 async function startPrivateChat() {
+  console.log('props.post 전체:', props.post)
   if (!props.post.writer) {
     alert("채팅을 시작할 수 없습니다.")
     closeChatModal()

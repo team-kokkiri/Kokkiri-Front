@@ -10,7 +10,7 @@
           />
         </div>
         <div class="message-section">
-          <p class="chat-message">{{ message }}</p>
+          <p class="chat-message">{{ displayMessage }}</p>
         </div>
         <div class="button-section">
           <button class="btn-confirm" @click="confirmChat">네</button>
@@ -47,6 +47,16 @@ export default {
       return this.message
     }
   },
+  watch: {
+    visible(newVal) {
+      if (newVal) {
+        // 모달이 열릴 때 DOM이 완전히 렌더링되도록 nextTick 사용
+        this.$nextTick(() => {
+          // 추가적인 초기화 로직이 필요하면 여기에
+        })
+      }
+    }
+  },
   methods: {
     confirmChat() {
       this.$emit('confirm')
@@ -69,7 +79,10 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 25vh;
   z-index: 1000;
 }
 
@@ -82,10 +95,6 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: absolute;
-  top: 25%;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .modal-content {

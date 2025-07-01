@@ -19,7 +19,7 @@
               class="reason-dropdown"
               @change="updateSelectedReason"
             >
-              <option value="" disabled>선택</option>
+              <option value="" disabled>드롭다운으로 선택</option>
               <option 
                 v-for="reason in reportReasons" 
                 :key="reason.code" 
@@ -29,17 +29,16 @@
               </option>
             </select>
           </div>
-          <div class="button-section">
-            <button
-                class="btn-submit"
-                @click="submitReport"
-                :disabled="!selectedReason"
-            >
-              제출
-            </button>
-          </div>
         </div>
-
+        <div class="button-section">
+          <button 
+            class="btn-submit" 
+            @click="submitReport"
+            :disabled="!selectedReason"
+          >
+            제출
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -109,6 +108,11 @@ export default {
     visible(newVal) {
       if (!newVal) {
         this.resetForm()
+      } else {
+        // 모달이 열릴 때 DOM이 완전히 렌더링되도록 nextTick 사용
+        this.$nextTick(() => {
+          // 추가적인 초기화 로직이 필요하면 여기에
+        })
       }
     }
   },
@@ -175,7 +179,10 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 25vh;
   z-index: 1000;
 }
 
@@ -188,11 +195,6 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: absolute;
-  top: 25%;
-  left: 50%;
-  transform: translateX(-50%);
-  padding-top: 10px;
 }
 
 .modal-content {
@@ -237,10 +239,9 @@ export default {
 .dropdown-section {
   height: 42px;
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-  padding-left: 68px;
-  padding-right: 25px;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 69px;
 }
 
 .dropdown-wrapper {
@@ -254,6 +255,7 @@ export default {
   height: 100%;
   border: 1px solid #DDDDDD;
   background: #FFFFFF;
+  padding: 5px 10px;
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 500;
   font-size: 12px;
@@ -278,7 +280,7 @@ export default {
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 12px;
-  padding: 5px 30px 5px 10px;
+  padding-right: 30px;
 }
 
 .button-section {
@@ -292,7 +294,7 @@ export default {
 .btn-submit {
   width: 60px;
   padding: 8px 15px;
-  background: red;
+  background: #ED2040;
   color: #FFFFFF;
   border: none;
   border-radius: 15px;
@@ -302,7 +304,6 @@ export default {
   line-height: 1.252;
   cursor: pointer;
   transition: opacity 0.2s;
-  margin-top: 5px;
 
   &:hover:not(:disabled) {
     opacity: 0.8;
@@ -313,7 +314,8 @@ export default {
   }
 
   &:disabled {
-    background: #DDDDDD;
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 </style>
