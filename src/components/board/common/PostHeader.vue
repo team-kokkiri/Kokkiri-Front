@@ -11,30 +11,7 @@
       <button class="btn-edit" @click="$emit('edit', post)">수정</button>
       <button class="btn-delete" @click="$emit('delete', post)">삭제</button>
       <button class="btn-chat" @click="openChatModal">채팅</button>
-      <div class="report-wrapper">
-        <button class="btn-report" @click="showReportPopup = !showReportPopup">신고</button>
-        <div v-if="showReportPopup" class="modal-overlay">
-          <div class="modal">
-            <div class="modal-header">
-              <h3>신고 사유 선택</h3>
-              <button class="close-btn" @click="showReportPopup = false">×</button>
-            </div>
-            <ul class="reason-list">
-              <li
-                v-for="reason in reportReasons"
-                :key="reason.value"
-                :class="{ selected: selectedReason === reason.value }"
-                @click="selectedReason = reason.value"
-              >
-                {{ reason.label }}
-              </li>
-            </ul>
-            <div class="modal-actions">
-              <button @click="confirmReport">신고</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <button class="btn-report" @click="openReportModal">신고</button>
     </div>
   </div>
 
@@ -50,6 +27,15 @@
       </div>
     </div>
   </div>
+
+  <!-- 신고 모달 -->
+  <ReportModal
+    :visible="isReportModalOpen"
+    :target-id="post.id"
+    report-type="POST"
+    @close="closeReportModal"
+    @success="handleReportSuccess"
+  />
 </template>
 
 <script setup>
@@ -58,6 +44,7 @@ import defaultAvatar from '@/assets/img/0.png'
 import axios from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import ReportModal from '@/components/common/ReportModal.vue'
 
 const props = defineProps({
   post: {
@@ -78,57 +65,18 @@ function formatDate(str) {
 }
 
 // ----------- 신고 기능 관련 -----------
-const reportReasons = [
-  { label: '게시판 성격에 부적절함', value: 'INAPPROPRIATE_CONTENT' },
-  { label: '욕설/비하', value: 'ABUSIVE_LANGUAGE' },
-  { label: '음란물/불건전한 만남 및 대화', value: 'INAPPROPRIATE_MEETING' },
-  { label: '상업적 광고 및 판매', value: 'COMMERCIAL_AD' },
-  { label: '유출/사칭/사기', value: 'LEAK_OR_FRAUD' },
-  { label: '낚시/놀람/도배', value: 'TROLLING_OR_SPAM' },
-  { label: '정당/정치인 비하 및 선거운동', value: 'POLITICAL_CONTENT' },
-  { label: '불법촬영물 등의 유통', value: 'ILLEGAL_CONTENT' }
-]
-const selectedReason = ref('')
-const showReportPopup = ref(false)
+const isReportModalOpen = ref(false)
 
-async function submitReport() {
-  if (!selectedReason.value) {
-    alert('신고 사유를 선택해주세요.')
-    return
-  }
-  try {
-    const token = localStorage.getItem('accessToken')
-    const response = await axios.post('/api/reports', {
-      targetId: props.post.id,
-      reportType: 'POST',
-      reportReason: selectedReason.value
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    if (![200, 201].includes(response.status)) {
-      alert('신고 제출에 실패했습니다. 다시 시도해주세요.')
-      return
-    }
-    alert('신고가 접수되었습니다.')
-    showReportPopup.value = false
-    selectedReason.value = ''
-    emit('report', props.post.id)
-  } catch (err) {
-    console.error('신고 실패:', err)
-    alert('신고 처리 중 오류가 발생했습니다.')
-  }
+function openReportModal() {
+  isReportModalOpen.value = true
 }
 
-function confirmReport() {
-  if (!selectedReason.value) {
-    alert('신고 사유를 선택해주세요.')
-    return
-  }
-  if (confirm('해당 게시글을 신고하시겠습니까?')) {
-    submitReport()
-  }
+function closeReportModal() {
+  isReportModalOpen.value = false
+}
+
+function handleReportSuccess(reportData) {
+  emit('report', props.post.id)
 }
 
 // ----------- 1:1 채팅 기능 관련 -----------
@@ -225,93 +173,6 @@ async function startPrivateChat() {
     display: flex;
     gap: 10px;
   }
-}
-
-.report-wrapper {
-  position: relative;
-
-  .report-popup {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
-    border: 1px solid #ccc;
-    padding: 10px;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  select {
-    padding: 4px;
-  }
-
-  button {
-    padding: 4px 8px;
-  }
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal {
-  background: #fff;
-  padding: 20px;
-  width: 420px;
-  border-radius: 10px;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  h3 {
-    margin: 0;
-  }
-
-  .close-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-  }
-}
-
-.reason-list {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-
-  li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-  }
-
-  li.selected {
-    font-weight: bold;
-  }
-}
-
-.modal-actions {
-  text-align: right;
-
-  button {
-    padding: 6px 12px;
-  }
-}
-
-.btn-report {
-  margin-bottom: 1.5px;
 }
 
 /* 모달 스타일 추가 */
