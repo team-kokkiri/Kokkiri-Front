@@ -51,7 +51,7 @@ import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '../../utils/axios';
 import SuccessModal from '@/components/common/SuccessModal.vue';
-import { useSuccessModal } from '@/composables/useSuccessModal.js';
+import { useSuccessModal } from '@/composables/useModal.js';
 
 const classcode = ref('');
 const classcodeError = ref('');
@@ -97,13 +97,13 @@ const onVerifyClasscode = async () => {
     showModal({
       message: '인증이 완료되었습니다.',
       autoClose: true,
-      autoCloseDelay: 2000
+      autoCloseDelay: 1000
     });
 
     setTimeout(() => {
       // state를 쿼리 파라미터로 넘겨서 회원가입 페이지 이동
       router.push(`/signup?state=${encodeURIComponent(state)}`);
-    }, 2000);
+    }, 1000);
   } catch (error) {
     console.error('반 코드 검증 실패:', error);
     classcodeError.value = '반 코드 인증에 실패했습니다.';
