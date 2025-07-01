@@ -124,6 +124,18 @@ function handleSubmit() {
     alert('제목과 내용을 입력해주세요.')
     return
   }
+
+  // 프로젝트 소개 게시판일 경우 이미지 필수 첨부 체크
+  if (props.boardTypeId === 5) {
+    const hasImage = formData.value.attachedImages.some(file =>
+      file.type && file.type.startsWith('image')
+    )
+    if (!hasImage) {
+      alert('프로젝트 소개 게시판은 이미지 1개 이상 첨부해야 합니다.')
+      return
+    }
+  }
+
   // 부모 컴포넌트로 데이터 전달
 emit('submit', {
   boardTitle: formData.value.boardTitle,
