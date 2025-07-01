@@ -34,18 +34,31 @@
         <button class="btn-classcode" type="submit">반 코드 인증하기</button>
       </form>
     </div>
+
+    <!-- Success Modal -->
+    <SuccessModal
+      :visible="modalState.visible"
+      :message="modalState.message"
+      :auto-close="modalState.autoClose"
+      :auto-close-delay="modalState.autoCloseDelay"
+      @close="hideModal"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { toast } from 'vue3-toastify';
 import axios from '../../utils/axios';
+import SuccessModal from '@/components/common/SuccessModal.vue';
+import { useSuccessModal } from '@/composables/useSuccessModal.js';
 
 const classcode = ref('');
 const classcodeError = ref('');
 const router = useRouter();
+
+// Success Modal 상태 관리
+const { modalState, showModal, hideModal } = useSuccessModal();
 
 // 입력 시 에러 메시지 제거
 watch(classcode, () => {
@@ -79,12 +92,18 @@ const onVerifyClasscode = async () => {
 
     const state = stateRes.data.state;
     console.log('발급된 state:', state);
-    toast.success('인증이 완료되었습니다.');
+    
+    // Success Modal 표시
+    showModal({
+      message: '인증이 완료되었습니다.',
+      autoClose: true,
+      autoCloseDelay: 2000
+    });
 
     setTimeout(() => {
       // state를 쿼리 파라미터로 넘겨서 회원가입 페이지 이동
       router.push(`/signup?state=${encodeURIComponent(state)}`);
-    }, 1000);
+    }, 2000);
   } catch (error) {
     console.error('반 코드 검증 실패:', error);
     classcodeError.value = '반 코드 인증에 실패했습니다.';
