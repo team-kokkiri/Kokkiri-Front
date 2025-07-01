@@ -11,9 +11,31 @@
         <button class="btn-delete" @click="$emit('delete', comment)">삭제</button>
         <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
         <button class="btn-like" @click="$emit('like', comment)">공감</button>
-        <!-- 채팅 버튼 클릭 시 모달을 열도록 수정 -->
         <button class="btn-chat" @click="openChatModal">채팅</button>
-        <button class="btn-report" @click="$emit('report', comment)">신고</button>
+        <div class="report-wrapper">
+          <button class="btn-report" @click="showReportPopup = !showReportPopup">신고</button>
+          <div v-if="showReportPopup" class="modal-overlay">
+            <div class="modal">
+              <div class="modal-header">
+                <h3>신고 사유 선택</h3>
+                <button class="close-btn" @click="showReportPopup = false">×</button>
+              </div>
+              <ul class="reason-list">
+                <li
+                  v-for="reason in reportReasons"
+                  :key="reason.value"
+                  :class="{ selected: selectedReason === reason.value }"
+                  @click="selectedReason = reason.value"
+                >
+                  {{ reason.label }}
+                </li>
+              </ul>
+              <div class="modal-actions">
+                <button @click="confirmReport">신고</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -97,11 +119,14 @@ const props = defineProps({
   }
 })
 
+console.log('allReplies')
+
 defineEmits([
   'edit',
   'delete',
   'reply',
   'like',
+  'chat',
   'report',
   'submit-edit',
   'close-edit',
@@ -115,7 +140,7 @@ const isChatModalOpen = ref(false);
 
 // 모달 열기 함수
 function openChatModal() {
-  if (userStore.memberId == props.comment.memberId) {
+  if (userStore.memberId === props.comment.memberId) {
     alert("자기 자신과는 채팅할 수 없습니다.");
     return;
   }
@@ -142,7 +167,7 @@ async function startPrivateChat() {
         alert("로그인이 필요합니다.");
         return;
     }
-    
+
     const response = await axios.post('/api/chat/room/private/create', null, {
         params: {
             otherMemberId: props.comment.memberId
@@ -173,6 +198,60 @@ function formatDate(str) {
   if (!str) return ''
   const d = new Date(str)
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+const token = localStorage.getItem('accessToken')
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080'
+
+const reportReasons = [
+  { label: '게시판 성격에 부적절함', value: 'INAPPROPRIATE_CONTENT' },
+  { label: '욕설/비하', value: 'ABUSIVE_LANGUAGE' },
+  { label: '음란물/불건전한 만남 및 대화', value: 'INAPPROPRIATE_MEETING' },
+  { label: '상업적 광고 및 판매', value: 'COMMERCIAL_AD' },
+  { label: '유출/사칭/사기', value: 'LEAK_OR_FRAUD' },
+  { label: '낚시/놀람/도배', value: 'TROLLING_OR_SPAM' },
+  { label: '정당/정치인 비하 및 선거운동', value: 'POLITICAL_CONTENT' },
+  { label: '불법촬영물 등의 유통', value: 'ILLEGAL_CONTENT' }
+]
+const selectedReason = ref('')
+const showReportPopup = ref(false)
+
+async function submitReport() {
+  if (!selectedReason.value) {
+    alert('신고 사유를 선택해주세요.')
+    return
+  }
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/reports`, {
+      targetId: props.comment.id,
+      reportType: 'COMMENT',
+      reportReason: selectedReason.value
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    if (response.status !== 200 && response.status !== 201) {
+      alert('신고 제출에 실패했습니다. 다시 시도해주세요.')
+      return
+    }
+    alert('신고가 접수되었습니다.')
+    showReportPopup.value = false
+    selectedReason.value = ''
+  } catch (err) {
+    console.error('신고 실패:', err)
+    alert('신고 처리 중 오류가 발생했습니다.')
+  }
+}
+
+function confirmReport() {
+  if (!selectedReason.value) {
+    alert('신고 사유를 선택해주세요.')
+    return
+  }
+  if (confirm('해당 댓글을 신고하시겠습니까?')) {
+    submitReport()
+  }
 }
 </script>
 
@@ -280,7 +359,13 @@ function formatDate(str) {
     }
   }
 }
+.report-wrapper {
+  position: relative;
 
+  .btn-report {
+    margin-bottom: 5px;
+  }
+}
 /* 모달 스타일 추가 */
 .modal-overlay {
   position: fixed;
@@ -339,4 +424,70 @@ function formatDate(str) {
     background-color: #e0e0e0;
   }
 }
+
+  .report-wrapper {
+    position: relative;
+
+    .btn-report {
+      margin-bottom: 5px;
+    }
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal {
+    background: #fff;
+    padding: 20px;
+    width: 420px;
+    border-radius: 10px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  }
+
+  .reason-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    li.selected {
+      font-weight: bold;
+    }
+  }
+
+  .modal-actions {
+    text-align: right;
+
+    button {
+      padding: 6px 12px;
+    }
+  }
 </style>

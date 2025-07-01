@@ -42,6 +42,15 @@
         </div>
       </form>
     </div>
+
+    <!-- Success Modal -->
+    <SuccessModal
+      :visible="modalState.visible"
+      :message="modalState.message"
+      :auto-close="modalState.autoClose"
+      :auto-close-delay="modalState.autoCloseDelay"
+      @close="hideModal"
+    />
   </div>
 </template>
 
@@ -49,8 +58,9 @@
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from '../../utils/axios';
-import { toast } from 'vue3-toastify';
 import { watch } from 'vue';
+import SuccessModal from '@/components/common/SuccessModal.vue';
+import { useSuccessModal } from '@/composables/useModal.js';
 
 const code = ref('');
 const error = ref('');
@@ -58,6 +68,9 @@ const router = useRouter();
 const route = useRoute();
 const email = route.query.email || '';
 const type = route.query.type || "signup";
+
+// Success Modal 상태 관리
+const { modalState, showModal, hideModal } = useSuccessModal();
 
 // 코드 입력 시 에러 자동 제거
 watch(code, () => {
@@ -94,12 +107,20 @@ const onVerify = async () => {
     });
 
     if (type === 'signup') {
-      toast.success('인증이 완료되었습니다.');
+      showModal({
+        message: '인증이 완료되었습니다.',
+        autoClose: true,
+        autoCloseDelay: 1500
+      });
       setTimeout(() => {
         router.push('/login');
       }, 1500);
     } else if (type === 'reset') {
-      toast.success('이메일 인증 성공! 비밀번호를 재설정해주세요.');
+      showModal({
+        message: '이메일 인증 성공! 비밀번호를 재설정해주세요.',
+        autoClose: true,
+        autoCloseDelay: 1500
+      });
       setTimeout(() => {
         router.push({ path: '/reset-password', query: { email } }); // 비번 재설정 페이지
       }, 1500);

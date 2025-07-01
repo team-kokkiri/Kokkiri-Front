@@ -95,6 +95,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Loading Modal -->
+    <LoadingModal
+      :visible="loadingModalState.visible"
+      :message="loadingModalState.message"
+      :sub-message="loadingModalState.subMessage"
+    />
   </div>
 
 </template>
@@ -103,8 +110,9 @@
 /*####### 임포트 #######*/
 import {ref, onMounted, computed, watch, onUnmounted} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { toast } from "vue3-toastify";
 import axios from '../../utils/axios';
+import LoadingModal from '@/components/common/LoadingModal.vue';
+import { useLoadingModal } from '@/composables/useModal.js';
 
 /*####### 변수들 #######*/
 const email = ref('');
@@ -118,6 +126,9 @@ const state = ref('');
 const router = useRouter();
 const route = useRoute();
 
+// Loading Modal 상태 관리
+const { loadingModalState, showLoadingModal, hideLoadingModal } = useLoadingModal();
+
 /* 에러 메시지 변수 */
 const emailError = ref('');
 const passwordCheckError = ref('');
@@ -129,7 +140,6 @@ onMounted(() => {
 
   // state 값이 없으면 비정상적인 접근으로 간주하고, 팀 코드 인증 페이지로 리다이렉트합니다.
   if (!queryState) {
-    toast.error('잘못된 접근입니다. 팀 코드 인증을 다시 진행해주세요.');
     router.push('/teamcode-verify');
     return;
   }
@@ -216,18 +226,27 @@ const onSignup = async () => {
       state: state.value,       // 이 state 값을 통해 백엔드는 Redis에서 teamCode를 찾습니다.
     });
 
-    // [수정] 성공 시 이메일 인증 페이지로 바로 이동
-    toast.success('회원가입 정보가 확인되었습니다. 이메일 인증을 진행해주세요.');
+    // Loading Modal 표시
+    showLoadingModal({
+      message: '인증 메일을 발송중입니다',
+      subMessage: '잠시만 기다려주세요!'
+    });
 
     // 이메일 인증 코드 발송 요청
     await axios.post('/api/email/send', null, {
       params: { email: email.value, type: 'signup' },
     });
 
+    // 로딩 모달 숨기기
+    hideLoadingModal();
+
     // 인증 페이지로 이동 (email 쿼리 포함)
     router.push({ path: '/email-verify', query: { email: email.value } });
 
   } catch (error) {
+    // 에러 시 로딩 모달 숨기기
+    hideLoadingModal();
+    
     console.error('회원가입 실패:', error);
     if (error.response?.status === 409) {
       emailError.value = '이미 존재하는 이메일입니다.';
@@ -290,7 +309,6 @@ const move = () => {
 onMounted(() => {
   const queryState = route.query.state;
   if (!queryState) {
-    toast.error('잘못된 접근입니다.');
     router.push('/teamcode-verify');
     return;
   }

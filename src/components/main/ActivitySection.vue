@@ -14,13 +14,6 @@
       <i class="bi bi-chat"></i>
       <span class="text">댓글 단 글</span>
     </div>
-    <div
-        class="activity-item"
-        @click="$emit('activity-click', { id: 'my-bookmarks', route: '/main-page/mypage' })"
-    >
-      <i class="bi bi-star"></i>
-      <span class="text">내 스크랩</span>
-    </div>
   </div>
 </template>
 
