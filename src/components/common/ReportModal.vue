@@ -29,8 +29,6 @@
               </option>
             </select>
           </div>
-        </div>
-        <div class="button-section">
           <button 
             class="btn-submit" 
             @click="submitReport"
@@ -239,9 +237,10 @@ export default {
 .dropdown-section {
   height: 42px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  padding: 8px 69px;
+  padding: 8px 69px 8px 69px;
+  gap: 20px;
 }
 
 .dropdown-wrapper {
@@ -283,16 +282,9 @@ export default {
   padding-right: 30px;
 }
 
-.button-section {
-  height: 41px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 0 40px 20px 0;
-}
-
 .btn-submit {
   width: 60px;
+  height: 26px;
   padding: 8px 15px;
   background: #ED2040;
   color: #FFFFFF;
@@ -304,6 +296,9 @@ export default {
   line-height: 1.252;
   cursor: pointer;
   transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover:not(:disabled) {
     opacity: 0.8;
