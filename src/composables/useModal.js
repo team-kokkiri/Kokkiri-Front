@@ -55,3 +55,28 @@ export function useLoadingModal() {
     hideLoadingModal
   }
 }
+
+export function useDeleteConfirmModal() {
+  // 각 컴포넌트마다 독립적인 상태를 생성
+  const deleteModalState = ref({
+    visible: false,
+    message: '정말 삭제하시겠습니까?'
+  })
+
+  const showDeleteModal = (options = {}) => {
+    deleteModalState.value = {
+      visible: true,
+      message: options.message || '정말 삭제하시겠습니까?'
+    }
+  }
+
+  const hideDeleteModal = () => {
+    deleteModalState.value.visible = false
+  }
+
+  return {
+    deleteModalState,
+    showDeleteModal,
+    hideDeleteModal
+  }
+}
