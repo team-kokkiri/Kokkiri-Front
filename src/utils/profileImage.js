@@ -7,10 +7,16 @@ import defaultProfileImage from '@/assets/img/0.png'
  */
 export const getProfileImageUrl = (avatar) => {
   console.log('getProfileImageUrl 호출:', avatar)
-  if (!avatar) return defaultProfileImage
+  
+  // null, undefined, 빈 문자열 처리
+  if (!avatar || avatar.trim() === '') {
+    console.log('아바타가 없어 기본 이미지 사용')
+    return defaultProfileImage
+  }
   
   // 이미 완전한 URL인 경우 (http/https로 시작)
   if (avatar.startsWith('http')) {
+    console.log('완전한 URL 반환:', avatar)
     return avatar
   }
   

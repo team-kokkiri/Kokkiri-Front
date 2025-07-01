@@ -3,16 +3,20 @@
     <div class="profile-avatar">
       <div class="avatar-circle">
         <img 
-          :src="getProfileImageUrl(user.avatar)" 
-          :alt="user.nickname + ' 프로필'"
+          v-if="user.avatar || user.profileImage"
+          :src="getProfileImageUrl(user.avatar || user.profileImage)" 
+          :alt="(user.nickname || user.name) + ' 프로필'"
           @error="handleImageError"
           class="avatar-image"
         />
+        <div v-else class="avatar-placeholder">
+          {{ getInitials(user.nickname || user.name) }}
+        </div>
       </div>
     </div>
     
     <div class="profile-info">
-      <div class="user-name">{{ user.nickname }}</div>
+      <div class="user-name">{{ user.nickname || user.name }}</div>
       <div class="user-email">{{ user.email }}</div>
     </div>
   </div>
@@ -28,10 +32,21 @@ defineProps({
     type: Object,
     required: true,
     validator: (user) => {
-      return user && user.nickname && user.email
+      return user && (user.nickname || user.name) && user.email
     }
   }
 })
+
+// ===== 유틸리티 함수 =====
+function getInitials(name) {
+  if (!name || typeof name !== 'string') return '?'
+
+  const words = name.trim().split(' ')
+  if (words.length === 1) {
+    return name.charAt(0).toUpperCase()
+  }
+  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -60,6 +75,13 @@ defineProps({
         width: 100%;
         height: 100%;
         object-fit: cover;
+      }
+
+      .avatar-placeholder {
+        font-family: $secondary-kr;
+        font-weight: 600;
+        font-size: 36px;
+        color: $dark-black;
       }
     }
   }

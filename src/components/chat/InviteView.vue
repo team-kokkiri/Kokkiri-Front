@@ -15,7 +15,7 @@
             class="invite-user-item"
             v-for="user in userListToDisplay"
             :key="user.memberId" >
-          <img class="avatar" :src="user.avatarUrl || defaultAvatar" :alt="user.nickname" />
+          <img class="avatar" :src="getProfileImageUrl(user.avatar || user.avatarUrl)" :alt="user.nickname" @error="handleImageError" />
           <div class="user-info">
             <span class="nickname">{{ user.nickname }}</span>
             <span class="email">{{ user.email }}</span>
@@ -69,7 +69,7 @@
 <script setup>
 import { computed, defineProps, defineEmits, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
-import defaultAvatar from '@/assets/img/0.png';
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage';
 import ChatUserInviteModal from '@/components/common/modal/ChatUserInviteModal.vue';
 
 // Props

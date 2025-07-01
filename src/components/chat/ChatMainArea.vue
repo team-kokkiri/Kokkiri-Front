@@ -31,7 +31,7 @@
           :key="msg.id"
           :class="{ 'my-message': msg.nickname === currentUserNickname }"
       >
-        <img class="avatar" :src="msg.avatar" alt="아바타" />
+        <img class="avatar" :src="getProfileImageUrl(msg.avatar || msg.avatarUrl)" alt="아바타" @error="handleImageError" />
         <div class="message-info">
           <div class="message-top">
             <span class="nickname">{{ msg.nickname }}</span>
@@ -99,6 +99,7 @@
 
 <script setup>
 import { ref, defineProps, defineEmits, watch, nextTick, onMounted, computed } from 'vue'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 
 // Props 정의
 const props = defineProps({

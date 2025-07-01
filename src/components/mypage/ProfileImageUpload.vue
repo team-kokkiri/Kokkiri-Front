@@ -552,7 +552,6 @@ const uploadProfileImage = async () => {
         
         &:disabled {
           opacity: 0.6;
-          cursor: not-allowed;
         }
       }
       
@@ -568,10 +567,9 @@ const uploadProfileImage = async () => {
       
       .btn-primary {
         background: $main-color;
-        color: $white;
-        
-        &:hover:not(:disabled) {
-          background: $royalblue;
+
+        span {
+          color: white;
         }
       }
     }
