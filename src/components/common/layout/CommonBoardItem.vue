@@ -105,7 +105,8 @@ function handleClick() {
 
   const itemData = {
     id: displayItem.value.id,
-    boardId: boardId
+    boardId: boardId,
+    boardType: displayItem.value.boardType
   }
   emit('click', itemData)
 }
