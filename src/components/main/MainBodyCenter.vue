@@ -24,7 +24,7 @@
             :board-title="board.title"
             :board-items="board.items"
             :board-type-id="board.id"
-            @board-item-click="(itemId) => $emit('board-item-click', { boardId: board.id, itemId })"
+            @board-item-click="(itemId) => $emit('board-item-click', { boardId: board.id, itemId, boardType: itemId.boardType })"
         />
       </div>
     </div>
@@ -63,7 +63,8 @@ const fetchMainBoardData = async () => {
         items: data.notice.slice(0, 5).map(item => ({
           id: item.id,
           text: item.boardTitle,
-          meta: item.createdAt?.slice(0, 10) || ''
+          meta: item.createdAt?.slice(0, 10) || '',
+          boardType: item.boardType
         }))
       },
       {
@@ -72,7 +73,8 @@ const fetchMainBoardData = async () => {
         items: data.free.slice(0, 5).map(item => ({
           id: item.id,
           text: item.boardTitle,
-          meta: item.createdAt?.slice(0, 10) || ''
+          meta: item.createdAt?.slice(0, 10) || '',
+          boardType: item.boardType
         }))
       },
       {
@@ -81,7 +83,8 @@ const fetchMainBoardData = async () => {
         items: data.best.slice(0, 5).map(item => ({
           id: item.id,
           text: item.boardTitle,
-          meta: item.createdAt?.slice(0, 10) || ''
+          meta: item.createdAt?.slice(0, 10) || '',
+          boardType: item.boardType
         }))
       }
     ];
