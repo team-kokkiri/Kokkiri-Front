@@ -106,9 +106,18 @@ const router = useRouter();
 const userStore = useUserStore();
 const isChatModalOpen = ref(false);
 
-// 모달 열기 함수
+// 모달 열기 함수 (디버깅 코드 추가)
 function openChatModal() {
-  if (userStore.memberId == props.reply.memberId) {
+  console.log(`[채팅 시작 시도] 현재 사용자 ID: ${userStore.id}, 댓글 작성자 ID: ${props.reply.memberId}`);
+
+  // 댓글 작성자 ID가 없는 경우를 방어
+  if (props.reply.memberId === undefined || props.reply.memberId === null) {
+      alert("댓글 작성자 정보를 찾을 수 없어 채팅을 시작할 수 없습니다.");
+      return;
+  }
+
+  // 본인과는 채팅할 수 없도록 체크
+  if (userStore.id == props.reply.memberId) {
     alert("자기 자신과는 채팅할 수 없습니다.");
     return;
   }
@@ -135,6 +144,7 @@ async function startPrivateChat() {
         alert("로그인이 필요합니다.");
         return;
     }
+    console.log(props.reply.memberId)
 
     const response = await axios.post('/api/chat/room/private/create', null, {
         params: {
