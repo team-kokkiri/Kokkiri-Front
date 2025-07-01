@@ -4,7 +4,6 @@
       <h2 class="chat-title">채팅목록</h2>
     </div>
 
-    <!-- 채팅방 만들기 버튼 (모달 열기) -->
     <div class="create-chat-wrapper">
       <div class="create-chat-button" @click="openCreateRoomModal">
         <i class="bi bi-plus-lg"></i>
@@ -12,7 +11,6 @@
       </div>
     </div>
 
-    <!-- 채팅방 목록 -->
     <div
       class="chat-room-list"
       v-if="chatRooms && chatRooms.length > 0"
@@ -25,10 +23,8 @@
         @click="selectRoom(room.roomId)"
       >
         <div class="chat-room-top">
-          <!-- 제목과 인원수를 묶는 래퍼 추가 -->
           <div class="title-wrapper">
             <span class="nickname">{{ room.roomName }}</span>
-            <!-- 그룹 채팅(isGroupChat === 'Y')이고 인원수가 있을 경우에만 표시 -->
             <span v-if="room.isGroupChat === 'Y' && room.userCount > 0" class="user-count">
               {{ room.userCount }}
             </span>
@@ -46,14 +42,12 @@
         채팅 목록을 불러오는 중...
       </div>
     </div>
-    <!-- 채팅방이 없을 때 메시지 -->
     <div v-else-if="!isLoading" class="empty-chat-message">
       <p>대화중인 채팅방이 없습니다.</p>
       <p>상단의 버튼을 눌러 새 채팅을 시작하세요.</p>
     </div>
   </aside>
 
-  <!-- 채팅방 생성 모달 -->
   <div v-if="isModalOpen" class="modal-overlay" @click.self="closeCreateRoomModal">
     <div class="modal-content">
       <h3 class="modal-title">새 채팅방 만들기</h3>
@@ -131,11 +125,24 @@ async function handleCreateRoom() {
       }
     });
 
-    const newRoom = response.data;
+    const newRoomFromServer = response.data;
 
-    if (newRoom && newRoom.roomId && newRoom.roomName) {
-      alert(`'${newRoom.roomName}' 채팅방이 성공적으로 개설되었습니다.`);
-      emit('add-and-select-room', newRoom);
+    if (newRoomFromServer && newRoomFromServer.roomId && newRoomFromServer.roomName) {
+      alert(`'${newRoomFromServer.roomName}' 채팅방이 성공적으로 개설되었습니다.`);
+      
+      // 서버에서 받은 데이터에 누락된 정보를 보완하여 완전한 객체를 만듭니다.
+      const completeNewRoom = {
+        ...newRoomFromServer,
+        userCount: 1, // 새 채팅방이므로 인원수는 1
+        isGroupChat: 'Y', // 그룹 채팅방 생성 요청이었으므로 'Y'
+        lastMessage: '', // 아직 메시지가 없음
+        lastMessageTime: new Date().toISOString(), // 현재 시간
+        unReadCount: 0 // 안 읽은 메시지 없음
+      };
+      
+      // 보완된 객체로 이벤트를 발생시킵니다.
+      emit('add-and-select-room', completeNewRoom);
+
     } else {
       console.error("서버로부터 받은 데이터 형식이 올바르지 않습니다:", response.data);
       alert("채팅방이 개설되었으나, 응답 데이터에 문제가 있습니다. 목록을 새로고침합니다.");
