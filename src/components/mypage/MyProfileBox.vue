@@ -49,6 +49,7 @@ const handleImageError = (event) => {
 
 // 프로필 이미지 URL 구성
 const getProfileImageUrl = (avatar) => {
+  console.log('getProfileImageUrl 호출:', avatar)
   if (!avatar) return defaultProfileImage
   
   // 이미 완전한 URL인 경우 (http/https로 시작)
@@ -58,7 +59,9 @@ const getProfileImageUrl = (avatar) => {
   
   // 상대 경로인 경우 백엔드 서버 URL과 결합
   const baseUrl = 'http://localhost:9090' // 백엔드 서버 URL
-  return baseUrl + avatar
+  const fullUrl = baseUrl + avatar
+  console.log('생성된 이미지 URL:', fullUrl)
+  return fullUrl
 }
 
 const displayName = computed(() => {

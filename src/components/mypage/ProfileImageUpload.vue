@@ -265,7 +265,7 @@ const uploadProfileImage = async () => {
     })
     
     if (response.data && response.data.profileImageUrl) {
-      // Pinia 스토어 업데이트
+      // Pinia 스토어 업데이트 (이미 localStorage 저장 포함)
       userStore.updateAvatar(response.data.profileImageUrl)
       
       successMessage.value = '프로필 사진이 성공적으로 변경되었습니다!'

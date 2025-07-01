@@ -55,6 +55,8 @@ export const useUserStore = defineStore('user', {
 
     updateAvatar(avatar) {
       this.avatar = avatar
+      // localStorage에도 저장
+      localStorage.setItem('avatar', avatar || '')
     },
 
     updateNickname(nickname) {
@@ -62,6 +64,7 @@ export const useUserStore = defineStore('user', {
     },
 
     clearUser({ preserveRefreshToken = false }) {
+      this.id = null
       this.email = null
       this.role = null
       this.avatar = null
@@ -71,7 +74,11 @@ export const useUserStore = defineStore('user', {
 
       console.log('clearUser called', { preserveRefreshToken });
       localStorage.removeItem('accessToken')
+      localStorage.removeItem('id')
       localStorage.removeItem('email')
+      localStorage.removeItem('role')
+      localStorage.removeItem('avatar')
+      localStorage.removeItem('nickname')
       if (!preserveRefreshToken) {
         localStorage.removeItem('refreshToken')
       }
@@ -92,7 +99,7 @@ export const useUserStore = defineStore('user', {
           id: userInfo.id,
           email: userInfo.email,
           role: userInfo.role,
-          avatar: userInfo.avatar || userInfo.avatarUrl || null,
+          avatar: userInfo.avatar,
           nickname: userInfo.nickname,
         });
 
@@ -115,10 +122,13 @@ export const useUserStore = defineStore('user', {
       if (token) {
         this.token = token;
         try {
+          // 서버에서 최신 사용자 정보 가져오기
           const response = await instance.get('/api/members/me', {
             headers: { Authorization: `Bearer ${token}` }
           });
           const userInfo = response.data;
+          console.log('restoreUser - 서버에서 가져온 사용자 정보:', userInfo);
+          
           this.setUserInfo({
             id: userInfo.id,
             email: userInfo.email,
@@ -126,8 +136,37 @@ export const useUserStore = defineStore('user', {
             avatar: userInfo.avatar,
             nickname: userInfo.nickname,
           });
+          
+          // localStorage도 업데이트
+          localStorage.setItem('id', userInfo.id);
+          localStorage.setItem('email', userInfo.email);
+          localStorage.setItem('role', userInfo.role);
+          localStorage.setItem('avatar', userInfo.avatar || '');
+          localStorage.setItem('nickname', userInfo.nickname || '');
+          
         } catch (err) {
-          this.clearUser({});
+          console.warn('API 호출 실패, localStorage에서 사용자 정보 복원 시도:', err);
+          
+          // API 호출 실패 시 localStorage에서 복원
+          const id = localStorage.getItem('id');
+          const email = localStorage.getItem('email');
+          const role = localStorage.getItem('role');
+          const avatar = localStorage.getItem('avatar');
+          const nickname = localStorage.getItem('nickname');
+          
+          if (email) {
+            console.log('localStorage에서 복원된 정보:', { id, email, role, avatar, nickname });
+            this.setUserInfo({
+              id: id,
+              email: email,
+              role: role,
+              avatar: avatar || null, // 빈 문자열이면 null로 설정
+              nickname: nickname,
+            });
+          } else {
+            // localStorage에도 정보가 없으면 로그아웃
+            this.clearUser({});
+          }
         }
       } else {
         this.clearUser({});
