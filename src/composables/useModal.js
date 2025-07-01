@@ -1,13 +1,5 @@
 import { ref } from 'vue'
 
-// Success Modal State
-const successModalState = ref({
-  visible: false,
-  message: '인증이 완료되었습니다.',
-  autoClose: true,
-  autoCloseDelay: 3000
-})
-
 // Loading Modal State
 const loadingModalState = ref({
   visible: false,
@@ -16,6 +8,14 @@ const loadingModalState = ref({
 })
 
 export function useSuccessModal() {
+  // 각 컴포넌트마다 독립적인 상태를 생성
+  const successModalState = ref({
+    visible: false,
+    message: '인증이 완료되었습니다.',
+    autoClose: true,
+    autoCloseDelay: 3000
+  })
+
   const showModal = (options = {}) => {
     successModalState.value = {
       visible: true,
