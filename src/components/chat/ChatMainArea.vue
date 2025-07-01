@@ -4,9 +4,12 @@
     <div class="chat-header">
       <div class="chat-room-user-count">
         <i class="bi bi-person-circle"></i>
-        <span class="user-count">{{ userCount || 1 }}</span>
+        <!-- 그룹 채팅과 개인 채팅 헤더를 분기 처리 -->
+        <span v-if="currentRoom?.isGroupChat === 'Y'" class="user-count">{{ userCount || 1 }}</span>
+        <span v-else class="private-chat-name">{{ currentRoom.roomName }}</span>
       </div>
-      <div class="chat-header-menu" ref="menuContainer">
+      <!-- 그룹 채팅일 경우에만 메뉴 버튼 전체를 보여줍니다. -->
+      <div class="chat-header-menu" v-if="currentRoom?.isGroupChat === 'Y'" ref="menuContainer">
         <button class="btn-more" @click="toggleMenu">
           <i class="bi bi-three-dots"></i>
         </button>
@@ -21,18 +24,20 @@
     </div>
 
     <div class="chat-content" ref="chatContentRef">
+      <!-- 유효한 메시지만 순회하도록 computed 속성 사용 -->
       <div
           class="chat-message"
-          v-for="msg in currentRoom.messages"
+          v-for="msg in validMessages"
           :key="msg.id"
+          :class="{ 'my-message': msg.nickname === currentUserNickname }"
       >
         <img class="avatar" :src="msg.avatar" alt="아바타" />
         <div class="message-info">
           <div class="message-top">
             <span class="nickname">{{ msg.nickname }}</span>
-            <span class="time">{{ formatDisplayTime(msg.time) }}</span>
           </div>
           <p class="message-text">{{ msg.text }}</p>
+          <span class="time">{{ formatDisplayTime(msg.time) }}</span>
         </div>
       </div>
     </div>
@@ -46,9 +51,15 @@
           @input="updateInput"
           @keyup.enter="sendMessage"
       />
-      <button class="btn-send" @click="sendMessage">
-        <i class="bi bi-vector-pen"></i>
-      </button>
+      <!-- 글자 수 카운터 및 전송 버튼을 포함하는 컨테이너 -->
+      <div class="input-actions">
+        <span class="char-counter" :class="{ 'limit-exceeded': input.length >= 500 }">
+          {{ input.length }}/500
+        </span>
+        <button class="btn-send" @click="sendMessage">
+          <i class="bi bi-vector-pen"></i>
+        </button>
+      </div>
     </div>
   </div>
   
@@ -60,10 +71,11 @@
      </div>
   </div>
 
+  <!-- 나가기 확인 모달 -->
   <div v-if="showLeaveModal" class="modal-overlay" @click.self="closeLeaveModal">
     <div class="modal-content">
       <p class="modal-text">
-        <strong>'{{ currentRoom.roomName }}'</strong> 채팅방을 나가시겠습니까?
+        <strong v-if="currentRoom">'{{ currentRoom.roomName }}'</strong> 채팅방을 나가시겠습니까?
       </p>
       <div class="modal-actions">
         <button class="btn-modal btn-confirm" @click="confirmLeave">네</button>
@@ -71,10 +83,22 @@
       </div>
     </div>
   </div>
+
+  <!-- 글자 수 제한 경고 모달 -->
+  <div v-if="showCharLimitModal" class="modal-overlay" @click.self="closeCharLimitModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        500자 이상 입력할 수 없습니다.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="closeCharLimitModal">확인</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, watch, nextTick, onMounted } from 'vue'
+import { ref, defineProps, defineEmits, watch, nextTick, onMounted, computed } from 'vue'
 
 // Props 정의
 const props = defineProps({
@@ -83,6 +107,7 @@ const props = defineProps({
   input: String,
   menuOpen: Boolean,
   userCount: Number,
+  currentUserNickname: String
 })
 
 // Emits 정의  
@@ -101,6 +126,15 @@ const chatContentRef = ref(null)
 
 // 모달 상태 관리를 위한 ref
 const showLeaveModal = ref(false);
+const showCharLimitModal = ref(false); // 글자 수 제한 모달 상태
+
+// 유효한 메시지만 렌더링하기 위한 computed 속성
+const validMessages = computed(() => {
+  if (!props.currentRoom || !props.currentRoom.messages) {
+    return [];
+  }
+  return props.currentRoom.messages.filter(msg => msg && msg.nickname && msg.text !== undefined);
+});
 
 
 // Helper 함수들
@@ -120,7 +154,7 @@ function scrollToBottom() {
 }
 
 function leaveRoom() {
-  showLeaveModal.value = true; // 이제 모달을 띄우는 역할만 합니다.
+  showLeaveModal.value = true;
 }
 
 function closeLeaveModal() {
@@ -128,13 +162,25 @@ function closeLeaveModal() {
 }
 
 function confirmLeave() {
-  emit('leave-room'); // 부모 컴포넌트에 '나가기' 이벤트를 전달
-  closeLeaveModal(); // 모달을 닫습니다.
+  emit('leave-room');
+  closeLeaveModal();
 }
 
+// 글자 수 제한 모달 닫기 함수
+function closeCharLimitModal() {
+  showCharLimitModal.value = false;
+}
 
+// 입력값 업데이트 및 글자 수 제한 함수
 function updateInput(event) {
-  emit('update-input', event.target.value)
+  let value = event.target.value;
+  if (value.length > 500) {
+    if (!showCharLimitModal.value) {
+        showCharLimitModal.value = true; // 모달이 닫혀있을 때만 띄웁니다.
+    }
+    value = value.slice(0, 500); // 500자로 잘라냄
+  }
+  emit('update-input', value);
 }
 
 function sendMessage() {
@@ -153,17 +199,15 @@ function openList() {
   emit('open-user-list') 
 }
 
-// currentRoom의 messages가 변경될 때 스크롤 이동
+// Watchers
 watch(() => props.currentRoom?.messages, () => {
   scrollToBottom()
 }, { deep: true })
 
-// activeRoomId가 변경될 때와 컴포넌트가 다시 마운트될 때도 스크롤 이동
 watch(() => props.activeRoomId, () => {
   scrollToBottom()
 })
 
-// showInviteView에서 돌아올 때를 감지하기 위해 컴포넌트 마운트 시에도 스크롤
 onMounted(() => {
   scrollToBottom()
 })
@@ -183,7 +227,6 @@ onMounted(() => {
     position: relative;
 }
 
-/* 채팅방 선택 안됐을 때 스타일 */
 .chat-main-placeholder {
     align-items: center;
     justify-content: center;
@@ -201,9 +244,6 @@ onMounted(() => {
     }
 }
 
-/* ==========================================================================
-   Chat Header
-   ========================================================================== */
 .chat-header {
   height: 72px;
   padding: 16px;
@@ -217,14 +257,9 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     gap: 14px;
-
-    .bi {
-      font-size: 30px;
-      object-fit: cover;
-      color:  $silver-black;
-    }
-
-    .user-count {
+    .bi { font-size: 30px; color:  $silver-black; }
+    
+    .user-count, .private-chat-name {
       font-family: $secondary-kr;
       font-weight: 500;
       font-size: 18px;
@@ -235,18 +270,10 @@ onMounted(() => {
 
   .chat-header-menu {
     position: relative;
-
     .btn-more {
-      width: 26px;
-      height: 26px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: $black;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 26px; height: 26px; background: none; border: none;
+      cursor: pointer; color: $black; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
     }
 
     .menu-dropdown {
@@ -254,12 +281,12 @@ onMounted(() => {
       top: 30px;
       right: -18px;
       width: 64px;
-      height: 98px;
       background: $white;
       border: 1px solid $dim-gray;
       border-radius: 5px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       z-index: 10;
+      overflow: hidden;
 
       .btn-invite,
       .btn-exit {
@@ -272,12 +299,8 @@ onMounted(() => {
         color: $black;
         cursor: pointer;
         text-align: center;
-
-        &:hover {
-          background-color: rgba($black, 0.05);
-        }
+        &:hover { background-color: rgba($black, 0.05); }
       }
-
       .divider {
         height: 1px;
         background-color: $dim-gray;
@@ -287,67 +310,65 @@ onMounted(() => {
   }
 }
 
-/* ==========================================================================
-   Chat Content
-   ========================================================================== */
 .chat-content {
   flex: 1;
   padding: 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 15px;
 
   .chat-message {
     display: flex;
-    gap: 21px;
-    align-items: flex-start;
+    gap: 12px;
+    align-items: flex-end;
+    max-width: 80%;
+    align-self: flex-start;
 
     .avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
+      width: 50px; height: 50px;
+      border-radius: 50%; object-fit: cover; flex-shrink: 0;
     }
 
     .message-info {
-      flex: 1;
-
+      display: flex; flex-direction: column; align-items: flex-start;
+      
       .message-top {
-        display: flex;
-        align-items: center;
-        gap: 13px;
         margin-bottom: 7px;
-
         .nickname {
-          font-family: $secondary-kr;
-          font-weight: 500;
-          font-size: 18px;
-          color: $dark-black;
-        }
-
-        .time {
-          font-family: $primary-kr;
-          font-size: 12px;
-          color: $silver-black;
+          font-family: $secondary-kr; font-weight: 500;
+          font-size: 16px; color: $dark-black;
         }
       }
 
       .message-text {
-        font-family: $primary-kr;
-        font-size: 14px;
-        color: $dark-black;
-        margin: 0;
-        word-wrap: break-word;
+        font-family: $primary-kr; font-size: 14px; color: $dark-black;
+        margin: 0; word-wrap: break-word;
+        padding: 10px 14px; border-radius: 18px;
+        background-color: #f1f3f5; line-height: 1.5;
+      }
+      
+      .time {
+        font-family: $primary-kr; font-size: 12px;
+        color: $silver-black; margin-top: 5px;
+      }
+    }
+    
+    &.my-message {
+      align-self: flex-end; 
+      flex-direction: row-reverse; 
+
+      .message-info {
+        align-items: flex-end;
+        .message-text {
+          background-color: $main-color; 
+          color: $white;
+        }
       }
     }
   }
 }
 
-/* ==========================================================================
-   Chat Input
-   ========================================================================== */
 .chat-input-wrap {
   height: 60px;
   border-top: 1px solid $dim-gray;
@@ -356,93 +377,68 @@ onMounted(() => {
   align-items: center;
 
   .chat-input {
-    flex: 1;
-    height: 100%;
-    border: none;
-    background: transparent;
-    padding: 20px;
-    font-family: $primary-kr;
-    font-size: 14px;
-    color: $dark-black;
-    outline: none;
+    flex: 1; height: 100%; border: none; background: transparent;
+    padding: 20px; font-family: $primary-kr; font-size: 14px;
+    color: $dark-black; outline: none;
+    &::placeholder { color: $silver-black; }
+  }
 
-    &::placeholder {
-      color: $silver-black;
+  .input-actions {
+    display: flex;
+    align-items: center;
+    padding-right: 5px; // 버튼과의 간격 확보
+  }
+
+  .char-counter {
+    margin-right: 10px;
+    font-size: 12px;
+    color: $silver-black;
+    white-space: nowrap;
+
+    &.limit-exceeded {
+        color: #f03e3e; // 경고 색상
+        font-weight: 700;
     }
   }
 
   .btn-send {
-    width: 60px;
-    height: 60px;
-    background-color: $main-color;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &:hover {
-      background-color: darken($main-color, 10%);
-    }
-
-    .bi {
-      color: $white;
-      font-size: 30px;
-    }
+    width: 60px; height: 60px; background-color: $main-color;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    &:hover { background-color: darken($main-color, 10%); }
+    .bi { color: $white; font-size: 30px; }
   }
 }
+
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000; /* 다른 요소들보다 위에 표시되도록 설정 */
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
 }
 .modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
+  background: white; padding: 24px; border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  width: 320px;
+  text-align: center; width: 320px;
 }
 .modal-text {
-  font-size: 16px;
-  margin: 0 0 20px;
-  color: #333;
-  line-height: 1.5;
+  font-size: 16px; margin: 0 0 20px; color: #333; line-height: 1.5;
 }
 .modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
+  display: flex; justify-content: center; gap: 12px;
 }
 .btn-modal {
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  border: none; padding: 8px 16px; border-radius: 4px;
+  font-size: 14px; cursor: pointer; transition: background-color 0.2s;
   min-width: 80px;
 }
 .btn-confirm {
-  background-color: $main-color;
-  color: white;
-  &:hover {
-    background-color: darken($main-color, 10%);
-  }
+  background-color: $main-color; color: white;
+  &:hover { background-color: darken($main-color, 10%); }
 }
 .btn-cancel {
-  background-color: #f0f0f0;
-  color: #333;
-  &:hover {
-    background-color: #e0e0e0;
-  }
+  background-color: #f0f0f0; color: #333;
+  &:hover { background-color: #e0e0e0; }
 }
 </style>

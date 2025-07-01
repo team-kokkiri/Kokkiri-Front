@@ -67,7 +67,8 @@ export function useNotifications() {
                     message: data.content,
                     datetime: data.actionCreatedAt,
                     invitationId: data.invitationId,
-                    url: data.url || null
+                    url: data.url || null,
+                    notificationType: data.notificationType
                 })
                 totalUnreadNotifications.value += 1
                 forceUpdate();
@@ -91,7 +92,7 @@ export function useNotifications() {
             })
 
             const { notifications: fetchedData, hasNext, totalUnreadCount } = response.data
-            const hasUnreadChat = fetchedData.some(item => item.notificationType?.toUpperCase() === 'CHAT' && item.delYn === 'N'); // isRead 대신 delYn으로 확인 (필요시)
+            const hasUnreadChat = fetchedData.some(item => item.notificationType?.toUpperCase() === 'CHAT' && item.delYn === 'N');
             if (hasUnreadChat) hasNewChatMessage.value = true;
             
             const nonChatNotifications = fetchedData.filter(item => item.notificationType?.toUpperCase() !== 'CHAT');
@@ -101,12 +102,12 @@ export function useNotifications() {
                 message: item.content,
                 datetime: item.actionCreatedAt,
                 invitationId: item.invitationId,
-                url: item.url || null
+                url: item.url || null,
+                notificationType: item.notificationType // 원본 타입도 유지
             }))
             
             if (isInitial) {
                 notifications.value = newNotifications
-                // totalUnreadCount는 이제 채팅 알림을 제외한 카운트라고 가정
                 totalUnreadNotifications.value = totalUnreadCount; 
             } else {
                 notifications.value.push(...newNotifications)
@@ -133,19 +134,14 @@ export function useNotifications() {
     }
 
     async function markChatAsRead() {
-        // 이미 빨간 점이 없는 상태면 함수를 실행X
         if (!hasNewChatMessage.value) {
             return;
         }
-        
-        // UI를 먼저 변경하여 사용자에게 즉각적인 피드백
         hasNewChatMessage.value = false;
-
         try {
             await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/notification/read-chat`, {}, {
             headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
             });
-
         } catch (error) {
             console.error('❌ 채팅 알림 읽음 처리 API 호출 실패:', error);
             hasNewChatMessage.value = true;
@@ -182,18 +178,17 @@ export function useNotifications() {
     }
     
     async function acceptInvitation(notification) {
-    try {
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notification.invitationId}/accept`, {}, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-        });
-        _removeNotificationFromState(notification.id);
-        
-        // roomId를 받아 채팅방으로 직접 라우팅합니다.
-        if (response.data && response.data.roomId) {
-          router.push({ path: '/main-page/chat', query: { roomId: response.data.roomId } });
-        }
-    } catch (error) { console.error('❌ 초대 수락 실패:', error); }
-}
+        try {
+            const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/api/chat/invitations/${notification.invitationId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+            });
+            _removeNotificationFromState(notification.id);
+            
+            if (response.data && response.data.roomId) {
+              router.push({ path: '/main-page/chat', query: { roomId: response.data.roomId } });
+            }
+        } catch (error) { console.error('❌ 초대 수락 실패:', error); }
+    }
 
     async function rejectInvitation(notification) {
         try {
@@ -203,6 +198,68 @@ export function useNotifications() {
             _removeNotificationFromState(notification.id)
         } catch (error) { console.error('❌ 초대 거절 실패:', error) }
     }
+
+    /**
+     * 알림 아이템 클릭 시 처리하는 함수.
+     * 알림 타입에 따라 적절한 페이지로 라우팅합니다.
+     * @param {object} notification - 클릭된 알림 객체
+     */
+    async function handleNotificationClick(notification) {
+        console.log('[handleNotificationClick] 알림 클릭:', notification);
+        if (!notification || !notification.notificationType) {
+            console.error("잘못된 알림 데이터입니다.", notification);
+            return;
+        }
+        
+        const type = notification.notificationType.toUpperCase();
+
+        if (type === 'INVITATION') {
+            return;
+        }
+
+        if (type === 'CHAT') {
+            await markChatAsRead();
+            router.push('/main-page/chat');
+            return;
+        }
+
+        const path = notification.url;
+        console.log('[handleNotificationClick] URL 경로:', path);
+
+        if (path) {
+            const pathParts = path.split('/').filter(p => p && p.trim() !== '');
+            console.log('[handleNotificationClick] 파싱된 경로 부분들:', pathParts);
+            
+            if (pathParts.length === 2) {
+                const boardTypeNum = parseInt(pathParts[0], 10);
+                const boardId = pathParts[1];
+                console.log(`[handleNotificationClick] 파싱된 정보: boardTypeNum=${boardTypeNum}, boardId=${boardId}`);
+
+                const boardTypeMap = {
+                    1: 'free-board',
+                    2: 'share-board',
+                    4: 'notice',
+                    5: 'project-board'
+                };
+
+                const boardPath = boardTypeMap[boardTypeNum];
+                console.log(`[handleNotificationClick] 매핑된 게시판 경로: ${boardPath}`);
+
+                if (boardPath) {
+                    const finalPath = `/main-page/${boardPath}/${boardId}`;
+                    console.log(`[handleNotificationClick] 최종 이동 경로: ${finalPath}`);
+                    router.push(finalPath);
+                } else {
+                    console.warn(`[handleNotificationClick] 알 수 없는 boardType(${boardTypeNum}) 입니다.`, notification);
+                }
+            } else {
+                 console.warn("[handleNotificationClick] URL 형식이 올바르지 않습니다:", path);
+            }
+        } else {
+            console.warn("[handleNotificationClick] 이 알림에는 이동할 URL 정보가 없습니다.", notification);
+        }
+    }
+
 
     function cleanup() {
         if (eventSource) { eventSource.close(); eventSource = null; }
@@ -223,7 +280,7 @@ export function useNotifications() {
     async function fetchChatRoomMembers(roomId, page = 0, size = 20) {
         if (!roomId) {
             console.error("채팅방 ID가 없어 멤버를 조회할 수 없습니다.");
-            return null; // Page 객체 구조를 위해 null 반환
+            return null;
         }
         try {
             const token = localStorage.getItem('accessToken');
@@ -246,6 +303,7 @@ export function useNotifications() {
     return {
         notifications, hasNewChatMessage, totalUnreadNotifications, isLoading, hasMore, isLogin, notificationVersion,
         formatLocalDateTime, initializeNotifications, fetchNotifications, markAllAsRead, markChatAsRead,
-        deleteNotification, acceptInvitation, rejectInvitation, cleanup, resetNotifications, isChatPageActive, fetchChatRoomMembers
+        deleteNotification, acceptInvitation, rejectInvitation, cleanup, resetNotifications, isChatPageActive, fetchChatRoomMembers,
+        handleNotificationClick 
     }
 }
