@@ -23,7 +23,6 @@
 
     <!-- 프로필 사진 변경 -->
     <template v-else-if="currentView === 'profile-image'">
-      <!-- ProfileImageSetting 컴포넌트 추가 예정 -->
       <div>프로필 사진 변경 컴포넌트</div>
     </template>
 
@@ -56,6 +55,17 @@
           ref="classCodeSettingRef"
       />
     </template>
+
+    <!-- 회원탈퇴 모달 -->
+    <div v-if="showDeleteModal" class="modal-backdrop">
+      <div class="modal-box">
+        <p class="modal-msg">정말 회원 계정을 삭제하시겠습니까?</p>
+        <div class="modal-btn-group">
+          <button class="modal-btn yes" @click="onDeleteAccount">예</button>
+          <button class="modal-btn no" @click="showDeleteModal = false">아니오</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -77,215 +87,94 @@ defineEmits([
   'my-comments'
 ])
 
-// 화면 상태 관리 - 확장 가능한 구조
-const currentView = ref('main') // 'main' | 'profile-image' | 'nickname' | 'password' | 'class-code'
-const nicknameSettingRef = ref(null) // 닉네임 설정 컴포넌트 참조
-const passwordSettingRef = ref(null) // 비밀번호 설정 컴포넌트 참조
-const classCodeSettingRef = ref(null) // 반 코드 설정 컴포넌트 참조
+const currentView = ref('main')
+const nicknameSettingRef = ref(null)
+const passwordSettingRef = ref(null)
+const classCodeSettingRef = ref(null)
+const showDeleteModal = ref(false)
 const router = useRouter()
 const userStore = useUserStore()
-/**
- * 메인 화면으로 돌아가기
- */
+
 const handleBackToMain = () => {
   currentView.value = 'main'
 }
 
-/**
- * 로그아웃 처리
- */
 const handleLogout = () => {
   try {
-    // 1. 서버에 로그아웃 요청
     instance.post('api/members/logout')
-
-    // 2. 프론트 상태 초기화
     userStore.clearUser({})
-
-    // 3. (옵션) JS에서 쿠키 직접 제거 시도
     document.cookie = 'refreshToken=; Path=/; Max-Age=0;'
-
-    // 4. 로그인 페이지로 이동
     router.replace('/login')
   } catch (error) {
     console.error('로그아웃 실패:', error)
   }
 }
 
-/**
- * 프로필 사진 변경 처리
- */
 const handleProfileImageChange = () => {
-  // TODO: 프로필 사진 변경 로직 구현
-  // 예: 파일 선택 다이얼로그 열기, 이미지 업로드 모달 등
   console.log('프로필 사진 변경 클릭')
 }
 
-/**
- * 닉네임 변경 화면으로 이동
- */
 const handleNicknameChange = () => {
   currentView.value = 'nickname'
 }
-
-/**
- * 비밀번호 변경 화면으로 이동
- */
 const handlePasswordChange = () => {
   currentView.value = 'password'
 }
-
-/**
- * 반 코드 변경 화면으로 이동
- */
 const handleClassCodeChange = () => {
   currentView.value = 'class-code'
 }
-
-/**
- * 회원탈퇴 처리 - 별도 모달이나 확인 창으로 처리 예정
- */
 const handleAccountDelete = () => {
-  // TODO: 회원탈퇴 모달 또는 확인 창 처리
-  console.log('회원탈퇴 처리')
+  showDeleteModal.value = true
 }
 
-/**
- * 내가 쓴 글 보기 처리
- */
+// 여기 반드시 중괄호로 닫아주세요!!
+const onDeleteAccount = async () => {
+  try {
+    await instance.delete('/api/members', {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('accessToken')
+      },
+      withCredentials: true
+    })
+    alert('회원 탈퇴가 완료되었습니다.')
+    userStore.clearUser({})
+    localStorage.removeItem('accessToken')
+    showDeleteModal.value = false
+    router.replace('/login')
+  } catch (e) {
+    alert('회원 탈퇴 중 오류가 발생했습니다.')
+    showDeleteModal.value = false
+  }
+} // <-- 중괄호 추가!
+
 const handleMyPosts = () => {
   router.push(`/main-page/my-written-posts`)
 }
-
-/**
- * 댓글 단 글 보기 처리
- */
 const handleMyComments = () => {
   router.push(`/main-page/my-commented-posts`)
 }
-
-/**
- * 닉네임 중복확인 요청 처리
- * @param {string} nickname - 확인할 닉네임
- */
-// const handleDuplicateCheck = async (nickname) => {
-//   try {
-//     // TODO: API 호출하여 중복확인
-//     // const response = await api.checkNicknameDuplicate(nickname)
-//
-//     // 임시로 성공으로 처리 (실제로는 API 응답에 따라 처리)
-//     const isAvailable = true
-//
-//     if (nicknameSettingRef.value) {
-//       nicknameSettingRef.value.setValidationResult(isAvailable)
-//     }
-//   } catch (error) {
-//     console.error('닉네임 중복확인 오류:', error)
-//     if (nicknameSettingRef.value) {
-//       nicknameSettingRef.value.setValidationResult(false)
-//     }
-//   }
-// }
-
-/**
- * 닉네임 저장 요청 처리
- * @param {string} nickname - 저장할 닉네임
- */
 const handleNicknameSave = async (nickname) => {
   try {
-    // TODO: API 호출하여 닉네임 저장
-    // await api.updateNickname(nickname)
-
     console.log('닉네임 저장:', nickname)
-
-    // 저장 성공 후 메인 화면으로 돌아가기
     currentView.value = 'main'
   } catch (error) {
     console.error('닉네임 저장 오류:', error)
   }
 }
-
-/**
- * 현재 비밀번호 확인 요청 처리
- * @param {string} currentPassword - 확인할 현재 비밀번호
- */
-// const handleVerifyCurrentPassword = async (currentPassword) => {
-//   try {
-//     // TODO: API 호출하여 현재 비밀번호 확인
-//     // const response = await api.verifyCurrentPassword(currentPassword)
-//
-//     // 임시로 성공으로 처리 (실제로는 API 응답에 따라 처리)
-//     const isValid = true
-//
-//     if (passwordSettingRef.value) {
-//       passwordSettingRef.value.setCurrentPasswordVerification(isValid)
-//     }
-//   } catch (error) {
-//     console.error('현재 비밀번호 확인 오류:', error)
-//     if (passwordSettingRef.value) {
-//       passwordSettingRef.value.setCurrentPasswordVerification(false)
-//     }
-//   }
-// }
-
-/**
- * 비밀번호 변경 저장 요청 처리
- * @param {Object} passwords - 현재 비밀번호와 새 비밀번호
- */
 const handlePasswordSave = async (passwords) => {
   try {
-    // TODO: API 호출하여 비밀번호 변경
-    // await api.changePassword(passwords)
-
     console.log('비밀번호 변경:', passwords)
-
-    // 저장 성공 후 메인 화면으로 돌아가기
     currentView.value = 'main'
   } catch (error) {
     console.error('비밀번호 변경 오류:', error)
   }
 }
-
-/**
- * 반 코드 확인 요청 처리
- * @param {string} classCode - 확인할 반 코드
- */
-// const handleVerifyClassCode = async (classCode) => {
-//   try {
-//     // TODO: API 호출하여 반 코드 확인
-//     // const response = await api.verifyClassCode(classCode)
-//
-//     // 임시로 성공으로 처리 (실제로는 API 응답에 따라 처리)
-//     const isValid = true
-//     const message = isValid ? '유효한 반 코드입니다.' : '존재하지 않는 반 코드입니다.'
-//
-//     if (classCodeSettingRef.value) {
-//       classCodeSettingRef.value.setVerificationResult(isValid, message)
-//     }
-//   } catch (error) {
-//     console.error('반 코드 확인 오류:', error)
-//     if (classCodeSettingRef.value) {
-//       classCodeSettingRef.value.setVerificationResult(false, '반 코드 확인 중 오류가 발생했습니다.')
-//     }
-//   }
-// }
-
-/**
- * 반 코드 변경 저장 요청 처리
- * @param {string} classCode - 저장할 반 코드
- */
 const handleClassCodeSave = async (classCode) => {
   try {
-    // TODO: API 호출하여 반 코드 변경
-    // await api.changeClassCode(classCode)
-
     console.log('반 코드 변경:', classCode)
-
     if (classCodeSettingRef.value) {
       classCodeSettingRef.value.setSaveResult('반 코드가 성공적으로 변경되었습니다.')
     }
-
-    // 저장 성공 후 잠시 후 메인 화면으로 돌아가기
     setTimeout(() => {
       currentView.value = 'main'
     }, 1500)
@@ -308,5 +197,37 @@ const handleClassCodeSave = async (classCode) => {
   padding-top: 24px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* 모달 스타일 예시 */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+}
+.modal-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 24px 24px 24px;
+  min-width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  text-align: center;
+}
+.modal-msg {
+  font-size: 1.08rem; margin-bottom: 22px;
+  line-height: 1.6;
+}
+.modal-btn-group {
+  display: flex; gap: 18px; justify-content: center;
+}
+.modal-btn {
+  min-width: 104px; padding: 9px 0;
+  border: none; border-radius: 8px;
+  font-weight: 500; font-size: 1rem;
+  cursor: pointer;
+  &.yes { background: #ff6565; color: #fff; }
+  &.no { background: #eee; color: #222; }
 }
 </style>
