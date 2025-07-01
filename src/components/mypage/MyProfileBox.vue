@@ -20,7 +20,7 @@
     <div class="profile-content">
       <div class="profile-image">
         <img
-            :src="userStore.avatar || defaultProfileImage"
+            :src="getProfileImageUrl(userStore.avatar)"
             :alt="`${userStore.email} 프로필 이미지`"
             @error="handleImageError"
         />
@@ -42,8 +42,23 @@ defineEmits(['logout', 'profile-image-change'])
 
 const userStore = useUserStore()
 
+// 이미지 에러 처리
 const handleImageError = (event) => {
   event.target.src = defaultProfileImage
+}
+
+// 프로필 이미지 URL 구성
+const getProfileImageUrl = (avatar) => {
+  if (!avatar) return defaultProfileImage
+  
+  // 이미 완전한 URL인 경우 (http/https로 시작)
+  if (avatar.startsWith('http')) {
+    return avatar
+  }
+  
+  // 상대 경로인 경우 백엔드 서버 URL과 결합
+  const baseUrl = 'http://localhost:9090' // 백엔드 서버 URL
+  return baseUrl + avatar
 }
 
 const displayName = computed(() => {
@@ -57,7 +72,7 @@ const displayName = computed(() => {
 .mypage-profile-box {
   width: 478px;
   height: 146px;
-  border: 1px solid #DDDDDD;
+  border: 1px solid $dim-gray;
   border-radius: 15px;
   padding: 22px 19px 27px 19px;
   background: $white;

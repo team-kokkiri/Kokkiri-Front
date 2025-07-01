@@ -23,7 +23,10 @@
 
     <!-- 프로필 사진 변경 -->
     <template v-else-if="currentView === 'profile-image'">
-      <div>프로필 사진 변경 컴포넌트</div>
+      <ProfileImageUpload
+          @back="handleBackToMain"
+          @upload-success="handleProfileUploadSuccess"
+      />
     </template>
 
     <!-- 닉네임 변경 -->
@@ -75,6 +78,7 @@ import NicknameSetting from '@/components/mypage/NicknameSetting.vue'
 import PasswordSetting from '@/components/mypage/PasswordSetting.vue'
 import ClassCodeSetting from '@/components/mypage/ClassCodeSetting.vue'
 import DeleteAccountModal from '@/components/common/modal/DeleteAccountModal.vue'
+import ProfileImageUpload from '@/components/mypage/ProfileImageUpload.vue'
 import instance from "@/utils/axios";
 import {useRouter} from "vue-router";
 import {useUserStore} from "@/stores";
@@ -109,7 +113,11 @@ const handleLogout = () => {
 }
 
 const handleProfileImageChange = () => {
-  console.log('프로필 사진 변경 클릭')
+  currentView.value = 'profile-image'
+}
+
+const handleProfileUploadSuccess = () => {
+  currentView.value = 'main'
 }
 
 const handleNicknameChange = () => {
