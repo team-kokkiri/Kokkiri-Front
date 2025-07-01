@@ -79,11 +79,20 @@
         </div>
       </div>
     </form>
+    
+    <!-- 글 작성 확인 모달 -->
+    <WriteConfirmModal
+      :visible="showWriteConfirmModal"
+      @confirm="confirmWrite"
+      @cancel="cancelWrite"
+      @close="closeWriteModal"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue'
+import WriteConfirmModal from '@/components/common/modal/WriteConfirmModal.vue'
 
 // Props
 const props = defineProps({
@@ -98,6 +107,9 @@ const emit = defineEmits(['submit', 'imageUpload'])
 
 // 글쓰기 폼 show/hide 여부
 const showWriteForm = ref(false)
+
+// 글 작성 확인 모달 표시 여부
+const showWriteConfirmModal = ref(false)
 
 // 폼 데이터
 const formData = ref({
@@ -124,13 +136,19 @@ function handleSubmit() {
     alert('제목과 내용을 입력해주세요.')
     return
   }
+  // 글 작성 확인 모달 표시
+  showWriteConfirmModal.value = true
+}
+
+// 글 작성 확인 처리
+function confirmWrite() {
   // 부모 컴포넌트로 데이터 전달
-emit('submit', {
-  boardTitle: formData.value.boardTitle,
-  boardContent: formData.value.boardContent,
-  questionYn: formData.value.questionYn,
-  attachedImages: formData.value.attachedImages // 이건 File[] 타입이어야 함
-})
+  emit('submit', {
+    boardTitle: formData.value.boardTitle,
+    boardContent: formData.value.boardContent,
+    questionYn: formData.value.questionYn,
+    attachedImages: formData.value.attachedImages // 이건 File[] 타입이어야 함
+  })
   
   // 폼 초기화
   formData.value = {
@@ -140,6 +158,17 @@ emit('submit', {
     attachedImages: []
   }
   showWriteForm.value = false
+  showWriteConfirmModal.value = false
+}
+
+// 글 작성 취소 처리
+function cancelWrite() {
+  showWriteConfirmModal.value = false
+}
+
+// 모달 닫기 처리
+function closeWriteModal() {
+  showWriteConfirmModal.value = false
 }
 
 // 이미지 업로드 처리
