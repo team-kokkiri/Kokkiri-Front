@@ -3,7 +3,7 @@
     <!-- 댓글 프로필 -->
     <div class="comment-profile">
       <div class="profile-info">
-        <img class="avatar" :src="getProfileImageUrl(getCurrentUserAvatar())" alt="아바타" @error="handleImageError" />
+        <img class="avatar" :src="getProfileImageUrl(comment.memberAvatar)" alt="아바타" @error="handleImageError" />
         <span class="nickname">{{ comment.memberNickname }}</span>
       </div>
       <div class="comment-actions">
@@ -103,13 +103,6 @@ const props = defineProps({
   }
 })
 
-console.log('allReplies')
-
-// 디버깅: comment 데이터 구조 확인
-console.log('CommentItem - comment 데이터:', props.comment)
-console.log('CommentItem - comment.memberAvatar:', props.comment.memberAvatar)
-console.log('CommentItem - comment.avatar:', props.comment.avatar)
-
 defineEmits([
   'edit',
   'delete',
@@ -126,16 +119,6 @@ defineEmits([
 const router = useRouter();
 const userStore = useUserStore();
 const isChatModalOpen = ref(false);
-
-// 현재 사용자의 아바타를 가져오는 함수 (임시 해결방안)
-const getCurrentUserAvatar = () => {
-  // 댓글 작성자가 현재 로그인한 사용자인 경우 userStore의 avatar 사용
-  if (props.comment.memberNickname === userStore.displayName || props.comment.memberNickname === userStore.nickname) {
-    return userStore.avatar
-  }
-  // 다른 사용자인 경우 기본 이미지 사용
-  return props.comment.memberAvatar || props.comment.avatar || null
-}
 
 // 모달 열기 함수
 function openChatModal() {

@@ -1,7 +1,7 @@
 <template>
   <div class="post-header">
     <div class="header-avatar">
-      <img class="avatar" :src="getProfileImageUrl(getCurrentUserAvatar())" alt="아바타" @error="handleImageError" />
+      <img class="avatar" :src="getProfileImageUrl(post.memberAvatar)" alt="아바타" @error="handleImageError" />
     </div>
     <div class="header-info">
       <span class="nickname">{{ post.writer }}</span>
@@ -51,24 +51,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['chat', 'report', 'edit', 'delete'])
 
-// 디버깅: post 데이터 구조 확인
-console.log('PostHeader - post 데이터:', props.post)
-console.log('PostHeader - post.memberAvatar:', props.post.memberAvatar)
-console.log('PostHeader - post.avatarUrl:', props.post.avatarUrl)
-console.log('PostHeader - post.avatar:', props.post.avatar)
-
 const router = useRouter()
 const userStore = useUserStore()
-
-// 현재 사용자의 아바타를 가져오는 함수 (임시 해결방안)
-const getCurrentUserAvatar = () => {
-  // 작성자가 현재 로그인한 사용자인 경우 userStore의 avatar 사용
-  if (props.post.writer === userStore.displayName || props.post.writer === userStore.nickname) {
-    return userStore.avatar
-  }
-  // 다른 사용자인 경우 기본 이미지 사용 (또는 서버에서 제공되는 값)
-  return props.post.memberAvatar || props.post.avatarUrl || null
-}
 
 // 날짜 포맷터
 function formatDate(str) {
