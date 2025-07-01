@@ -51,9 +51,15 @@
           @input="updateInput"
           @keyup.enter="sendMessage"
       />
-      <button class="btn-send" @click="sendMessage">
-        <i class="bi bi-vector-pen"></i>
-      </button>
+      <!-- 글자 수 카운터 및 전송 버튼을 포함하는 컨테이너 -->
+      <div class="input-actions">
+        <span class="char-counter" :class="{ 'limit-exceeded': input.length >= 500 }">
+          {{ input.length }}/500
+        </span>
+        <button class="btn-send" @click="sendMessage">
+          <i class="bi bi-vector-pen"></i>
+        </button>
+      </div>
     </div>
   </div>
   
@@ -65,6 +71,7 @@
      </div>
   </div>
 
+  <!-- 나가기 확인 모달 -->
   <div v-if="showLeaveModal" class="modal-overlay" @click.self="closeLeaveModal">
     <div class="modal-content">
       <p class="modal-text">
@@ -73,6 +80,18 @@
       <div class="modal-actions">
         <button class="btn-modal btn-confirm" @click="confirmLeave">네</button>
         <button class="btn-modal btn-cancel" @click="closeLeaveModal">아니오</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 글자 수 제한 경고 모달 -->
+  <div v-if="showCharLimitModal" class="modal-overlay" @click.self="closeCharLimitModal">
+    <div class="modal-content">
+      <p class="modal-text">
+        500자 이상 입력할 수 없습니다.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal btn-confirm" @click="closeCharLimitModal">확인</button>
       </div>
     </div>
   </div>
@@ -107,6 +126,7 @@ const chatContentRef = ref(null)
 
 // 모달 상태 관리를 위한 ref
 const showLeaveModal = ref(false);
+const showCharLimitModal = ref(false); // 글자 수 제한 모달 상태
 
 // 유효한 메시지만 렌더링하기 위한 computed 속성
 const validMessages = computed(() => {
@@ -146,8 +166,21 @@ function confirmLeave() {
   closeLeaveModal();
 }
 
+// 글자 수 제한 모달 닫기 함수
+function closeCharLimitModal() {
+  showCharLimitModal.value = false;
+}
+
+// 입력값 업데이트 및 글자 수 제한 함수
 function updateInput(event) {
-  emit('update-input', event.target.value)
+  let value = event.target.value;
+  if (value.length > 500) {
+    if (!showCharLimitModal.value) {
+        showCharLimitModal.value = true; // 모달이 닫혀있을 때만 띄웁니다.
+    }
+    value = value.slice(0, 500); // 500자로 잘라냄
+  }
+  emit('update-input', value);
 }
 
 function sendMessage() {
@@ -350,10 +383,29 @@ onMounted(() => {
     &::placeholder { color: $silver-black; }
   }
 
+  .input-actions {
+    display: flex;
+    align-items: center;
+    padding-right: 5px; // 버튼과의 간격 확보
+  }
+
+  .char-counter {
+    margin-right: 10px;
+    font-size: 12px;
+    color: $silver-black;
+    white-space: nowrap;
+
+    &.limit-exceeded {
+        color: #f03e3e; // 경고 색상
+        font-weight: 700;
+    }
+  }
+
   .btn-send {
     width: 60px; height: 60px; background-color: $main-color;
     border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
     &:hover { background-color: darken($main-color, 10%); }
     .bi { color: $white; font-size: 30px; }
   }
