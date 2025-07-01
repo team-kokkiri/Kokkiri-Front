@@ -15,6 +15,7 @@ export function useDailyRanking() {
   const expandedRankingId = ref(null)
   const submissionCode = ref(null)
   const isLoadingCode = ref(false)
+  const hasUserSolved = ref(false)
 
   /**
    * 인증 토큰이 포함된 Axios 설정 객체를 생성
@@ -49,6 +50,26 @@ export function useDailyRanking() {
       console.error('Failed to fetch rankings:', err)
     } finally {
       isLoading.value = false
+    }
+  }
+
+  /**
+   * 사용자가 오늘 문제를 해결했는지 확인
+   * GET /api/problems/today API 호출하여 hasSolved 확인
+   */
+  const checkUserSolvedToday = async () => {
+    try {
+      const config = getAuthConfig()
+      const response = await axios.get(`${API_BASE_URL}/api/problems/today`, config)
+      
+      if (response.data.status_code === 200) {
+        hasUserSolved.value = response.data.result.hasSolved
+        return response.data.result.hasSolved
+      }
+      return false
+    } catch (err) {
+      console.error('Failed to check user solved status:', err)
+      return false
     }
   }
 
@@ -139,8 +160,10 @@ export function useDailyRanking() {
     expandedRankingId,
     submissionCode,
     isLoadingCode,
+    hasUserSolved,
     // 메소드
     fetchTodayRankings,
+    checkUserSolvedToday,
     fetchSubmissionCode,
     toggleRankingExpansion,
     formatSolveTime,
