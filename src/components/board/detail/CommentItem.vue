@@ -198,7 +198,7 @@ function closeReportModal() {
   isReportModalOpen.value = false
 }
 
-function handleReportSuccess(reportData) {
+function handleReportSuccess() {
   // 필요시 부모 컴포넌트로 신고 성공 이벤트 전달
 }
 </script>

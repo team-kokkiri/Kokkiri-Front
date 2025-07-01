@@ -19,7 +19,7 @@
               class="reason-dropdown"
               @change="updateSelectedReason"
             >
-              <option value="" disabled>드롭다운으로 선택</option>
+              <option value="" disabled>선택</option>
               <option 
                 v-for="reason in reportReasons" 
                 :key="reason.code" 
@@ -29,16 +29,17 @@
               </option>
             </select>
           </div>
+          <div class="button-section">
+            <button
+                class="btn-submit"
+                @click="submitReport"
+                :disabled="!selectedReason"
+            >
+              제출
+            </button>
+          </div>
         </div>
-        <div class="button-section">
-          <button 
-            class="btn-submit" 
-            @click="submitReport"
-            :disabled="!selectedReason"
-          >
-            제출
-          </button>
-        </div>
+
       </div>
     </div>
   </div>
@@ -191,6 +192,7 @@ export default {
   top: 25%;
   left: 50%;
   transform: translateX(-50%);
+  padding-top: 10px;
 }
 
 .modal-content {
@@ -235,9 +237,10 @@ export default {
 .dropdown-section {
   height: 42px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px 69px;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-left: 68px;
+  padding-right: 25px;
 }
 
 .dropdown-wrapper {
@@ -251,7 +254,6 @@ export default {
   height: 100%;
   border: 1px solid #DDDDDD;
   background: #FFFFFF;
-  padding: 5px 10px;
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 500;
   font-size: 12px;
@@ -276,7 +278,7 @@ export default {
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 12px;
-  padding-right: 30px;
+  padding: 5px 30px 5px 10px;
 }
 
 .button-section {
@@ -290,7 +292,7 @@ export default {
 .btn-submit {
   width: 60px;
   padding: 8px 15px;
-  background: #ED2040;
+  background: red;
   color: #FFFFFF;
   border: none;
   border-radius: 15px;
@@ -300,6 +302,7 @@ export default {
   line-height: 1.252;
   cursor: pointer;
   transition: opacity 0.2s;
+  margin-top: 5px;
 
   &:hover:not(:disabled) {
     opacity: 0.8;
@@ -310,8 +313,7 @@ export default {
   }
 
   &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background: #DDDDDD;
   }
 }
 </style>

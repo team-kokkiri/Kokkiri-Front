@@ -75,7 +75,7 @@ function closeReportModal() {
   isReportModalOpen.value = false
 }
 
-function handleReportSuccess(reportData) {
+function handleReportSuccess() {
   emit('report', props.post.id)
 }
 
