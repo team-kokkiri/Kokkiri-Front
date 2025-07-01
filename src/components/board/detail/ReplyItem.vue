@@ -63,7 +63,7 @@ import { ref, defineProps, defineEmits } from 'vue'
 import defaultAvatar from '@/assets/img/0.png'
 import EditForm from './EditForm.vue'
 import ReplyList from './ReplyList.vue'
-import axios from 'axios'
+import axios from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
@@ -137,6 +137,7 @@ async function startPrivateChat() {
         alert("로그인이 필요합니다.");
         return;
     }
+    console.log(props.reply.memberId)
     
     const response = await axios.post('/api/chat/room/private/create', null, {
         params: {
