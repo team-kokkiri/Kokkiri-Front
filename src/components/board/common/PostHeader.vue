@@ -15,18 +15,14 @@
     </div>
   </div>
 
-  <!-- 채팅 시작 확인 모달 -->
-  <div v-if="isChatModalOpen" class="modal-overlay" @click.self="closeChatModal">
-    <div class="modal-content">
-      <p class="modal-text">
-        <strong>{{ post.writer }}</strong>님에게 채팅을 거시겠습니까?
-      </p>
-      <div class="modal-actions">
-        <button class="btn-modal btn-cancel" @click="closeChatModal">아니오</button>
-        <button class="btn-modal btn-confirm" @click="startPrivateChat">네</button>
-      </div>
-    </div>
-  </div>
+  <!-- 채팅 초대 모달 -->
+  <ChatInviteModal
+    :visible="isChatModalOpen"
+    :target-nickname="post.writer"
+    @confirm="startPrivateChat"
+    @cancel="closeChatModal"
+    @close="closeChatModal"
+  />
 
   <!-- 신고 모달 -->
   <ReportModal
@@ -45,6 +41,7 @@ import axios from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import ReportModal from '@/components/common/ReportModal.vue'
+import ChatInviteModal from '@/components/common/ChatInviteModal.vue'
 
 const props = defineProps({
   post: {
@@ -172,65 +169,6 @@ async function startPrivateChat() {
   .header-actions {
     display: flex;
     gap: 10px;
-  }
-}
-
-/* 모달 스타일 추가 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  width: 320px;
-}
-.modal-text {
-  font-size: 16px;
-  margin: 0 0 20px;
-  color: #333;
-  line-height: 1.5;
-  strong {
-    font-weight: 700;
-  }
-}
-.modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-.btn-modal {
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  min-width: 80px;
-}
-.btn-confirm {
-  background-color: #5a7dff; // 메인 컬러
-  color: white;
-  &:hover {
-    background-color: darken(#5a7dff, 10%);
-  }
-}
-.btn-cancel {
-  background-color: #f0f0f0;
-  color: #333;
-  &:hover {
-    background-color: #e0e0e0;
   }
 }
 </style>
