@@ -1,24 +1,3 @@
-<script setup>
-import { defineProps, defineEmits } from 'vue'
-import defaultAvatar from '@/assets/img/0.png'
-
-defineProps({
-  post: {
-    type: Object,
-    required: true
-  }
-})
-
-defineEmits(['chat', 'report', 'edit', 'delete'])
-
-// 날짜 포맷터
-function formatDate(str) {
-  if (!str) return ''
-  const d = new Date(str)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-</script>
-
 <template>
   <div class="post-header">
     <div class="header-avatar">
@@ -32,8 +11,6 @@ function formatDate(str) {
       <button class="btn-edit" @click="$emit('edit', post)">수정</button>
       <button class="btn-delete" @click="$emit('delete', post)">삭제</button>
       <button class="btn-chat" @click="openChatModal">채팅</button>
-      <button class="btn-report" @click="$emit('report', post)">신고</button>
-      <button class="btn-chat" @click="$emit('chat', post)">채팅</button>
       <div class="report-wrapper">
         <button class="btn-report" @click="showReportPopup = !showReportPopup">신고</button>
         <div v-if="showReportPopup" class="modal-overlay">
@@ -76,9 +53,11 @@ function formatDate(str) {
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue'
-import axios from 'axios'
+import { ref, defineProps, defineEmits } from 'vue'
 import defaultAvatar from '@/assets/img/0.png'
+import axios from '@/utils/axios'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const props = defineProps({
   post: {
@@ -86,9 +65,10 @@ const props = defineProps({
     required: true
   }
 })
-const token = localStorage.getItem('accessToken')
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
-defineEmits(['chat', 'report', 'edit', 'delete'])
+const emit = defineEmits(['chat', 'report', 'edit', 'delete'])
+
+const router = useRouter()
+const userStore = useUserStore()
 
 // 날짜 포맷터
 function formatDate(str) {
@@ -97,6 +77,7 @@ function formatDate(str) {
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+// ----------- 신고 기능 관련 -----------
 const reportReasons = [
   { label: '게시판 성격에 부적절함', value: 'INAPPROPRIATE_CONTENT' },
   { label: '욕설/비하', value: 'ABUSIVE_LANGUAGE' },
@@ -116,12 +97,8 @@ async function submitReport() {
     return
   }
   try {
-    console.log('Submitting report with:', {
-      targetId: props.post.id,
-      reportType: 'POST',
-      reportReason: selectedReason.value
-    })
-    const response = await axios.post(`${API_BASE_URL}/api/reports`, {
+    const token = localStorage.getItem('accessToken')
+    const response = await axios.post('/api/reports', {
       targetId: props.post.id,
       reportType: 'POST',
       reportReason: selectedReason.value
@@ -130,14 +107,14 @@ async function submitReport() {
         Authorization: `Bearer ${token}`
       }
     })
-    console.log('Report response:', response)
-    if (response.status !== 200 && response.status !== 201) {
+    if (![200, 201].includes(response.status)) {
       alert('신고 제출에 실패했습니다. 다시 시도해주세요.')
       return
     }
     alert('신고가 접수되었습니다.')
     showReportPopup.value = false
     selectedReason.value = ''
+    emit('report', props.post.id)
   } catch (err) {
     console.error('신고 실패:', err)
     alert('신고 처리 중 오류가 발생했습니다.')
@@ -153,95 +130,58 @@ function confirmReport() {
     submitReport()
   }
 }
-</script>
 
-<script setup>
-import { ref, defineProps, defineEmits } from 'vue'
-import defaultAvatar from '@/assets/img/0.png'
-import axios from '@/utils/axios' // API 호출을 위해 import
-import { useRouter } from 'vue-router' // 페이지 이동을 위해 import
-import { useUserStore } from '@/stores/user' // 현재 사용자 정보 확인을 위해 import
+// ----------- 1:1 채팅 기능 관련 -----------
+const isChatModalOpen = ref(false)
 
-const props = defineProps({
-  post: {
-    type: Object,
-    required: true
-  }
-})
-
-// 'chat' 이벤트는 더 이상 직접 발생시키지 않으므로 제거합니다.
-defineEmits(['report', 'edit', 'delete'])
-
-const router = useRouter();
-const userStore = useUserStore(); // Pinia 스토어 인스턴스 생성
-const isChatModalOpen = ref(false);
-
-// 모달 열기 함수
 function openChatModal() {
-  // 본인과는 채팅할 수 없도록 체크 (== 연산자로 타입 불일치 문제를 방지)
   if (userStore.nickname == props.post.writer) {
-    alert("자기 자신과는 채팅할 수 없습니다.");
-    return;
+    alert("자기 자신과는 채팅할 수 없습니다.")
+    return
   }
-  isChatModalOpen.value = true;
+  isChatModalOpen.value = true
 }
 
-// 모달 닫기 함수
 function closeChatModal() {
-  isChatModalOpen.value = false;
+  isChatModalOpen.value = false
 }
 
-// 1:1 채팅 시작 함수
 async function startPrivateChat() {
-  // 게시글 작성자의 memberId가 있는지 확인
   if (!props.post.writer) {
-    console.error("작성자를 찾을 수 없습니다.");
-    alert("채팅을 시작할 수 없습니다.");
-    closeChatModal();
-    return;
+    alert("채팅을 시작할 수 없습니다.")
+    closeChatModal()
+    return
   }
-
   try {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken')
     if (!token) {
-        alert("로그인이 필요합니다.");
-        return;
+      alert("로그인이 필요합니다.")
+      return
     }
-
-    // 1:1 채팅방 생성 또는 조회 API 호출
     const response = await axios.post('/api/chat/room/private/create', null, {
-        params: {
-            otherMemberId: props.post.memberId
-        },
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    const roomId = response.data;
+      params: {
+        otherMemberId: props.post.memberId
+      },
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    const roomId = response.data
     if (roomId) {
-        // 성공 시, 해당 채팅방으로 이동
-        router.push({ path: '/main-page/chat', query: { roomId: roomId } });
+      router.push({ path: '/main-page/chat', query: { roomId } })
     } else {
-        alert("채팅방 정보를 가져오지 못했습니다.");
+      alert("채팅방 정보를 가져오지 못했습니다.")
     }
-
   } catch (error) {
-    console.error("1:1 채팅 시작에 실패했습니다:", error);
-    const errorMessage = error.response?.data?.message || "채팅방을 시작하는 중 오류가 발생했습니다.";
-    alert(errorMessage);
+    console.error("1:1 채팅 시작에 실패했습니다:", error)
+    const errorMessage = error.response?.data?.message || "채팅방을 시작하는 중 오류가 발생했습니다."
+    alert(errorMessage)
   } finally {
-    closeChatModal();
+    closeChatModal()
   }
-}
-
-// 날짜 포맷터
-function formatDate(str) {
-  if (!str) return ''
-  const d = new Date(str)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 </script>
+
 
 <style lang="scss" scoped>
 .post-header {

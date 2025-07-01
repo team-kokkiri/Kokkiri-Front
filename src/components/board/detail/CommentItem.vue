@@ -11,7 +11,7 @@
         <button class="btn-delete" @click="$emit('delete', comment)">삭제</button>
         <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
         <button class="btn-like" @click="$emit('like', comment)">공감</button>
-        <button class="btn-chat" @click="$emit('chat', comment) , openChatModal">채팅</button>
+        <button class="btn-chat" @click="openChatModal">채팅</button>
         <div class="report-wrapper">
           <button class="btn-report" @click="showReportPopup = !showReportPopup">신고</button>
           <div v-if="showReportPopup" class="modal-overlay">

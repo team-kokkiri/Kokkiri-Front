@@ -10,7 +10,7 @@
         <button class="btn-edit" @click="$emit('edit', reply)">수정</button>
         <button class="btn-delete" @click="$emit('delete', reply)">삭제</button>
         <button class="btn-like" @click="$emit('like', reply)">공감</button>
-        <button class="btn-chat" @click="$emit('chat', reply)">채팅</button>
+        <button class="btn-chat" @click="openChatModal">채팅</button>
         <!-- 신고 버튼 및 모달 -->
         <div class="report-wrapper">
           <button class="btn-report" @click="showReportPopup = !showReportPopup">신고</button>
@@ -86,9 +86,6 @@
 
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
-import { ref } from 'vue'
-import axios from 'axios'
 import { ref, defineProps, defineEmits } from 'vue'
 import defaultAvatar from '@/assets/img/0.png'
 import EditForm from './EditForm.vue'
