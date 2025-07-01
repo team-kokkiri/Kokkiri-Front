@@ -11,7 +11,7 @@
         <button class="btn-delete" @click="$emit('delete', reply)">삭제</button>
         <button class="btn-like" @click="$emit('like', reply)">공감</button>
         <button class="btn-chat" @click="openChatModal">채팅</button>
-        <button class="btn-report" @click="$emit('report', reply)">신고</button>
+        <button class="btn-report" @click="openReportModal">신고</button>
       </div>
     </div>
 
@@ -43,18 +43,23 @@
       @close="handleCloseEdit"
   />
 
-  <!-- 채팅 시작 확인 모달 -->
-  <div v-if="isChatModalOpen" class="modal-overlay" @click.self="closeChatModal">
-    <div class="modal-content">
-      <p class="modal-text">
-        <strong>{{ reply.memberNickname }}</strong>님에게 채팅을 거시겠습니까?
-      </p>
-      <div class="modal-actions">
-        <button class="btn-modal btn-cancel" @click="closeChatModal">아니오</button>
-        <button class="btn-modal btn-confirm" @click="startPrivateChat">네</button>
-      </div>
-    </div>
-  </div>
+  <!-- 채팅 초대 모달 -->
+  <ChatInviteModal
+    :visible="isChatModalOpen"
+    :target-nickname="reply.memberNickname"
+    @confirm="startPrivateChat"
+    @cancel="closeChatModal"
+    @close="closeChatModal"
+  />
+
+  <!-- 신고 모달 -->
+  <ReportModal
+    :visible="isReportModalOpen"
+    :target-id="reply.id"
+    report-type="REPLY"
+    @close="closeReportModal"
+    @success="handleReportSuccess"
+  />
 </template>
 
 
@@ -66,6 +71,8 @@ import ReplyList from './ReplyList.vue'
 import axios from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import ReportModal from '@/components/common/ReportModal.vue'
+import ChatInviteModal from '@/components/common/ChatInviteModal.vue'
 
 const props = defineProps({
   reply: {
@@ -138,7 +145,7 @@ async function startPrivateChat() {
         return;
     }
     console.log(props.reply.memberId)
-    
+
     const response = await axios.post('/api/chat/room/private/create', null, {
         params: {
             otherMemberId: props.reply.memberId
@@ -170,6 +177,20 @@ const handleCloseEdit = () => {
   emit('close-edit')
 }
 
+// ----------- 신고 기능 관련 -----------
+const isReportModalOpen = ref(false)
+
+function openReportModal() {
+  isReportModalOpen.value = true
+}
+
+function closeReportModal() {
+  isReportModalOpen.value = false
+}
+
+function handleReportSuccess() {
+  // 필요시 부모 컴포넌트로 신고 성공 이벤트 전달
+}
 </script>
 
 <style lang="scss" scoped>
@@ -210,7 +231,7 @@ const handleCloseEdit = () => {
     .comment-actions {
       display: flex;
       gap: 1px;
-      
+
       button {
         font-family: 'Spoqa Han Sans Neo', sans-serif;
         font-size: 12px;
@@ -271,65 +292,6 @@ const handleCloseEdit = () => {
         color: #ed2040;
       }
     }
-  }
-}
-
-/* 모달 스타일 추가 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  width: 320px;
-}
-.modal-text {
-  font-size: 16px;
-  margin: 0 0 20px;
-  color: #333;
-  line-height: 1.5;
-  strong {
-    font-weight: 700;
-  }
-}
-.modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-.btn-modal {
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  min-width: 80px;
-}
-.btn-confirm {
-  background-color: #5a7dff; // 메인 컬러
-  color: white;
-  &:hover {
-    background-color: darken(#5a7dff, 10%);
-  }
-}
-.btn-cancel {
-  background-color: #f0f0f0;
-  color: #333;
-  &:hover {
-    background-color: #e0e0e0;
   }
 }
 </style>

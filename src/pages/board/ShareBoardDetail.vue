@@ -59,6 +59,15 @@
   <div v-else>
     게시글을 찾을 수 없습니다.
   </div>
+
+  <!-- Delete Confirm Modal -->
+  <DeleteConfirmModal
+    :visible="deleteModalState.visible"
+    :message="deleteModalState.message"
+    @confirm="handleDeleteConfirm"
+    @cancel="hideDeleteModal"
+    @close="hideDeleteModal"
+  />
 </template>
 
 <script setup>
@@ -72,6 +81,8 @@ import PostActionBar from '@/components/board/common/PostActionBar.vue'
 import CommentList from '@/components/board/detail/CommentList.vue'
 import CommentForm from '@/components/board/detail/CommentForm.vue'
 import PostEditForm from '@/components/board/detail/PostEditForm.vue'
+import DeleteConfirmModal from '@/components/common/DeleteConfirmModal.vue'
+import { useDeleteConfirmModal } from '@/composables/useModal.js'
 // import boardSample from '@/data/boardSample.json'
 
 
@@ -86,6 +97,10 @@ const post = ref(null)
 
 // 본문 수정 입력창 상태 관리
 const postEditVisible = ref(false)
+
+// Delete Modal 상태 관리
+const { deleteModalState, showDeleteModal, hideDeleteModal } = useDeleteConfirmModal()
+let deleteTarget = null
 
 // 페이지 진입시 라우터 params.id로 게시글 찾아오기
 const fetchPost = async () => {
@@ -293,38 +308,48 @@ const onCancelEdit = () => {
 // 삭제 기능 // 본문 댓글 대댓글 전부 이 메소드로 합쳤는데 필요하면 나눠드림
 // 타입으로 구분해서 처리하면 될 듯 합니다
 const onDelete = async (item) => {
+  deleteTarget = item
+  const message = item === post.value
+      ? '정말 게시글을 삭제하시겠습니까?'
+      : '정말 댓글을 삭제하시겠습니까?'
+  
+  showDeleteModal({ message })
+}
+
+// 삭제 확인 핸들러
+const handleDeleteConfirm = async () => {
+  if (!deleteTarget) return
+  
   try {
     const config = {
       headers: {
         Authorization: `Bearer ${token}`
       }
     }
-    const confirmMessage = item === post.value
-        ? '게시글을 삭제하시겠습니까?'
-        : '댓글을 삭제하시겠습니까?'
-
-    if (!confirm(confirmMessage)) {
-      return // 사용자가 취소하면 함수 종료
-    }
 
     // item이 게시글인지, 댓글인지, 대댓글인지 구분
-    if (item === post.value) {
+    if (deleteTarget === post.value) {
       // 게시글 삭제
       await axios.delete(
           `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
           config
       )
+      hideDeleteModal()
       await router.push('/main-page/share-board')
     } else {
       // 댓글 대댓글 삭제
       await axios.delete(
-          `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}`,
+          `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${deleteTarget.id}`,
           config
       )
+      hideDeleteModal()
       await fetchPost()
     }
   } catch (err) {
     console.error('삭제 실패', err.response?.data || err.message || err);
+    hideDeleteModal()
+  } finally {
+    deleteTarget = null
   }
 }
 

@@ -4,21 +4,18 @@
       <div class="modal-content">
         <div class="image-section">
           <img 
-            src="@/assets/img/웃는마스코트.png" 
-            alt="성공 마스코트"
+            src="@/assets/img/마스코트채팅.png" 
+            alt="채팅 마스코트"
             class="mascot-image"
           />
         </div>
         <div class="message-section">
-          <p class="success-message">{{ message }}</p>
+          <p class="chat-message">{{ displayMessage }}</p>
         </div>
-      </div>
-      <!-- Progress Bar -->
-      <div v-if="autoClose" class="progress-bar">
-        <div
-            class="progress-fill"
-            :style="{ animationDuration: `${autoCloseDelay}ms` }"
-        ></div>
+        <div class="button-section">
+          <button class="btn-confirm" @click="confirmChat">네</button>
+          <button class="btn-cancel" @click="cancelChat">아니오</button>
+        </div>
       </div>
     </div>
   </div>
@@ -26,7 +23,7 @@
 
 <script>
 export default {
-  name: 'SuccessModal',
+  name: 'ChatInviteModal',
   props: {
     visible: {
       type: Boolean,
@@ -34,33 +31,41 @@ export default {
     },
     message: {
       type: String,
-      default: '인증이 완료되었습니다.'
+      default: '채팅을 시작하시겠습니까?'
     },
-    autoClose: {
-      type: Boolean,
-      default: true
-    },
-    autoCloseDelay: {
-      type: Number,
-      default: 3000
+    targetNickname: {
+      type: String,
+      default: ''
     }
   },
-  emits: ['close'],
+  emits: ['confirm', 'cancel', 'close'],
+  computed: {
+    displayMessage() {
+      if (this.targetNickname) {
+        return `${this.targetNickname}님에게 채팅을 거시겠습니까?`
+      }
+      return this.message
+    }
+  },
   watch: {
     visible(newVal) {
-      if (newVal && this.autoClose) {
-        this.scheduleAutoClose()
+      if (newVal) {
+        // 모달이 열릴 때 DOM이 완전히 렌더링되도록 nextTick 사용
+        this.$nextTick(() => {
+          // 추가적인 초기화 로직이 필요하면 여기에
+        })
       }
     }
   },
   methods: {
+    confirmChat() {
+      this.$emit('confirm')
+    },
+    cancelChat() {
+      this.$emit('cancel')
+    },
     closeModal() {
       this.$emit('close')
-    },
-    scheduleAutoClose() {
-      setTimeout(() => {
-        this.closeModal()
-      }, this.autoCloseDelay)
     }
   }
 }
@@ -92,33 +97,6 @@ export default {
   overflow: hidden;
 }
 
-.progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: #f0f0f0;
-  z-index: 1;
-}
-
-.progress-fill {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #4CAF50, #45a049);
-  animation: progressDecrease linear forwards;
-  transform-origin: left;
-}
-
-@keyframes progressDecrease {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-
 .modal-content {
   width: 100%;
   height: 100%;
@@ -127,7 +105,7 @@ export default {
 }
 
 .image-section {
-  height: 191px;
+  height: 170px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -141,14 +119,14 @@ export default {
 }
 
 .message-section {
-  height: 109px;
+  height: 47px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 5px 5px 30px;
+  padding: 5px;
 }
 
-.success-message {
+.chat-message {
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 700;
   font-size: 24px;
@@ -156,5 +134,38 @@ export default {
   color: #333333;
   text-align: center;
   margin: 0;
+}
+
+.button-section {
+  height: 83px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 34px;
+  padding: 20px;
+}
+
+.btn-confirm,
+.btn-cancel {
+  width: 100px;
+  padding: 8px 15px;
+  background: #2196F3;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 15px;
+  font-family: 'Spoqa Han Sans Neo', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.252;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:active {
+    opacity: 0.6;
+  }
 }
 </style>

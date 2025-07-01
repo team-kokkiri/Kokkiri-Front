@@ -48,33 +48,19 @@
     </div>
   </aside>
 
-  <div v-if="isModalOpen" class="modal-overlay" @click.self="closeCreateRoomModal">
-    <div class="modal-content">
-      <h3 class="modal-title">새 채팅방 만들기</h3>
-      <p class="modal-description">채팅방의 이름을 입력해주세요.</p>
-      <div class="modal-body">
-        <input
-          type="text"
-          v-model="newRoomName"
-          class="modal-input"
-          placeholder="예: 프로젝트 회의"
-          @keyup.enter="handleCreateRoom"
-        />
-      </div>
-      <div class="modal-footer">
-        <button class="modal-btn cancel" @click="closeCreateRoomModal">취소</button>
-        <button class="modal-btn confirm" @click="handleCreateRoom">만들기</button>
-      </div>
-    </div>
-  </div>
+  <!-- 채팅방 생성 모달 -->
+  <CreateRoomModal
+    :visible="isModalOpen"
+    @close="closeCreateRoomModal"
+    @success="handleRoomCreated"
+  />
 </template>
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue'
-import axios from '../../utils/axios'
+import CreateRoomModal from '@/components/common/CreateRoomModal.vue'
 
 const isModalOpen = ref(false)
-const newRoomName = ref('')
 
 const props = defineProps({
   chatRooms: Array,
@@ -92,81 +78,23 @@ const props = defineProps({
 const emit = defineEmits(['select', 'load-more', 'room-created', 'add-and-select-room'])
 
 function openCreateRoomModal() {
-  newRoomName.value = '';
-  isModalOpen.value = true;
+  isModalOpen.value = true
 }
 
 function closeCreateRoomModal() {
-  isModalOpen.value = false;
+  isModalOpen.value = false
 }
 
-async function handleCreateRoom() {
-  const roomName = newRoomName.value.trim();
-  if (!roomName) {
-    alert('채팅방 이름을 입력해주세요.');
-    return;
-  }
-
-  const token = localStorage.getItem('accessToken');
-  if (!token) {
-    alert('로그인이 필요합니다. 다시 로그인해주세요.');
-    closeCreateRoomModal();
-    return;
-  }
-
-  try {
-    const formData = new URLSearchParams();
-    formData.append('roomName', roomName);
-
-    const response = await axios.post('/api/chat/room/group/create', formData.toString(), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    const newRoomFromServer = response.data;
-
-    if (newRoomFromServer && newRoomFromServer.roomId && newRoomFromServer.roomName) {
-      alert(`'${newRoomFromServer.roomName}' 채팅방이 성공적으로 개설되었습니다.`);
-      
-      // 서버에서 받은 데이터에 누락된 정보를 보완하여 완전한 객체를 만듭니다.
-      const completeNewRoom = {
-        ...newRoomFromServer,
-        userCount: 1, // 새 채팅방이므로 인원수는 1
-        isGroupChat: 'Y', // 그룹 채팅방 생성 요청이었으므로 'Y'
-        lastMessage: '', // 아직 메시지가 없음
-        lastMessageTime: new Date().toISOString(), // 현재 시간
-        unReadCount: 0 // 안 읽은 메시지 없음
-      };
-      
-      // 보완된 객체로 이벤트를 발생시킵니다.
-      emit('add-and-select-room', completeNewRoom);
-
-    } else {
-      console.error("서버로부터 받은 데이터 형식이 올바르지 않습니다:", response.data);
-      alert("채팅방이 개설되었으나, 응답 데이터에 문제가 있습니다. 목록을 새로고침합니다.");
-      emit('room-created'); 
-    }
-
-  } catch (error) {
-    if (error.response) {
-      console.error('API Error:', error.response.status, error.response.data);
-      alert(`채팅방 개설에 실패했습니다. 서버 오류: ${error.response.status}`);
-    } else if (error.request) {
-      console.error('Network Error:', error.request);
-      alert('서버로부터 응답이 없습니다. 네트워크나 서버 상태를 확인해주세요.');
-    } else {
-      console.error('Axios Error:', error.message);
-      alert('요청 중 오류가 발생했습니다.');
-    }
-  } finally {
-    closeCreateRoomModal();
+function handleRoomCreated(newRoom) {
+  if (newRoom && newRoom.roomId && newRoom.roomName) {
+    emit('add-and-select-room', newRoom)
+  } else {
+    emit('room-created')
   }
 }
 
 function selectRoom(id) {
-  emit('select', id);
+  emit('select', id)
 }
 
 function handleScroll(event) {
@@ -178,17 +106,17 @@ function handleScroll(event) {
 }
 
 function formatDisplayTime(dateTimeString) {
-  if (!dateTimeString) return '';
-  const now = new Date();
-  const messageDate = new Date(dateTimeString);
-  if (isNaN(messageDate.getTime())) return '';
-  const isToday = now.toDateString() === messageDate.toDateString();
+  if (!dateTimeString) return ''
+  const now = new Date()
+  const messageDate = new Date(dateTimeString)
+  if (isNaN(messageDate.getTime())) return ''
+  const isToday = now.toDateString() === messageDate.toDateString()
   if (isToday) {
     return messageDate.toLocaleTimeString('ko-KR', {
       hour: 'numeric', minute: 'numeric', hour12: true
-    });
+    })
   } else {
-    return messageDate.toLocaleDateString('ko-KR');
+    return messageDate.toLocaleDateString('ko-KR')
   }
 }
 </script>
@@ -364,82 +292,5 @@ $light-gray: #f0f0f0;
   color: $silver-black;
   padding: 20px;
   p { margin: 5px 0; font-family: $primary-kr; font-size: 14px; line-height: 1.5; }
-}
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal-content {
-  background: $white;
-  padding: 24px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.modal-title {
-  font-family: $secondary-kr;
-  font-weight: 700;
-  font-size: 20px;
-  color: $black;
-  margin: 0;
-}
-.modal-description {
-  font-family: $primary-kr;
-  font-size: 14px;
-  color: $silver-black;
-  margin: -8px 0 0 0;
-}
-.modal-body {
-  margin: 8px 0;
-}
-.modal-input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid $dim-gray;
-  border-radius: 8px;
-  font-size: 16px;
-  box-sizing: border-box;
-  &:focus {
-    outline: none;
-    border-color: $main-color;
-    box-shadow: 0 0 0 2px rgba($main-color, 0.2);
-  }
-}
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-.modal-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-family: $secondary-kr;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  &.confirm {
-    background-color: $main-color;
-    color: $white;
-    &:hover { opacity: 0.9; }
-  }
-  &.cancel {
-    background-color: $light-gray;
-    color: $dark-black;
-    &:hover { background-color: $dim-gray; }
-  }
 }
 </style>
