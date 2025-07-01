@@ -71,7 +71,7 @@ import instance from "@/utils/axios";
 import {useRouter} from "vue-router";
 import {useUserStore} from "@/stores";
 
-const emit = defineEmits([
+defineEmits([
   'logout',
   'my-posts',
   'my-comments'
@@ -154,14 +154,14 @@ const handleAccountDelete = () => {
  * 내가 쓴 글 보기 처리
  */
 const handleMyPosts = () => {
-  emit('my-posts')
+  router.push(`/main-page/my-written-posts`)
 }
 
 /**
  * 댓글 단 글 보기 처리
  */
 const handleMyComments = () => {
-  emit('my-comments')
+  router.push(`/main-page/my-commented-posts`)
 }
 
 /**

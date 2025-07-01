@@ -3,7 +3,6 @@
   <PostEditForm 
     v-if="postEditVisible && post"
     :post="post"
-    :boardType="2"
     @submit="onSubmitEdit"
     @cancel="onCancelEdit"
   />
@@ -12,7 +11,7 @@
   <div class="board-free-detail" v-else-if="post">
     <!-- 상세 헤딩 -->
     <div class="detail-heading">
-      <h2 class="board-title">자료공유 게시판</h2>
+      <h2 class="board-title">공지사항</h2>
     </div>
 
     <!-- 게시글 본문 -->
@@ -150,22 +149,11 @@ const onSubmitEdit = async (editData) => {
     // FormData 생성
     const formData = new FormData()
     
-    // 기존 파일에서 ID 추출
-    const keepFileIds = []
-    if (editData.existingImages && editData.existingImages.length > 0) {
-      editData.existingImages.forEach(file => {
-        // file 객체에서 id를 추출
-        if (file.id) {
-          keepFileIds.push(file.id)
-        }
-      })
-    }
-    
     // board 데이터를 JSON으로 변환하여 Blob으로 추가
     const boardData = {
       boardTitle: editData.boardTitle,
       boardContent: editData.boardContent,
-      keepFileIds: keepFileIds // 유지할 기존 파일 ID들
+      keepFileIds: [] // 기존 파일 유지 ID들 (필요시 구현)
     }
     
     // JSON을 Blob으로 변환하고 Content-Type 지정
@@ -314,7 +302,7 @@ const onDelete = async (item) => {
           `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
           config
       )
-      await router.push('/main-page/share-board')
+      await router.push('/main-page/notice')
     } else {
       // 댓글 대댓글 삭제
       await axios.delete(
@@ -340,7 +328,7 @@ const onReport = (item) => {
 
 // 글 목록 이동
 const goToList = () => {
-  router.push('/main-page/share-board')
+  router.push('/main-page/notice')
 }
 </script>
 

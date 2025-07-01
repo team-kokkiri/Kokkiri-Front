@@ -38,6 +38,13 @@
         <button class="btn-findpw" type="submit">재설정 코드 전송하기</button>
       </form>
     </div>
+
+    <!-- Loading Modal -->
+    <LoadingModal
+      :visible="loadingModalState.visible"
+      :message="loadingModalState.message"
+      :sub-message="loadingModalState.subMessage"
+    />
   </div>
 </template>
 
@@ -45,12 +52,16 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
-import { toast } from 'vue3-toastify';
 import axios from '../../utils/axios';
+import LoadingModal from '@/components/common/LoadingModal.vue';
+import { useLoadingModal } from '@/composables/useModal.js';
 
 const email = ref('');
 const emailError = ref('');
 const router = useRouter();
+
+// Loading Modal 상태 관리
+const { loadingModalState, showLoadingModal, hideLoadingModal } = useLoadingModal();
 
 // 이메일 입력 시 에러 메시지 제거
 watch(email, () => {
@@ -69,6 +80,12 @@ const onFindPassword = async () => {
 
     if (emailError.value) return;
   try {
+    // Loading Modal 표시
+    showLoadingModal({
+      message: '인증 메일을 발송중입니다',
+      subMessage: '잠시만 기다려주세요!'
+    });
+
     await axios.post('/api/email/send', null, {
       params: {
         email: email.value,
@@ -76,12 +93,15 @@ const onFindPassword = async () => {
       }
     });
 
+    // 로딩 모달 숨기기
+    hideLoadingModal();
+
     // 성공 시 인증 코드 입력 페이지로 이동
-    toast.success('이메일로 재설정 코드가 전송되었습니다.');
-    setTimeout(() => {
-      router.push({ path: '/email-verify', query: { email: email.value, type: 'reset' } });
-    }, 1500);
+    router.push({ path: '/email-verify', query: { email: email.value, type: 'reset' } });
   } catch (err) {
+    // 에러 시 로딩 모달 숨기기
+    hideLoadingModal();
+    
     if (err.response?.status === 404) {
       emailError.value = '가입된 이메일이 아닙니다.';
     } else {

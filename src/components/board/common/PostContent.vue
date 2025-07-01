@@ -35,16 +35,24 @@ const fileUrls = computed(() =>
     <!-- 이미지 슬라이드 -->
     <div v-if="imageUrls.length" class="file-list">
       <VueperSlides
+          class="no-shadow"
           :arrows="true"
           :bullets="true"
           fixed-height="350px"
-          style="max-width: 600px; margin: 0 auto;"
+          style="max-width: 800px; height: 500px; margin: 0 auto;"
       >
         <VueperSlide
             v-for="(url, idx) in imageUrls"
             :key="idx"
-            :image="resolveImageUrl(url)"
-        />
+        >
+          <template #content>
+            <img
+                :src="resolveImageUrl(url)"
+                alt=""
+                class="slide-img-custom"
+            />
+          </template>
+        </VueperSlide>
       </VueperSlides>
     </div>
 
@@ -85,11 +93,8 @@ const fileUrls = computed(() =>
       margin-bottom: 10px;
 
       .file-image {
-        max-width: 100%;
-        max-height: 400px; /* or 원하는 높이 값 */
-        width: auto;
-        height: auto;
-        border-radius: 5px;
+        width: 100%;
+        height: 100%;
         object-fit: contain; /* 이미지 비율 유지하면서 박스에 맞게 조정 */
         display: block;
         margin: 10px auto; /* add vertical spacing */
@@ -139,4 +144,15 @@ const fileUrls = computed(() =>
   background-color: #fff !important;
   border: 2px solid #fff !important;
 }
+
+::v-deep .slide-img-custom {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000; /* 원하는 배경색 */
+  border-radius: 5px;
+  display: block;
+  margin: 0 auto;
+}
+
 </style>

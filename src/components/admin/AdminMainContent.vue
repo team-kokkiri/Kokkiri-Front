@@ -15,6 +15,13 @@
       @refresh="handleRefresh"
       @user-updated="handleUserUpdated"
     />
+    
+    <!-- 신고관리 뷰 -->
+    <AdminReports
+      v-else-if="activeMenu === 'reports'"
+      :is-loading="isLoading"
+      @refresh="handleRefresh"
+    />
   </div>
 </template>
 
@@ -22,6 +29,7 @@
 import { defineProps, defineEmits } from 'vue'
 import AdminDashboard from './AdminDashboard.vue'
 import AdminUsers from './AdminUsers.vue'
+import AdminReports from './AdminReports.vue'
 
 // ===== Props =====
 defineProps({

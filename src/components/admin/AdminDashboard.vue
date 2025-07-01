@@ -38,7 +38,7 @@ const statsCards = computed(() => [
     id: 'new-users',
     title: '신규 가입자 수',
     value: `${props.dashboardData.newUsers || 0}명`,
-    iconClass: 'bi bi-person-fill-add'
+    iconClass: 'bi bi-person-plus-fill'
   },
   {
     id: 'total-users', 
@@ -54,9 +54,9 @@ const statsCards = computed(() => [
   },
   {
     id: 'total-files',
-    title: '공유 자료 수',
+    title: '오늘 신고 건수',
     value: `${props.dashboardData.totalFiles || 0}개`,
-    iconClass: 'bi bi-file-earmark-arrow-down-fill'
+    iconClass: 'bi bi-bell-fill'
   }
 ])
 </script>
@@ -83,6 +83,11 @@ const statsCards = computed(() => [
   grid-template-columns: repeat(2, 1fr);
   width: 100%;
   height: 100%;
+}
+
+.stat-card:last-child .stat-icon {
+  background: white;
+  border: 1px solid $dim-gray;
 }
 
 .stat-card {
@@ -112,7 +117,12 @@ const statsCards = computed(() => [
       font-size: 60px;
       color: $main-color;
     }
+    .bi-bell-fill {
+      color: red;
+    }
   }
+
+
 
   .stat-info {
     .stat-title {

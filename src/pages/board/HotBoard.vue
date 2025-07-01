@@ -45,6 +45,7 @@ const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080'
 const boardConfig = {
   showBoardType: true,  // 게시판명 표시
   showPreview: true,    // 내용 미리보기 표시
+  showThumbnail: true,
   emptyMessage: 'HOT 게시물이 없습니다.',
   emptyDescription: '좋아요 10개 이상을 받은 게시물이 여기에 표시됩니다.'
 }
@@ -84,10 +85,18 @@ onMounted(async () => {
 const hasNextPage = computed(() => !isLastPage.value)
 
 // 게시글 상세로 이동하는 함수 - 각 게시판의 상세 페이지로 이동
-function goToDetail({ id, route, boardId }) {
-  const targetId = id || boardId
-  const targetRoute = route || 'free-board' // 기본값 설정
-  router.push(`/main-page/${targetRoute}/${targetId}`)
+function goToDetail({ id, boardType }) {
+  const routeMap = {
+    '자유게시판': 'free-board',
+    '공지사항': 'notice',
+    '자료공유 게시판': 'share-board',
+    '프로젝트 소개': 'project-board',
+    'HOT 게시판': 'hot-board'
+    // 필요시 추가
+  }
+
+  const targetRoute = routeMap[boardType?.trim()] || 'free-board'
+  router.push(`/main-page/${targetRoute}/${id}`)
 }
 
 // 페이지 이동

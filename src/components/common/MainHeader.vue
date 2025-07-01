@@ -31,7 +31,8 @@
                        :key="item.id"
                        @click="handleNotificationClick(item)"
                        :class="{ 'clickable': item.url && item.type !== 'invite' }">
-                    <div class="item-mark" :class="{ 'invite': item.type === 'invite' }"></div>
+                    <!-- 'invite' 타입일 때만 item-mark를 표시하도록 v-if 추가 -->
+                    <div v-if="item.type === 'invite'" class="item-mark invite"></div>
                     <div class="item-content">
                       <p class="message">{{ item.message }}</p>
                       <span class="datetime">{{ formatLocalDateTime(item.datetime) }}</span>
@@ -121,9 +122,26 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, defineProps, defineEmits } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
+
+const props = defineProps({
+  notifications: Array,
+  totalUnreadNotifications: Number,
+  isLoading: Boolean,
+  hasMore: Boolean,
+  hasNewChatMessage: Boolean,
+});
+
+const emit = defineEmits([
+  'deleteNotification',
+  'markAllAsRead',
+  'acceptInvitation',
+  'rejectInvitation',
+  'fetchMoreNotifications',
+  'markChatAsRead',
+]);
 
 const {
   notifications,
@@ -137,8 +155,10 @@ const {
   markAllAsRead,
   deleteNotification,
   acceptInvitation,
-  rejectInvitation
-} = useNotifications();
+  rejectInvitation,
+  handleNotificationClick,
+} = useNotifications(props, emit);
+
 
 const router = useRouter();
 const route = useRoute();
@@ -254,6 +274,7 @@ async function confirmMarkAllAsRead() {
   closeMarkAllAsReadModal();
 }
 
+// 삭제 관련 함수
 function handleDeleteClick(id) {
   notificationIdToDelete.value = id;
   showDeleteModal.value = true;
@@ -269,14 +290,6 @@ async function confirmDelete() {
   closeDeleteModal();
 }
 
-
-function handleNotificationClick(item) {
-  if (item.type === 'invite') return;
-  if (item.url) {
-    router.push(item.url);
-    showNotification.value = false;
-  }
-}
 
 let scrollHandler = null;
 
@@ -557,10 +570,9 @@ onBeforeUnmount(() => {
                 .item-mark {
                   width: 15px;
                   height: 70px;
-                  background: white;
+                  background: $orangered;
                   flex-shrink: 0;
                   border: none;
-                  &.invite { background: $orangered; }
                 }
 
                 .item-content {

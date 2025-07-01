@@ -173,6 +173,9 @@ async function loadMenuData(menuName) {
       case 'users':
         await loadUsersData()
         break
+      case 'reports':
+        // 신고 관리는 컴포넌트 내부에서 로드
+        break
       default:
         console.warn(`알 수 없는 메뉴: ${menuName}`)
     }

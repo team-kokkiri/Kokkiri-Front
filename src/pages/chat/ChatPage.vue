@@ -7,9 +7,10 @@
             :active-room-id="activeRoomId"
             :is-loading="isLoading"
             :has-more="hasMore"
+            @room-created="fetchChatRooms"
             @select="selectRoom"
-            @create="createRoom"
             @load-more="fetchMoreChatRooms"
+            @add-and-select-room="handleRoomCreation" 
         />
 
         <ChatUserList
@@ -21,6 +22,7 @@
             @back="closeUserListView"
             @search="handleUserListSearch"
             @load-more="fetchMoreMembers"
+            @navigate-to-room="handleNavigation"
         />
 
         <InviteView
@@ -40,6 +42,7 @@
             :input="input"
             :menu-open="menuOpen"
             :userCount="userCount"
+            :current-user-nickname="userStore.nickname"
             @update-input="updateInput"
             @send-message="sendMessage"
             @toggle-menu="toggleMenu"
@@ -61,11 +64,16 @@ import ChatUserList from '@/components/chat/ChatUserList.vue';
 
 // 유틸 및 라이브러리 임포트
 import Avatar from '@/assets/img/0.png';
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'; // ✨ watch 임포트 추가
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import SockJS from 'sockjs-client';
 import Stomp from 'webstomp-client';
 import axios from 'axios';
 import { onBeforeRouteLeave, useRoute } from 'vue-router';
+
+// --- 오류 해결을 위한 코드 추가 ---
+import { useUserStore } from '@/stores/user'; // 1. Pinia 스토어를 import 합니다.
+const userStore = useUserStore(); // 2. userStore 인스턴스를 생성합니다.
+// --------------------------------
 
 // ===== 상태(State) 관리 =====
 
@@ -108,11 +116,6 @@ const currentRoom = computed(() =>
     chatRooms.value.find(room => room.roomId === activeRoomId.value)
 );
 
-// ===== 함수 =====
-
-function createRoom() {
-  console.log("새 채팅방 생성 로직 구현 필요");
-}
 
 // 채팅방 멤버 목록 API 호출 함수
 async function fetchChatRoomMembers(roomId, query, pageNum) {
@@ -237,7 +240,7 @@ async function fetchChatRooms() {
     const newRooms = data.content.map(room => ({
       roomId: room.roomId, avatar: Avatar, roomName: room.roomName,
       lastMessageTime: room.lastMessageTime, lastMessage: room.lastMessage,
-      unReadCount: room.unReadCount, messages: []
+      unReadCount: room.unReadCount, messages: [], isGroupChat: room.isGroupChat, userCount: room.userCount
     }));
     chatRooms.value.push(...newRooms);
     hasMore.value = !data.last;
@@ -260,7 +263,7 @@ async function fetchMessageHistory(roomId) {
     const room = chatRooms.value.find(r => r.roomId === roomId);
     if (room) {
       room.messages = res.data.map(msg => ({
-        id: msg.id, avatar: Avatar, nickname: msg.senderEmail, time: msg.createdTime, text: msg.message
+        id: msg.id, avatar: Avatar, nickname: msg.nickname, time: msg.createdTime, text: msg.message
       }));
     }
   } catch (error) { console.error("메시지 내역 로딩 실패:", error); }
@@ -300,7 +303,7 @@ function sendMessage() {
 }
 
 function handleIncomingMessage(msg) {
-  const { roomId, senderEmail, message, createdTime } = msg;
+  const { roomId, senderEmail, message, createdTime, nickname } = msg;
   const chatIndex = chatRooms.value.findIndex(c => c.roomId === roomId);
   if (chatIndex !== -1) {
     const chat = chatRooms.value[chatIndex];
@@ -320,7 +323,7 @@ function handleIncomingMessage(msg) {
   }
   if (roomId === activeRoomId.value) {
     currentRoom.value.messages.push({
-      id: Date.now(), avatar: Avatar, nickname: senderEmail, time: createdTime, text: message
+      id: Date.now(), avatar: Avatar, nickname: nickname, email: senderEmail, time: createdTime, text: message
     });
   }
 }
@@ -360,6 +363,33 @@ function handleEscapeKey(event) {
 function closeInviteView() { showInviteView.value = false; inviteSearchQuery.value = ''; }
 function handleInviteSearch(query) { inviteSearchQuery.value = query; }
 function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
+
+function handleRoomCreation(newRoom) {
+  const roomExists = chatRooms.value.some(room => room.roomId === newRoom.roomId);
+  if (roomExists) {
+    selectRoom(newRoom.roomId);
+    return;
+  }
+  const roomToAdd = { ...newRoom, messages: [] };
+  chatRooms.value.unshift(roomToAdd);
+  if (stompClient.value?.connected) {
+    subscribeToRooms([roomToAdd]);
+  }
+  selectRoom(newRoom.roomId);
+}
+
+async function handleNavigation(roomId) {
+  try {
+    page.value = 0;
+    hasMore.value = true;
+    chatRooms.value = [];
+    await fetchChatRooms();
+    await selectRoom(roomId);
+    closeUserListView();
+  } catch (error) {
+    console.error("채팅방 이동에 실패했습니다:", error);
+  }
+}
 
 
 // ===== 생명주기 훅 =====

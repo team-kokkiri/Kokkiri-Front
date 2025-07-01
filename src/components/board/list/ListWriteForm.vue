@@ -56,9 +56,7 @@
       </div>
       <div class="form-footer">
         <div class="form-actions-left">
-          <button type="button" class="btn-upload-image" @click="handleImageUpload">
-            <i class="bi bi-image"></i>
-          </button>
+          <img src="@/assets/img/attach.png" alt="" @click="handleImageUpload">
           <input
             ref="fileInputRef"
             type="file"
@@ -89,7 +87,7 @@ import { ref, defineProps, defineEmits } from 'vue'
 
 // Props
 const props = defineProps({
-  boardType: {
+  boardTypeId: {
     type: Number,
     required: true
   }
@@ -152,6 +150,8 @@ function handleImageUpload() {
 }
 
 function onFileChange(event) {
+
+  console.log('📌 boardTypeId:', props.boardTypeId)
   const files = Array.from(event.target.files)
   if (!files.length) return
 
@@ -173,10 +173,9 @@ function onFileChange(event) {
 
   let filteredFiles = []
 
-  if (props.boardType === 1) {
+  if (props.boardTypeId === 1) {
     // 자유게시판: 이미지만
     filteredFiles = files.filter(file => allowedImageTypes.includes(file.type))
-
     if (filteredFiles.length === 0) {
       alert('이미지만 첨부할 수 있습니다.')
       return
@@ -309,20 +308,10 @@ function removeImage(index) {
         display: flex;
         gap: 8px;
 
-        .btn-upload-image {
-          display: flex;
-          align-items: center;
+        img {
           height: 40px;
           width: 40px;
-          border: none;
-          background: none;
-          padding: 10px;
           cursor: pointer;
-
-          .bi-image {
-            font-size: 20px;
-            color: $silver-black;
-          }
         }
       }
 

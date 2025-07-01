@@ -77,7 +77,7 @@ const fetchMainBoardData = async () => {
       },
       {
         id: 3,
-        title: 'BEST 게시판',
+        title: 'HOT 게시판',
         items: data.best.slice(0, 5).map(item => ({
           id: item.id,
           text: item.boardTitle,

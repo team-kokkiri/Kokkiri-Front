@@ -96,11 +96,6 @@ onMounted(async () => {
 const hasNextPage = computed(() => !isLastPage.value)
 
 // 게시글 상세로 이동하는 함수
-// function goToDetail({ id, boardId }) {
-//   const targetId = id || boardId
-//   router.push(`/main-page/share-board/${targetId}`)
-// }
-
 function goToDetail(item) {
   console.log('클릭된 게시글:', item)
   const targetId = item.id || item.boardId
