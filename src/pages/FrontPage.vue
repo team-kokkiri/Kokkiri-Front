@@ -18,14 +18,14 @@
             <div class="side-member-header">
               <span class="side-member-title">KOSA 소속 회원사</span>
               <div class="side-member-search">
-                <input type="text" placeholder="회원사 검색" />
+                <input type="text" placeholder="회원사 검색" v-model="companySearch" />
                 <i class="bi bi-search"></i>
               </div>
             </div>
             <div class="side-member-list">
               <a
                   class="side-member-item"
-                  v-for="(company, idx) in companyList"
+                  v-for="(company, idx) in filteredCompanyList"
                   :key="idx"
                   :href="company.url"
                   target="_blank" rel="noopener"
@@ -210,7 +210,7 @@ import { companyList } from '@/data/companyList'
 // 소개 아이템들 리스트 불러오기
 import platformFeatureList from '@/data/platformFeatureList'
 // 로고 애니메이션.
-import {ref, onMounted, onUnmounted, nextTick} from 'vue';
+import {ref, onMounted, onUnmounted, nextTick, computed} from 'vue'
 
 const isVisible = ref(false);
 const mascotRef = ref(null);
@@ -337,6 +337,15 @@ onMounted(async () => {
   setupPopupAnimations()
 })
 
+const companySearch = ref('')
+
+const filteredCompanyList = computed(() => {
+  if (!companySearch.value.trim()) return companyList // 검색 없으면 전체
+  return companyList.filter(company =>
+      company.name.toLowerCase().includes(companySearch.value.toLowerCase())
+  )
+})
+
 // 메모리 누수 방지: 컴포넌트 언마운트 시 모든 리소스 정리
 onUnmounted(() => {
   // 모든 IntersectionObserver 정리
@@ -351,6 +360,8 @@ onUnmounted(() => {
   })
   timers.length = 0
 })
+
+
 
 </script>
 
