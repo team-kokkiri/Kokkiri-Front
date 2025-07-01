@@ -70,35 +70,24 @@ import Stomp from 'webstomp-client';
 import axios from 'axios';
 import { onBeforeRouteLeave, useRoute } from 'vue-router';
 
-// --- 오류 해결을 위한 코드 추가 ---
-import { useUserStore } from '@/stores/user'; // 1. Pinia 스토어를 import 합니다.
-const userStore = useUserStore(); // 2. userStore 인스턴스를 생성합니다.
-// --------------------------------
+import { useUserStore } from '@/stores/user';
+const userStore = useUserStore();
 
 // ===== 상태(State) 관리 =====
 
-// 채팅방 및 메시지 관련
 const chatRooms = ref([]);
 const activeRoomId = ref(null);
 const input = ref('');
 const menuOpen = ref(false);
-
-// 채팅방 목록 페이징 관련
 const page = ref(0);
 const isLoading = ref(false);
 const hasMore = ref(true);
-
-// Stomp 및 인증 관련
 const stompClient = ref(null);
 const token = ref(null);
 const currentUserEmail = ref('');
-
-// 초대 관련
 const showInviteView = ref(false);
 const inviteSearchQuery = ref('');
 const invitedUserIds = ref([]);
-
-// 유저 목록 관련
 const showUserListView = ref(false);
 const roomUsers = ref([]);
 const userListSearchQuery = ref('');
@@ -206,7 +195,6 @@ async function selectRoom(roomId) {
     if (room.messages.length === 0) {
       await fetchMessageHistory(roomId);
     }
-    // 방을 선택할 때마다 멤버 수를 다시 불러옵니다.
     const memberData = await fetchChatRoomMembers(roomId, '', 0);
     if(memberData) userCount.value = memberData.totalElements;
   }
@@ -267,6 +255,32 @@ async function fetchMessageHistory(roomId) {
       }));
     }
   } catch (error) { console.error("메시지 내역 로딩 실패:", error); }
+}
+
+// --- 새로운 함수 추가 ---
+// 특정 채팅방 하나의 정보를 가져오는 함수
+async function fetchSingleRoom(roomId) {
+    try {
+        const response = await axios.get(`${VUE_APP_API_BASE_URL}/api/chat/room/${roomId}`, {
+            headers: { Authorization: `Bearer ${token.value}` }
+        });
+        const roomData = response.data;
+        // 목록의 다른 방들과 데이터 구조를 맞춰줍니다.
+        return {
+            roomId: roomData.roomId,
+            avatar: Avatar,
+            roomName: roomData.roomName,
+            lastMessageTime: roomData.lastMessageTime,
+            lastMessage: roomData.lastMessage,
+            unReadCount: roomData.unReadCount,
+            isGroupChat: roomData.isGroupChat,
+            userCount: roomData.userCount,
+            messages: []
+        };
+    } catch (error) {
+        console.error(`채팅방(${roomId}) 정보 조회 실패:`, error);
+        return null;
+    }
 }
 
 function subscribeToRooms(roomsToSubscribe) {
@@ -393,6 +407,7 @@ async function handleNavigation(roomId) {
 
 
 // ===== 생명주기 훅 =====
+// --- onMounted 로직 수정 ---
 onMounted(async () => {
   currentUserEmail.value = localStorage.getItem('email');
   token.value = localStorage.getItem('accessToken');
@@ -407,11 +422,22 @@ onMounted(async () => {
   const targetRoomId = route.query.roomId;
   if (targetRoomId) {
     const roomIdAsNumber = parseInt(targetRoomId, 10);
-    const roomExists = chatRooms.value.some(room => room.roomId === roomIdAsNumber);
+    let roomExists = chatRooms.value.some(room => room.roomId === roomIdAsNumber);
+    
+    // 만약 목록에 방이 없다면, 개별적으로 조회합니다.
+    if (!roomExists) {
+        console.log(`채팅방 ID(${roomIdAsNumber})가 목록에 없어 개별 조회합니다.`);
+        const newRoom = await fetchSingleRoom(roomIdAsNumber);
+        if (newRoom) {
+            chatRooms.value.unshift(newRoom); // 목록 맨 앞에 추가
+            roomExists = true;
+        }
+    }
+
     if (roomExists) {
       await selectRoom(roomIdAsNumber);
     } else {
-      console.warn(`URL의 채팅방 ID(${roomIdAsNumber})가 현재 사용자의 채팅 목록에 없습니다.`);
+      console.warn(`URL의 채팅방 ID(${roomIdAsNumber})를 찾을 수 없습니다.`);
     }
   }
 
