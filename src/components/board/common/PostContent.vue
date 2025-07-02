@@ -26,6 +26,12 @@ const imageUrls = computed(() =>
 const fileUrls = computed(() =>
     (props.post.fileUrls || []).filter(url => !isImage(url))
 )
+
+const formattedContent = computed(() =>
+  props.post.boardContent
+    ? props.post.boardContent.replace(/\n/g, '<br>')
+    : ''
+)
 </script>
 
 <template>
@@ -66,11 +72,7 @@ const fileUrls = computed(() =>
     </div>
 
     <!-- 본문 내용 -->
-    <div v-if="post.boardContent">
-      <p v-for="(line, idx) in post.boardContent.split('\n')" :key="idx" class="content">
-        {{ line }}
-      </p>
-    </div>
+    <div v-if="post.boardContent" class="content" v-html="formattedContent"></div>
   </div>
 </template>
 
@@ -120,10 +122,7 @@ const fileUrls = computed(() =>
     color: #686868;
     line-height: 1.2;
     margin: 0 0 8px 0;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+    white-space: normal; /* remove any pre-line since we now use <br> */
   }
 }
 // Vueper Slides 슬라이더 내부까지 강제로 적용
