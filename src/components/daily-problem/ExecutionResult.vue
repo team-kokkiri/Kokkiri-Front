@@ -5,6 +5,39 @@
     </div>
     
     <div v-else class="result-content">
+      <!-- 테스트케이스 결과 표시 -->
+      <div v-if="result.totalTestCases > 0" class="test-cases-summary">
+        <h4>테스트 결과: {{ result.passedTestCases }} / {{ result.totalTestCases }} 통과</h4>
+        <div class="test-case-list">
+          <div v-for="testCase in result.testCaseResults" :key="testCase.testCaseNum" 
+               class="test-case-item" :class="{ 'passed': testCase.passed, 'failed': !testCase.passed }">
+            <div class="test-case-header">
+              <span class="test-case-number">테스트 {{ testCase.testCaseNum }}</span>
+              <span class="test-case-status" :class="testCase.passed ? 'passed' : 'failed'">
+                {{ testCase.passed ? '통과' : '실패' }}
+              </span>
+            </div>
+            <div v-if="!testCase.passed && testCase.errorMessage" class="test-case-error">
+              {{ testCase.errorMessage }}
+            </div>
+            <div v-if="testCase.expectedOutput !== 'Hidden'" class="test-case-details">
+              <div class="expected-output">
+                <strong>예상 출력:</strong>
+                <pre>{{ testCase.expectedOutput }}</pre>
+              </div>
+              <div v-if="testCase.actualOutput" class="actual-output">
+                <strong>실제 출력:</strong>
+                <pre>{{ testCase.actualOutput }}</pre>
+              </div>
+            </div>
+            <div v-else class="hidden-test-case">
+              히든 테스트케이스
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 기존 상태 정보 -->
       <div v-if="result.status" class="status-info">
         <span class="status-badge" :class="statusClass">
           {{ getStatusText(result.status) }}
@@ -17,12 +50,12 @@
         </span>
       </div>
       
-      <div v-if="result.judgeResult" class="output-section">
+      <div v-if="result.judgeResult && !result.testCaseResults" class="output-section">
         <h4>출력:</h4>
         <pre class="output-content">{{ result.judgeResult }}</pre>
       </div>
       
-      <div v-if="result.errorMessage" class="error-section">
+      <div v-if="result.errorMessage && !result.testCaseResults" class="error-section">
         <h4>오류:</h4>
         <pre class="error-content">{{ result.errorMessage }}</pre>
       </div>
@@ -116,6 +149,107 @@ const formatMemory = (bytes) => {
   }
   
   .result-content {
+    .test-cases-summary {
+      margin-bottom: 15px;
+      
+      h4 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+      }
+      
+      .test-case-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        
+        .test-case-item {
+          border: 1px solid #e0e0e0;
+          border-radius: 4px;
+          padding: 10px;
+          background: #f9f9f9;
+          
+          &.passed {
+            border-color: #4caf50;
+            background: #f1f8f4;
+          }
+          
+          &.failed {
+            border-color: #f44336;
+            background: #fef1f1;
+          }
+          
+          .test-case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            
+            .test-case-number {
+              font-weight: 600;
+              font-size: 14px;
+            }
+            
+            .test-case-status {
+              font-size: 12px;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 3px;
+              
+              &.passed {
+                color: #2e7d32;
+                background: #c8e6c9;
+              }
+              
+              &.failed {
+                color: #c62828;
+                background: #ffcdd2;
+              }
+            }
+          }
+          
+          .test-case-error {
+            color: #c62828;
+            font-size: 12px;
+            margin: 5px 0;
+          }
+          
+          .test-case-details {
+            margin-top: 10px;
+            font-size: 12px;
+            
+            .expected-output,
+            .actual-output {
+              margin: 5px 0;
+              
+              strong {
+                display: block;
+                margin-bottom: 3px;
+              }
+              
+              pre {
+                margin: 0;
+                padding: 5px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+                font-family: 'Courier New', monospace;
+                white-space: pre-wrap;
+              }
+            }
+          }
+          
+          .hidden-test-case {
+            font-style: italic;
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+          }
+        }
+      }
+    }
+    
     .status-info {
       display: flex;
       gap: 15px;

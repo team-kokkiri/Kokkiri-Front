@@ -97,38 +97,29 @@
         </div>
       </div>
 
-      <!-- 히든 테스트 케이스 -->
+      <!-- 테스트 케이스 섹션 -->
       <div class="form-group">
         <div class="test-cases-section">
           <div class="test-cases-header">
-            <label class="form-label">히든 테스트 케이스 :</label>
-            <button
-              type="button"
-              @click="addTestCase"
-              class="add-test-case-btn"
-              :disabled="isLoading"
-            >
-              <i class="bi bi-plus-circle"></i>
-              추가
-            </button>
+            <label class="form-label">테스트 케이스 (3개 필수) :</label>
           </div>
           
           <div class="test-cases-list">
             <div
-              v-for="(testCase, index) in formData.hiddenTestCases"
+              v-for="(testCase, index) in formData.testCases"
               :key="index"
               class="test-case-item"
             >
               <div class="test-case-header">
                 <span class="test-case-number">테스트 케이스 {{ index + 1 }}</span>
-                <button
-                  type="button"
-                  @click="removeTestCase(index)"
-                  class="remove-test-case-btn"
-                  :disabled="isLoading"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
+                <label class="hidden-checkbox">
+                  <input
+                    type="checkbox"
+                    v-model="testCase.isHidden"
+                    :disabled="isLoading"
+                  />
+                  <span>히든</span>
+                </label>
               </div>
               
               <div class="test-case-content">
@@ -137,7 +128,7 @@
                   <textarea
                     v-model="testCase.input"
                     class="test-case-input"
-                    placeholder="입력 데이터 (없으면 비워두세요)"
+                    placeholder="입력 데이터"
                     :disabled="isLoading"
                   ></textarea>
                 </div>
@@ -153,10 +144,6 @@
                   ></textarea>
                 </div>
               </div>
-            </div>
-            
-            <div v-if="formData.hiddenTestCases.length === 0" class="empty-test-cases">
-              <p>히든 테스트 케이스가 없습니다. '추가' 버튼을 눌러 테스트 케이스를 추가하세요.</p>
             </div>
           </div>
         </div>
@@ -259,19 +246,30 @@ const formData = ref({
   outputDescription: '',
   sampleInput: '',
   sampleOutput: '',
-  hiddenTestCases: [],
+  testCases: [
+    { input: '', expectedOutput: '', isHidden: false },
+    { input: '', expectedOutput: '', isHidden: false },
+    { input: '', expectedOutput: '', isHidden: true }
+  ],
   timeLimit: 1000,
   memoryLimit: 128
 })
 
 // ===== Computed =====
 const isFormValid = computed(() => {
-  return formData.value.problemDate &&
+  // 기본 필드 검증
+  const basicValid = formData.value.problemDate &&
          formData.value.title.trim() &&
          formData.value.description.trim() &&
          formData.value.sampleOutput.trim() &&
          formData.value.timeLimit > 0 &&
          formData.value.memoryLimit > 0
+  
+  // 테스트케이스 검증 (3개 모두 예상 출력이 있어야 함)
+  const testCasesValid = formData.value.testCases.length === 3 &&
+    formData.value.testCases.every(tc => tc.expectedOutput && tc.expectedOutput.trim())
+  
+  return basicValid && testCasesValid
 })
 
 // ===== 폼 초기화 =====
@@ -286,7 +284,11 @@ function initializeForm() {
       outputDescription: props.problemData.outputDescription || '',
       sampleInput: props.problemData.sampleInput || '',
       sampleOutput: props.problemData.sampleOutput || '',
-      hiddenTestCases: parseHiddenTestCases(props.problemData.hiddenTestCases) || [],
+      testCases: props.problemData.testCases || [
+        { input: '', expectedOutput: '', isHidden: false },
+        { input: '', expectedOutput: '', isHidden: false },
+        { input: '', expectedOutput: '', isHidden: true }
+      ],
       timeLimit: props.problemData.timeLimit || 1000,
       memoryLimit: props.problemData.memoryLimit || 128
     }
@@ -301,43 +303,21 @@ function initializeForm() {
       outputDescription: '',
       sampleInput: '',
       sampleOutput: '',
-      hiddenTestCases: [],
+      testCases: [
+        { input: '', expectedOutput: '', isHidden: false },
+        { input: '', expectedOutput: '', isHidden: false },
+        { input: '', expectedOutput: '', isHidden: true }
+      ],
       timeLimit: 1000,
       memoryLimit: 128
     }
   }
 }
 
-// ===== 테스트 케이스 관리 =====
-function parseHiddenTestCases(hiddenTestCasesJson) {
-  if (!hiddenTestCasesJson) return []
-  
-  try {
-    const parsed = JSON.parse(hiddenTestCasesJson)
-    return Array.isArray(parsed) ? parsed : []
-  } catch (e) {
-    console.error('히든 테스트 케이스 파싱 오류:', e)
-    return []
-  }
-}
-
-function addTestCase() {
-  formData.value.hiddenTestCases.push({
-    input: '',
-    expectedOutput: ''
-  })
-}
-
-function removeTestCase(index) {
-  if (confirm('이 테스트 케이스를 삭제하시겠습니까?')) {
-    formData.value.hiddenTestCases.splice(index, 1)
-  }
-}
-
 // ===== 이벤트 핸들러 =====
 function handleSubmit() {
   if (!isFormValid.value) {
-    alert('모든 필수 항목을 입력해주세요.')
+    alert('모든 필수 항목을 입력해주세요.\n테스트케이스 3개의 예상 출력은 필수입니다.')
     return
   }
 
@@ -349,7 +329,12 @@ function handleSubmit() {
     sampleInput: formData.value.sampleInput.trim(),
     sampleOutput: formData.value.sampleOutput.trim(),
     timeLimit: Number(formData.value.timeLimit),
-    memoryLimit: Number(formData.value.memoryLimit)
+    memoryLimit: Number(formData.value.memoryLimit),
+    testCases: formData.value.testCases.map(tc => ({
+      input: tc.input || '',
+      expectedOutput: tc.expectedOutput.trim(),
+      isHidden: tc.isHidden || false
+    }))
   }
   
   // inputDescription과 outputDescription이 비어있지 않으면 추가
@@ -358,18 +343,6 @@ function handleSubmit() {
   }
   if (formData.value.outputDescription?.trim()) {
     submitData.outputDescription = formData.value.outputDescription.trim()
-  }
-  
-  // 히든 테스트 케이스 추가 (비어있지 않은 경우만)
-  const validTestCases = formData.value.hiddenTestCases.filter(tc => 
-    tc.expectedOutput && tc.expectedOutput.trim()
-  )
-  
-  if (validTestCases.length > 0) {
-    submitData.hiddenTestCases = validTestCases.map(tc => ({
-      input: tc.input || '',
-      expectedOutput: tc.expectedOutput.trim()
-    }))
   }
 
   emit('save', submitData)
@@ -392,15 +365,10 @@ function hasChanges() {
            formData.value.outputDescription.trim() ||
            formData.value.sampleInput.trim() ||
            formData.value.sampleOutput.trim() ||
-           formData.value.hiddenTestCases.length > 0
+           formData.value.testCases.some(tc => tc.input || tc.expectedOutput)
   }
   
   if (props.mode === 'edit' && props.problemData) {
-    const originalTestCases = parseHiddenTestCases(props.problemData.hiddenTestCases)
-    const currentTestCases = formData.value.hiddenTestCases
-    
-    const testCasesChanged = JSON.stringify(originalTestCases) !== JSON.stringify(currentTestCases)
-    
     return formData.value.title !== props.problemData.title ||
            formData.value.description !== props.problemData.description ||
            formData.value.inputDescription !== (props.problemData.inputDescription || '') ||
@@ -409,7 +377,7 @@ function hasChanges() {
            formData.value.sampleOutput !== props.problemData.sampleOutput ||
            formData.value.timeLimit !== props.problemData.timeLimit ||
            formData.value.memoryLimit !== props.problemData.memoryLimit ||
-           testCasesChanged
+           JSON.stringify(formData.value.testCases) !== JSON.stringify(props.problemData.testCases || [])
   }
   
   return false
@@ -549,16 +517,13 @@ onMounted(() => {
   }
 }
 
-// 히든 테스트 케이스 스타일
+// 테스트 케이스 스타일
 .test-cases-section {
   padding: 20px;
   border-bottom: 1px solid $dim-gray;
   background: $white;
 
   .test-cases-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 15px;
 
     .form-label {
@@ -568,35 +533,6 @@ onMounted(() => {
       line-height: 1.252;
       color: $dark-black;
       margin: 0;
-    }
-
-    .add-test-case-btn {
-      background: $main-color;
-      color: $white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-family: $secondary-kr;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-
-      &:hover:not(:disabled) {
-        background: darken($main-color, 10%);
-        transform: translateY(-1px);
-      }
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-
-      i {
-        font-size: 16px;
-      }
     }
   }
 
@@ -621,23 +557,20 @@ onMounted(() => {
           color: $dark-black;
         }
 
-        .remove-test-case-btn {
-          background: #dc3545;
-          color: $white;
-          border: none;
-          border-radius: 4px;
-          padding: 6px 10px;
+        .hidden-checkbox {
+          display: flex;
+          align-items: center;
+          gap: 6px;
           cursor: pointer;
-          font-size: 14px;
-          transition: all 0.2s ease;
 
-          &:hover:not(:disabled) {
-            background: darken(#dc3545, 10%);
+          input[type="checkbox"] {
+            cursor: pointer;
           }
 
-          &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+          span {
+            font-family: $secondary-kr;
+            font-size: 14px;
+            color: $dark-black;
           }
         }
       }
@@ -687,22 +620,6 @@ onMounted(() => {
             }
           }
         }
-      }
-    }
-
-    .empty-test-cases {
-      text-align: center;
-      padding: 30px 20px;
-      color: $silver-black;
-      background: $silver-gray;
-      border: 1px dashed $dim-gray;
-      border-radius: 8px;
-
-      p {
-        margin: 0;
-        font-family: $secondary-kr;
-        font-size: 14px;
-        line-height: 1.4;
       }
     }
   }
@@ -768,5 +685,4 @@ onMounted(() => {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-
 </style>
