@@ -5,55 +5,79 @@
       <div class="modal-icon">
         <div class="icon-placeholder"></div>
       </div>
-      
+
       <!-- 제목 영역 -->
       <div class="modal-title">
         {{ modalTitle }}
       </div>
-      
-      <!-- 폼 영역 -->
+
+      <!-- ...중략... -->
       <div class="form-section">
         <!-- 일정 제목 -->
         <div class="form-group">
           <label class="form-label"><span>제목 :</span></label>
-          <input 
-            v-model="formData.title"
-            type="text" 
-            class="form-input"
-            placeholder="일정 제목을 입력하세요"
-            ref="titleInput"
-          >
+          <template v-if="isEditMode">
+            <input
+                v-model="formData.title"
+                type="text"
+                class="form-input"
+                placeholder="일정 제목을 입력하세요"
+                ref="titleInput"
+            >
+          </template>
+          <template v-else>
+            <div class="form-label-content">{{ props.eventData.title }}</div>
+          </template>
         </div>
-        
+
         <!-- 일정 내용 -->
         <div class="form-group">
           <label class="form-label-content"><span>내용 :</span></label>
-          <textarea 
-            v-model="formData.description"
-            class="form-textarea"
-            placeholder="일정 내용을 입력하세요"
-            rows="4"
-          ></textarea>
+          <template v-if="isEditMode">
+      <textarea
+          v-model="formData.description"
+          class="form-textarea"
+          placeholder="일정 내용을 입력하세요"
+          rows="4"
+      ></textarea>
+          </template>
+          <template v-else>
+            <div class="form-label-content" style="white-space: pre-line;">{{ props.eventData.description }}</div>
+          </template>
         </div>
       </div>
-      
+
+      <!-- 버튼 영역은 위에 안내한 대로만 바꿔줘! -->
+
+
       <!-- 버튼 영역 -->
       <div class="button-section">
-        <button 
-          type="button" 
-          class="btn btn-register"
-          @click="handleSubmit"
-        >
-          {{ isEditMode ? '수정' : '등록' }}
-        </button>
-        <button 
-          type="button" 
-          :class="['btn', 'btn-delete', { disabled: !isEditMode }]"
-          @click="handleDelete"
-          :disabled="!isEditMode"
-        >
-          삭제
-        </button>
+        <template v-if="isEditMode">
+          <button
+              type="button"
+              class="btn btn-register"
+              @click="handleSubmit"
+          >
+            {{ selectedEventIsNull ? '등록' : '수정' }}
+          </button>
+          <button
+              type="button"
+              :class="['btn', 'btn-delete', { disabled: !isEditMode }]"
+              @click="handleDelete"
+              :disabled="!isEditMode"
+          >
+            삭제
+          </button>
+        </template>
+        <template v-else>
+          <button
+              type="button"
+              class="btn btn-register"
+              @click="handleBackdropClick"
+          >
+            닫기
+          </button>
+        </template>
       </div>
     </div>
   </div>
@@ -121,6 +145,8 @@ watch(() => props.isVisible, (visible) => {
   }
 })
 
+const selectedEventIsNull = computed(() => props.eventData && !props.eventData.id)
+
 // Methods
 const handleBackdropClick = () => {
   emit('close')
@@ -131,7 +157,7 @@ const handleSubmit = () => {
     alert('제목을 입력해주세요!')
     return
   }
-  
+
   emit('submit', {
     title: formData.value.title.trim(),
     description: formData.value.description.trim()
@@ -140,7 +166,7 @@ const handleSubmit = () => {
 
 const handleDelete = () => {
   if (!props.isEditMode) return
-  
+
   if (confirm('정말 삭제하시겠습니까?')) {
     emit('delete')
   }
