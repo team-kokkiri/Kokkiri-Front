@@ -170,6 +170,15 @@ function handleSubmit() {
     return
   }
 
+  // 조건 먼저 검사
+  const hasImageInExisting = existingImages.value.some(file => isImageFile(file.fileUrl || file))
+  const hasImageInNew = formData.value.attachedImages.some(file => isImageFileType(file.type))
+
+  if (props.boardTypeId === 5 && !hasImageInExisting && !hasImageInNew) {
+    alert('프로젝트 소개 게시판은 이미지 1개 이상 첨부해야 합니다.')
+    return
+  }
+
   // 글 수정 확인 모달 표시
   showEditConfirmModal.value = true
 }
