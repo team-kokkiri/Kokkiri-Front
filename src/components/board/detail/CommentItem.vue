@@ -7,12 +7,12 @@
         <span class="nickname">{{ comment.memberNickname }}</span>
       </div>
       <div class="comment-actions">
+        <!-- 대댓글: 이미 처리되어있음. 수정할필요 없음 -->
+        <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
         <!-- 수정: 작성한 본인만 보여지게 -->
         <button v-if="isOwner" class="btn-edit" @click="$emit('edit', comment)">수정</button>
         <!-- 삭제: 작성한 본인과 관리자한테 보여지게 -->
         <button v-if="isOwner || userStore.isAdmin" class="btn-delete" @click="$emit('delete', comment)">삭제</button>
-        <!-- 대댓글: 이미 처리되어있음. 수정할필요 없음 -->
-        <button class="btn-reply" @click="$emit('reply', comment)">대댓글</button>
         <!-- 공감: 본인이 작성한 거는 안보여지게 (남이 작성한 거에만 보여지게) -->
         <button v-if="!isOwner" class="btn-like" @click="$emit('like', comment)">공감</button>
         <!-- 채팅: 본인이 작성한 거는 안보여지게 (남이 작성한 거에만 보여지게) -->

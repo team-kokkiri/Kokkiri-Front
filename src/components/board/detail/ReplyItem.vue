@@ -26,6 +26,17 @@
     </div>
 
     <!-- 대댓글 메타 정보 -->
+    <div class="comment-meta">
+      <span class="date">{{ formatDate(reply.commentCreatedAt) }}</span>
+      <span class="comment-likes" v-if="reply.likeCount > 0">
+        <i
+          :class="reply.liked ? 'bi bi-hand-thumbs-up-fill' : 'bi bi-hand-thumbs-up'"
+        ></i>
+        <span class="like-count">{{ reply.likeCount }}</span>
+      </span>
+    </div>
+
+    <!-- 중첩 대댓글 리스트 -->
     <ReplyList
       v-if="replies.some(r => r.parentId === reply.id)"
       :replies="replies"
@@ -190,6 +201,13 @@ async function startPrivateChat() {
 const handleCloseEdit = () => {
   console.log('EditForm close event received') // 디버깅용
   emit('close-edit')
+}
+
+// 날짜 포맷터
+function formatDate(str) {
+  if (!str) return ''
+  const d = new Date(str)
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
 // ----------- 신고 기능 관련 -----------
