@@ -139,6 +139,7 @@ onMounted(() => {
       questionYn: props.post.questionYn || false,
       attachedImages: []
     }
+    console.log(props.post)
     
     // 기존 이미지 설정 - files 배열이 있으면 사용, 없으면 fileUrls 사용
     if (props.post.files && props.post.files.length > 0) {
