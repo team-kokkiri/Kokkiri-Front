@@ -10,12 +10,12 @@ import pinia from './stores';
 const app = createApp(App)
 
 app.use(router)
-   .use(Vue3Toastify, {
-       position: "top-center",
-       autoClose: 2000,
-       icon: false,
-   })
-   .use(pinia)
+    .use(Vue3Toastify, {
+        position: "top-center",
+        autoClose: 2000,
+        icon: false,
+    })
+    .use(pinia)
 
 // 앱 마운트
 app.mount('#app')

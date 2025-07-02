@@ -1,7 +1,8 @@
 <script setup>
-import { defineProps, computed } from 'vue'
+import { defineProps, computed, ref, watch } from 'vue'
 import { VueperSlides, VueperSlide } from 'vueperslides'
 import 'vueperslides/dist/vueperslides.css'
+import VueEasyLightbox from 'vue-easy-lightbox'
 
 const props = defineProps({
   post: {
@@ -32,6 +33,32 @@ const formattedContent = computed(() =>
     ? props.post.boardContent.replace(/\n/g, '<br>')
     : ''
 )
+
+// 이미지 클릭시 확대
+const showViewer = ref(false)
+const currentImageIndex = ref(0)
+const imageList = computed(() => imageUrls.value.map(resolveImageUrl))
+
+function openViewer(index) {
+  currentImageIndex.value = index
+  showViewer.value = true
+}
+
+// VueEasyLightbox 뷰어가 열릴 때 툴바 배경을 투명하게 만들고 하단 버튼들을 숨김 처리함
+// 라이브러리 내부 스타일이 강제 적용되어 있어, DOM 렌더링 이후 직접 수정 필요
+watch(showViewer, (visible) => {
+  if (visible) {
+    setTimeout(() => {
+      const toolbar = document.querySelector('.vel-toolbar')
+      if (toolbar) {
+        toolbar.style.backgroundColor = 'transparent'
+        // 하단 툴바 버튼 제거
+        const toolbarBtns = document.querySelectorAll('.vel-toolbar .toolbar-btn');
+        toolbarBtns.forEach(btn => btn.style.display = 'none');
+      }
+    }, 100) // 약간의 렌더링 대기 시간
+  }
+})
 </script>
 
 <template>
@@ -56,10 +83,21 @@ const formattedContent = computed(() =>
                 :src="resolveImageUrl(url)"
                 alt=""
                 class="slide-img-custom"
+                @click="openViewer(idx)"
+                style="cursor: zoom-in"
             />
           </template>
         </VueperSlide>
       </VueperSlides>
+
+      <!-- 라이트박스 확대 보기 -->
+      <VueEasyLightbox
+        :visible="showViewer"
+        :imgs="imageList"
+        :index="currentImageIndex"
+        @hide="showViewer = false"
+      />
+
     </div>
 
     <!-- 이미지가 아닌 파일 링크 -->
@@ -145,10 +183,15 @@ const formattedContent = computed(() =>
 }
 
 ::v-deep .slide-img-custom {
-  width: 100%;
-  height: 100%;
+  // width: 100%;
+  // height: 100%;
+  // object-fit: cover;
+  // background: transparent; /* 원하는 배경색 */
+  max-width: 100%;
+  max-height: 500px;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  background: #000; /* 원하는 배경색 */
   border-radius: 5px;
   display: block;
   margin: 0 auto;
