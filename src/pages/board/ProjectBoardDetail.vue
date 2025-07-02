@@ -3,6 +3,7 @@
   <PostEditForm 
     v-if="postEditVisible && post"
     :post="post"
+    :boardTypeId="post.boardTypeId"
     @submit="onSubmitEdit"
     @cancel="onCancelEdit"
   />
@@ -104,6 +105,7 @@ const fetchPost = async () => {
       }
     })
     post.value = res.data
+    console.log('📌 게시글 API 응답:', res.data)
   } catch (err) {
     console.error('게시글 조회 실패', err)
     post.value = null

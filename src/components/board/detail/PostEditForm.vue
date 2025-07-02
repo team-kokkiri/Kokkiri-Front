@@ -60,7 +60,7 @@
             ref="fileInputRef"
             type="file"
             multiple
-            accept="image/*"
+            :accept="fileAccept"
             style="display: none"
             @change="onFileChange"
           />
@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, onMounted } from 'vue'
+import { ref, defineProps, defineEmits, onMounted, computed } from 'vue'
 import EditConfirmModal from '@/components/common/modal/EditConfirmModal.vue'
 
 // Props
@@ -101,7 +101,7 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  boardType: {
+  boardTypeId: {
     type: Number,
     default: 1 // 기본값은 자유게시판
   }
@@ -130,6 +130,11 @@ const showEditConfirmModal = ref(false)
 // 파일 입력 참조
 const fileInputRef = ref(null)
 
+// 스크립트 setup 내부에 추가
+const fileAccept = computed(() => {
+  return props.boardTypeId === 1 ? 'image/*' : ''  // 자유게시판(1)만 이미지 제한
+})
+
 // 컴포넌트 마운트시 기존 게시글 데이터로 폼 초기화
 onMounted(() => {
   if (props.post) {
@@ -146,7 +151,14 @@ onMounted(() => {
       existingImages.value = [...props.post.files]
     } else if (props.post.fileUrls && props.post.fileUrls.length > 0) {
       // 기존 fileUrls만 있는 경우 (호환성)
-      existingImages.value = props.post.fileUrls.map(url => ({ fileUrl: url }))
+      // existingImages.value = props.post.fileUrls.map(url => ({ fileUrl: url }))
+            
+      // 바꾼거
+      existingImages.value = props.post.fileUrls.map(url => ({
+        id: null,
+        fileUrl: url
+      }))
+
     }
   }
 })
@@ -172,7 +184,14 @@ function confirmEdit() {
     questionYn: formData.value.questionYn,
     attachedImages: formData.value.attachedImages, // 새로 추가된 이미지
     existingImages: existingImages.value, // 남아있는 기존 이미지
-    deletedImages: deletedImages.value // 삭제된 기존 이미지
+    
+    // deletedImages: deletedImages.value // 삭제된 기존 이미지
+
+    // 바꾼거
+    deletedImages: deletedImages.value, // 삭제된 기존 이미지
+    keepFileIds: existingImages.value
+      .filter(file => file.id != null)
+      .map(file => file.id)
   })
   
   showEditConfirmModal.value = false
@@ -277,12 +296,12 @@ function getFileName(file) {
 function getBoardTypeName() {
   const boardTypeNames = {
     1: '자유게시판',
-    2: '자료공유',
+    2: '자료공유 게시판',
     3: 'BEST',
     4: '공지사항',
     5: '프로젝트 소개'
   }
-  return boardTypeNames[props.boardType] || '게시판'
+  return boardTypeNames[props.boardTypeId] || '게시판'
 }
 </script>
 
