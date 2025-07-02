@@ -3,15 +3,11 @@
     <div class="user-avatar">
       <div class="avatar-circle">
         <img
-            v-if="user.profileImage || user.avatar"
             :src="getProfileImageUrl(user.avatar || user.profileImage)"
             :alt="`${user.name} 프로필`"
             class="avatar-image"
             @error="handleImageError"
         />
-        <div v-else class="avatar-placeholder">
-          {{ getInitials(user.name) }}
-        </div>
       </div>
     </div>
 
@@ -75,16 +71,6 @@ const isValidUser = computed(() => {
 })
 
 // ===== 유틸리티 함수 (SRP) =====
-function getInitials(name) {
-  if (!name || typeof name !== 'string') return '?'
-
-  const words = name.trim().split(' ')
-  if (words.length === 1) {
-    return name.charAt(0).toUpperCase()
-  }
-  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
-}
-
 function getRoleText(role) {
   const roleMap = {
     'admin': '관리자',
@@ -169,13 +155,6 @@ async function handleManage() {
         width: 100%;
         height: 100%;
         object-fit: cover;
-      }
-
-      .avatar-placeholder {
-        font-family: $secondary-kr;
-        font-weight: 600;
-        font-size: 24px;
-        color: $dark-black;
       }
     }
   }
