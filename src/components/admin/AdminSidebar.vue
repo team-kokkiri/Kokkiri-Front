@@ -36,6 +36,7 @@ const menuItems = [
   { id: 'dashboard', label: '대시보드' },
   { id: 'users', label: '회원관리' },
   { id: 'reports', label: '신고관리' },
+  { id: 'problems', label: '일일문제관리' },
 ]
 
 // ===== 이벤트 핸들러 =====
