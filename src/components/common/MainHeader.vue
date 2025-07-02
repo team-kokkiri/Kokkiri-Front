@@ -125,6 +125,7 @@
 import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, defineProps, defineEmits } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
+import { useUserStore } from '@/stores/user';
 
 const props = defineProps({
   notifications: Array,
@@ -162,6 +163,7 @@ const {
 
 const router = useRouter();
 const route = useRoute();
+const userStore = useUserStore();
 const showNotification = ref(false);
 const notificationRef = ref(null);
 const notificationListRef = ref(null);
@@ -191,14 +193,30 @@ const rejectionRoomName = computed(() => {
   return match && match[1] ? match[1] : '해당';
 });
 
-const menuList = [
-  { name: '게시판', path: '' }, { name: '캘린더', path: '/calendar' }, { name: '일일문제', path: '/daily-problem' }, { name: '순위', path: '/daily-ranking' },
-  { name: '공지사항', path: '/notice' }, { name: '관리자페이지', path: '/admin' }
+// 기본 메뉴 리스트
+const baseMenuList = [
+  { name: '게시판', path: '' }, 
+  { name: '캘린더', path: '/calendar' }, 
+  { name: '일일문제', path: '/daily-problem' }, 
+  { name: '순위', path: '/daily-ranking' },
+  { name: '공지사항', path: '/notice' }
 ];
+
+// 관리자 메뉴
+const adminMenu = { name: '관리자페이지', path: '/admin' };
+
+// 사용자 권한에 따른 동적 메뉴 리스트
+const menuList = computed(() => {
+  const menus = [...baseMenuList];
+  if (userStore.isAdmin) {
+    menus.push(adminMenu);
+  }
+  return menus;
+});
 
 const activeMenu = ref('게시판');
 watch(() => route.path, (newPath) => {
-    const found = menuList.find(menu => `/main-page${menu.path}` === newPath);
+    const found = menuList.value.find(menu => `/main-page${menu.path}` === newPath);
     if (found) activeMenu.value = found.name;
 }, { immediate: true });
 
