@@ -47,11 +47,19 @@
             @send-message="sendMessage"
             @toggle-menu="toggleMenu"
             @open-invite="openInvite"
-            @leave-room="handleLeaveRoom"
+            @leave-room="handleShowExitModal"
             @open-user-list="openList"
         />
       </div>
     </section>
+
+    <!-- 채팅방 나가기 모달 -->
+    <ChatExitModal
+        :visible="showExitModalVisible"
+        @confirm="confirmLeaveRoom"
+        @cancel="cancelLeaveRoom"
+        @close="cancelLeaveRoom"
+    />
   </div>
 </template>
 
@@ -61,6 +69,7 @@ import ChatSidebar from '@/components/chat/ChatSidebar.vue';
 import InviteView from '@/components/chat/InviteView.vue';
 import ChatMainArea from '@/components/chat/ChatMainArea.vue';
 import ChatUserList from '@/components/chat/ChatUserList.vue';
+import ChatExitModal from '@/components/common/modal/ChatExitModal.vue';
 
 // 유틸 및 라이브러리 임포트
 import Avatar from '@/assets/img/0.png';
@@ -95,6 +104,7 @@ const userCount = ref(0);
 const memberPage = ref(0);
 const isMemberLoading = ref(false);
 const hasMoreMembers = ref(true);
+const showExitModalVisible = ref(false);
 let searchDebounceTimer = null;
 
 const route = useRoute();
@@ -195,12 +205,33 @@ async function selectRoom(roomId) {
     if (room.messages.length === 0) {
       await fetchMessageHistory(roomId);
     }
-    const memberData = await fetchChatRoomMembers(roomId, '', 0);
-    if(memberData) userCount.value = memberData.totalElements;
+    
+    // 그룹 채팅인 경우에만 멤버 수 정보를 가져옵니다
+    if (room.isGroupChat === 'Y') {
+      const memberData = await fetchChatRoomMembers(roomId, '', 0);
+      if(memberData) {
+        userCount.value = memberData.totalElements;
+        // 방 정보에도 업데이트
+        room.userCount = memberData.totalElements;
+      }
+    }
+  } else {
+    console.warn(`채팅방 ID(${roomId})을 찾을 수 없습니다.`);
   }
 }
 
-async function handleLeaveRoom() {
+// 채팅방 나가기 모달 열기
+function handleShowExitModal() {
+  if (!activeRoomId.value) {
+    alert("나갈 채팅방을 먼저 선택해주세요.");
+    return;
+  }
+  showExitModalVisible.value = true;
+  menuOpen.value = false; // 메뉴 닫기
+}
+
+// 채팅방 나가기 확인
+async function confirmLeaveRoom() {
   if (!activeRoomId.value) return;
   
   try {
@@ -210,10 +241,17 @@ async function handleLeaveRoom() {
     const leftRoomId = activeRoomId.value;
     chatRooms.value = chatRooms.value.filter(room => room.roomId !== leftRoomId);
     activeRoomId.value = null;
+    showExitModalVisible.value = false;
   } catch (error) {
     console.error("채팅방 나가기 실패:", error);
     alert("채팅방을 나가는 데 실패했습니다.");
+    showExitModalVisible.value = false;
   }
+}
+
+// 채팅방 나가기 취소
+function cancelLeaveRoom() {
+  showExitModalVisible.value = false;
 }
 
 async function fetchChatRooms() {
@@ -388,16 +426,37 @@ function handleInviteSearch(query) { inviteSearchQuery.value = query; }
 function handleUserInvite(user) { invitedUserIds.value.push(user.memberId); }
 
 function handleRoomCreation(newRoom) {
+  console.log('하이 채팅방 생성 데이터:', newRoom); // 디버깅 로그
+  
   const roomExists = chatRooms.value.some(room => room.roomId === newRoom.roomId);
   if (roomExists) {
     selectRoom(newRoom.roomId);
     return;
   }
-  const roomToAdd = { ...newRoom, messages: [] };
-  chatRooms.value.unshift(roomToAdd);
+  
+  // 새로운 방의 기본 정보를 사용하되, 필수 필드를 보장합니다
+  const roomToAdd = { 
+    ...newRoom, 
+    messages: [],
+    isGroupChat: newRoom.isGroupChat || 'Y', // 기본값 설정
+    userCount: newRoom.userCount || 1, // 기본값 설정
+    avatar: Avatar, // 기본 아바타 추가
+    lastMessage: '', // 기본 마지막 메시지
+    lastMessageTime: new Date().toISOString(), // 현재 시간
+    unReadCount: 0 // 읽지 않은 메시지 수
+  };
+  
+  console.log('채팅방 목록에 추가할 데이터:', roomToAdd); // 디버깅 로그
+  
+  // 반응성을 보장하기 위해 새 배열로 교체
+  chatRooms.value = [roomToAdd, ...chatRooms.value];
+  
+  console.log('업데이트된 채팅방 목록:', chatRooms.value); // 디버깅 로그
+  
   if (stompClient.value?.connected) {
     subscribeToRooms([roomToAdd]);
   }
+  
   selectRoom(newRoom.roomId);
 }
 

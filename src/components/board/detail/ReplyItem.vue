@@ -7,11 +7,16 @@
         <span class="nickname">{{ reply.memberNickname }}</span>
       </div>
       <div class="comment-actions">
-        <button class="btn-edit" @click="$emit('edit', reply)">수정</button>
-        <button class="btn-delete" @click="$emit('delete', reply)">삭제</button>
-        <button class="btn-like" @click="$emit('like', reply)">공감</button>
-        <button class="btn-chat" @click="openChatModal">채팅</button>
-        <button class="btn-report" @click="openReportModal">신고</button>
+        <!-- 수정: 작성한 본인만 보여지게 -->
+        <button v-if="isOwner" class="btn-edit" @click="$emit('edit', reply)">수정</button>
+        <!-- 삭제: 작성한 본인과 관리자한테 보여지게 -->
+        <button v-if="isOwner || userStore.isAdmin" class="btn-delete" @click="$emit('delete', reply)">삭제</button>
+        <!-- 공감: 본인이 작성한 거는 안보여지게 (남이 작성한 거에만 보여지게) -->
+        <button v-if="!isOwner" class="btn-like" @click="$emit('like', reply)">공감</button>
+        <!-- 채팅: 본인이 작성한 거는 안보여지게 (남이 작성한 거에만 보여지게) -->
+        <button v-if="!isOwner" class="btn-chat" @click="openChatModal">채팅</button>
+        <!-- 신고: 본인이 작성한 거는 안보여지게 (남이 작성한 거에만 보여지게) -->
+        <button v-if="!isOwner" class="btn-report" @click="openReportModal">신고</button>
       </div>
     </div>
 
@@ -21,6 +26,17 @@
     </div>
 
     <!-- 대댓글 메타 정보 -->
+    <div class="comment-meta">
+      <span class="date">{{ formatDate(reply.commentCreatedAt) }}</span>
+      <span class="comment-likes" v-if="reply.likeCount > 0">
+        <i
+          :class="reply.liked ? 'bi bi-hand-thumbs-up-fill' : 'bi bi-hand-thumbs-up'"
+        ></i>
+        <span class="like-count">{{ reply.likeCount }}</span>
+      </span>
+    </div>
+
+    <!-- 중첩 대댓글 리스트 -->
     <ReplyList
       v-if="replies.some(r => r.parentId === reply.id)"
       :replies="replies"
@@ -64,7 +80,7 @@
 
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits, computed } from 'vue'
 import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 import EditForm from './EditForm.vue'
 import ReplyList from './ReplyList.vue'
@@ -105,6 +121,16 @@ const emit = defineEmits([
 const router = useRouter();
 const userStore = useUserStore();
 const isChatModalOpen = ref(false);
+
+// 작성자인지 확인하는 computed
+const isOwner = computed(() => {
+  // memberId로 비교 (숫자 비교)
+  if (props.reply.memberId && userStore.id) {
+    return props.reply.memberId === userStore.id
+  }
+  // nickname으로 비교 (fallback)
+  return props.reply.memberNickname === userStore.nickname
+})
 
 // 모달 열기 함수 (디버깅 코드 추가)
 function openChatModal() {
@@ -175,6 +201,13 @@ async function startPrivateChat() {
 const handleCloseEdit = () => {
   console.log('EditForm close event received') // 디버깅용
   emit('close-edit')
+}
+
+// 날짜 포맷터
+function formatDate(str) {
+  if (!str) return ''
+  const d = new Date(str)
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
 // ----------- 신고 기능 관련 -----------

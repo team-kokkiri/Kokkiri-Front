@@ -17,14 +17,12 @@
         class="board-free-form"
         v-if="showWriteForm"
         @submit.prevent="handleSubmit"
-        @focusin="onFormFocus"
-        @focusout="onFormBlur"
         tabindex="0"
     >
       <div class="form-title">
-        <input 
-            type="text" 
-            class="input-title" 
+        <input
+            type="text"
+            class="input-title"
             placeholder="제목을 입력하세요"
             v-model="formData.boardTitle"
         />
@@ -38,37 +36,54 @@
         </button>
       </div>
       <div class="form-body">
-        <textarea 
-            class="input-body" 
+        <textarea
+            class="input-body"
             placeholder="내용을 입력하세요"
             v-model="formData.boardContent"
         ></textarea>
       </div>
-      
-      <!-- 이미지 미리보기창 -->
+
+      <!-- 파일/이미지 미리보기 -->
       <div v-if="formData.attachedImages && formData.attachedImages.length > 0" class="image-preview-container">
-        <div class="image-preview-item" v-for="(file, index) in formData.attachedImages" :key="index" @click="removeImage(index)">
-          <img :src="getImagePreviewUrl(file)" alt="미리보기" class="preview-image" />
+        <div
+            v-for="(file, index) in formData.attachedImages"
+            :key="index"
+            class="image-preview-item"
+            @click="removeImage(index)"
+        >
+          <!-- 이미지인 경우 썸네일 -->
+          <img
+              v-if="file.type && file.type.startsWith('image/')"
+              :src="getImagePreviewUrl(file)"
+              alt="미리보기"
+              class="preview-image"
+          />
+          <!-- 파일인 경우 아이콘+파일명 -->
+          <div v-else class="file-icon">
+            <i class="bi bi-file-earmark"></i>
+            <span class="file-name">{{ file.name }}</span>
+          </div>
         </div>
         <div class="image-add-item" @click="handleImageUpload">
-          <img src="@/assets/img/imgPlus.jpg" alt="이미지 추가" class="add-image-icon" />
+          <img src="@/assets/img/imgPlus.jpg" alt="파일 추가" class="add-image-icon" />
         </div>
       </div>
+
       <div class="form-footer">
         <div class="form-actions-left">
           <img src="@/assets/img/attach.png" alt="" @click="handleImageUpload">
           <input
-            ref="fileInputRef"
-            type="file"
-            multiple
-            style="display: none"
-            @change="onFileChange"
+              ref="fileInputRef"
+              type="file"
+              multiple
+              style="display: none"
+              @change="onFileChange"
           />
         </div>
         <div class="form-actions-right">
           <label class="checkbox-wrap">
-            <input 
-                type="checkbox" 
+            <input
+                type="checkbox"
                 v-model="formData.questionYn"
             />
             <span class="label-text">질문</span>
@@ -82,10 +97,10 @@
 
     <!-- 글 작성 확인 모달 -->
     <WriteConfirmModal
-      :visible="showWriteConfirmModal"
-      @confirm="confirmWrite"
-      @cancel="cancelWrite"
-      @close="closeWriteModal"
+        :visible="showWriteConfirmModal"
+        @confirm="confirmWrite"
+        @cancel="cancelWrite"
+        @close="closeWriteModal"
     />
   </div>
 </template>
@@ -96,22 +111,17 @@ import WriteConfirmModal from '@/components/common/modal/WriteConfirmModal.vue'
 
 // Props
 const props = defineProps({
-  boardTypeId: {
-    type: Number,
-    required: true
-  }
+  boardTypeId: { type: Number, required: true }
 })
 
 // Emits
 const emit = defineEmits(['submit', 'imageUpload'])
 
-// 글쓰기 폼 show/hide 여부
 const showWriteForm = ref(false)
-
-// 글 작성 확인 모달 표시 여부
 const showWriteConfirmModal = ref(false)
+const formRef = ref(null)
+const fileInputRef = ref(null)
 
-// 폼 데이터
 const formData = ref({
   boardTitle: '',
   boardContent: '',
@@ -119,50 +129,36 @@ const formData = ref({
   attachedImages: []
 })
 
-// 글쓰기 폼 dom 참조
-const formRef = ref(null)
-
-// 폼이 포커스 됐는지 체크 (폼 안에서 클릭·포커스 이동시 안 사라지게)
-let formFocusTimer = null
-
-// 글쓰기 폼 포커스 처리
-function onFormFocus() {
-  clearTimeout(formFocusTimer)
-}
-
-// 글쓰기 폼 제출
+// 폼 제출
 function handleSubmit() {
   if (!formData.value.boardTitle.trim() || !formData.value.boardContent.trim()) {
     alert('제목과 내용을 입력해주세요.')
     return
   }
-  // 글 작성 확인 모달 표시
   showWriteConfirmModal.value = true
 }
 
-// 글 작성 확인 처리
+// 글 작성 확정
 function confirmWrite() {
-
-  // 프로젝트 소개 게시판일 경우 이미지 필수 첨부 체크
   if (props.boardTypeId === 5) {
     const hasImage = formData.value.attachedImages.some(file =>
-      file.type && file.type.startsWith('image')
+        file.type && file.type.startsWith('image/')
     )
     if (!hasImage) {
       alert('프로젝트 소개 게시판은 이미지 1개 이상 첨부해야 합니다.')
       return
     }
   }
-
-  // 부모 컴포넌트로 데이터 전달
   emit('submit', {
     boardTitle: formData.value.boardTitle,
     boardContent: formData.value.boardContent,
     questionYn: formData.value.questionYn,
-    attachedImages: formData.value.attachedImages // 이건 File[] 타입이어야 함
+    attachedImages: formData.value.attachedImages
   })
-  
-  // 폼 초기화
+  resetForm()
+}
+
+function resetForm() {
   formData.value = {
     boardTitle: '',
     boardContent: '',
@@ -172,80 +168,63 @@ function confirmWrite() {
   showWriteForm.value = false
   showWriteConfirmModal.value = false
 }
-
-// 글 작성 취소 처리
 function cancelWrite() {
   showWriteConfirmModal.value = false
 }
-
-// 모달 닫기 처리
 function closeWriteModal() {
   showWriteConfirmModal.value = false
 }
 
-// 이미지 업로드 처리
-const fileInputRef = ref(null)
-
+// 파일 업로드
 function handleImageUpload() {
   fileInputRef.value?.click()
 }
 
 function onFileChange(event) {
-
-  console.log('📌 boardTypeId:', props.boardTypeId)
   const files = Array.from(event.target.files)
   if (!files.length) return
 
-  // MIME 타입 기준
-  const allowedImageTypes = ['image/jpeg', 'image/png']
+  // 허용 타입 정의
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp']
   const allowedFileTypes = [
-    'application/pdf',
-    'application/vnd.hancom.hwp',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/pdf', 'application/vnd.hancom.hwp', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-    'text/plain',
-    'text/csv',
-    'application/zip'
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain', 'text/csv', 'application/zip'
   ]
-
   let filteredFiles = []
 
   if (props.boardTypeId === 1) {
-    // 자유게시판: 이미지만
     filteredFiles = files.filter(file => allowedImageTypes.includes(file.type))
     if (filteredFiles.length === 0) {
       alert('이미지만 첨부할 수 있습니다.')
       return
     }
   } else {
-    // 나머지 게시판: 이미지 + 파일
     filteredFiles = files.filter(file =>
-      allowedImageTypes.includes(file.type) || allowedFileTypes.includes(file.type)
+        allowedImageTypes.includes(file.type) || allowedFileTypes.includes(file.type)
     )
+    if (filteredFiles.length === 0) {
+      alert('첨부 가능한 파일만 업로드할 수 있습니다.')
+      return
+    }
   }
-
-  // 기존 이미지에 새 이미지 추가
   formData.value.attachedImages = [...formData.value.attachedImages, ...filteredFiles]
-  
-  // 파일 입력 초기화
   event.target.value = ''
 }
 
-// 이미지 미리보기 URL 생성
+// 미리보기 URL
 function getImagePreviewUrl(file) {
   return URL.createObjectURL(file)
 }
 
-// 이미지 삭제
+// 첨부파일 삭제
 function removeImage(index) {
   formData.value.attachedImages.splice(index, 1)
 }
-
-
 </script>
 
 <style lang="scss" scoped>
@@ -400,8 +379,8 @@ function removeImage(index) {
         }
       }
     }
-    
-    // 이미지 미리보기창 스타일
+
+    // 파일/이미지 미리보기
     .image-preview-container {
       height: 121px;
       border-top: 1px solid $dim-gray;
@@ -416,7 +395,7 @@ function removeImage(index) {
       &:hover {
         opacity: 0.8;
       }
-      
+
       .image-preview-item {
         position: relative;
         width: 85px;
@@ -425,15 +404,43 @@ function removeImage(index) {
         border: 1px solid $dim-gray;
         border-radius: 4px;
         overflow: hidden;
-        
+
         .preview-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
           display: block;
         }
+        .file-icon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #f8f9fa;
+
+          .bi-file-earmark {
+            font-size: 30px;
+            color: #6c757d;
+            margin-bottom: 4px;
+          }
+          .file-name {
+            font-size: 10px;
+            color: #495057;
+            text-align: center;
+            word-break: break-all;
+            padding: 0 4px;
+            max-height: 30px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
+        }
       }
-      
+
       .image-add-item {
         width: 85px;
         height: 85px;
@@ -445,11 +452,10 @@ function removeImage(index) {
         justify-content: center;
         cursor: pointer;
         background: #f8f9fa;
-        
+
         &:hover {
           background: #e9ecef;
         }
-        
         .add-image-icon {
           width: 100%;
           height: 100%;

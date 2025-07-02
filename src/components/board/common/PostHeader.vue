@@ -8,10 +8,14 @@
       <span class="date">{{ formatDate(post.boardCreatedAt) }}</span>
     </div>
     <div class="header-actions">
-      <button class="btn-edit" @click="$emit('edit', post)">수정</button>
-      <button class="btn-delete" @click="$emit('delete', post)">삭제</button>
-      <button class="btn-chat" @click="openChatModal">채팅</button>
-      <button class="btn-report" @click="openReportModal">신고</button>
+      <!-- 수정: 작성한 본인만 보여지게 -->
+      <button v-if="isOwner" class="btn-edit" @click="$emit('edit', post)">수정</button>
+      <!-- 삭제: 작성한 본인과 관리자한테 보여지게 -->
+      <button v-if="isOwner || userStore.isAdmin" class="btn-delete" @click="$emit('delete', post)">삭제</button>
+      <!-- 채팅: 본인이 작성한 거는 안보여지게 (남이 작성한 거에만 보여지게) -->
+      <button v-if="!isOwner" class="btn-chat" @click="openChatModal">채팅</button>
+      <!-- 신고: 본인이 작성한 거는 안보여지게 (남이 작성한 거에만 보여지게) -->
+      <button v-if="!isOwner" class="btn-report" @click="openReportModal">신고</button>
     </div>
   </div>
 
@@ -35,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits, computed } from 'vue'
 import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 import axios from '@/utils/axios'
 import { useRouter } from 'vue-router'
@@ -53,6 +57,16 @@ const emit = defineEmits(['chat', 'report', 'edit', 'delete'])
 
 const router = useRouter()
 const userStore = useUserStore()
+
+// 작성자인지 확인하는 computed
+const isOwner = computed(() => {
+  // memberId로 비교 (숫자 비교)
+  if (props.post.memberId && userStore.id) {
+    return props.post.memberId === userStore.id
+  }
+  // nickname으로 비교 (fallback)
+  return props.post.writer === userStore.nickname
+})
 
 // 날짜 포맷터
 function formatDate(str) {

@@ -22,6 +22,13 @@
       :is-loading="isLoading"
       @refresh="handleRefresh"
     />
+    
+    <!-- 일일문제관리 뷰 -->
+    <AdminProblemManagement
+      v-else-if="activeMenu === 'problems'"
+      :active-menu="activeMenu"
+      @refresh="handleRefresh"
+    />
   </div>
 </template>
 
@@ -30,6 +37,7 @@ import { defineProps, defineEmits } from 'vue'
 import AdminDashboard from './AdminDashboard.vue'
 import AdminUsers from './AdminUsers.vue'
 import AdminReports from './AdminReports.vue'
+import AdminProblemManagement from './AdminProblemManagement.vue'
 
 // ===== Props =====
 defineProps({

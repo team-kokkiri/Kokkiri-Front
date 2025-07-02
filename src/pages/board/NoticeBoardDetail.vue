@@ -71,7 +71,7 @@
 
 <script setup>
 import axios from 'axios'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PostHeader from '@/components/board/common/PostHeader.vue'
 import PostContent from '@/components/board/common/PostContent.vue'
@@ -82,26 +82,18 @@ import CommentForm from '@/components/board/detail/CommentForm.vue'
 import PostEditForm from '@/components/board/detail/PostEditForm.vue'
 import DeleteConfirmModal from '@/components/common/modal/DeleteConfirmModal.vue'
 import { useDeleteConfirmModal } from '@/composables/useModal.js'
-// import boardSample from '@/data/boardSample.json'
-
 
 const route = useRoute()
 const router = useRouter()
-const token = localStorage.getItem('accessToken');
-// API 기본 URL (환경 변수 사용 권장)
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080';
+const token = localStorage.getItem('accessToken')
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080'
 
-// 현재 상세 게시글 데이터
 const post = ref(null)
-
-// 본문 수정 입력창 상태 관리
 const postEditVisible = ref(false)
-
-// Delete Modal 상태 관리
 const { deleteModalState, showDeleteModal, hideDeleteModal } = useDeleteConfirmModal()
 let deleteTarget = null
 
-// 페이지 진입시 라우터 params.id로 게시글 찾아오기
+// 게시글 데이터 불러오기
 const fetchPost = async () => {
   try {
     const res = await axios.get(`${API_BASE_URL}/api/boards/detail/${route.params.id}`, {
@@ -116,14 +108,11 @@ const fetchPost = async () => {
   }
 }
 
-// 페이지 진입시 라우터
-onMounted(() => {
-  fetchPost()
-})
+onMounted(fetchPost)
+watch(() => route.params.id, fetchPost)
 
 // 댓글 등록
 const onSubmitComment = async (commentData) => {
-
   try {
     await axios.post(`${API_BASE_URL}/api/boards/detail/${post.value.id}/comments`, {
       boardId: post.value.id,
@@ -132,8 +121,7 @@ const onSubmitComment = async (commentData) => {
     }, {
       headers: { Authorization: `Bearer ${token}` }
     })
-
-    await fetchPost()  // 댓글 등록 후 전체 게시글 다시 불러오기
+    await fetchPost()
   } catch (err) {
     console.error('댓글 등록 실패', err)
   }
@@ -149,61 +137,52 @@ const onSubmitReply = async (replyData) => {
     }, {
       headers: { Authorization: `Bearer ${token}` }
     })
-
-    await fetchPost() // 대댓글 등록 후 전체 게시글 다시 불러오기
+    await fetchPost()
   } catch (err) {
     console.error('대댓글 등록 실패', err)
   }
 }
 
-// 게시글 수정 등록 핸들러
+// 게시글 수정 (기존 이미지 유지 로직)
 const onSubmitEdit = async (editData) => {
   if (!post.value) return
-  
   try {
-    // FormData 생성
     const formData = new FormData()
-    
-    // board 데이터를 JSON으로 변환하여 Blob으로 추가
+    // 기존 이미지 파일 ID 추출 (PostEditForm에서 existingImages 필드 제공 가정)
+    const keepFileIds = []
+    if (editData.existingImages && editData.existingImages.length > 0) {
+      editData.existingImages.forEach(image => {
+        if (image.id) keepFileIds.push(image.id)
+      })
+    }
+    // 수정 데이터 조립
     const boardData = {
       boardTitle: editData.boardTitle,
       boardContent: editData.boardContent,
-      keepFileIds: [] // 기존 파일 유지 ID들 (필요시 구현)
+      keepFileIds: keepFileIds
     }
-    
-    // JSON을 Blob으로 변환하고 Content-Type 지정
-    const boardBlob = new Blob([JSON.stringify(boardData)], {
-      type: 'application/json'
-    })
-    
+    const boardBlob = new Blob([JSON.stringify(boardData)], { type: 'application/json' })
     formData.append('board', boardBlob)
-    
-    // 첨부파일이 있다면 추가
+
+    // 신규 첨부파일 추가
     if (editData.attachedImages && editData.attachedImages.length > 0) {
       editData.attachedImages.forEach(file => {
         formData.append('files', file)
       })
     }
-    
+
     const config = {
       headers: {
         'Authorization': `Bearer ${token}`
-        // Content-Type은 FormData 사용시 자동으로 설정되므로 지정하지 않음
       }
     }
-    
-    // 게시글 수정 API 호출
     await axios.put(
-      `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
-      formData,
-      config
+        `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
+        formData,
+        config
     )
-    
-    // 수정 완료 후 상세보기 모드로 돌아가기
     postEditVisible.value = false
-    // 게시글 데이터 다시 불러오기
     await fetchPost()
-    
     alert('게시글이 수정되었습니다.')
   } catch (err) {
     console.error('게시글 수정 실패', err.response?.data || err.message || err)
@@ -211,24 +190,14 @@ const onSubmitEdit = async (editData) => {
   }
 }
 
-// 댓글 수정 등록 핸들러
+// 댓글 수정
 const onSubmitCommentEdit = async (item) => {
   if (!post.value) return
-  
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-    
-    // 댓글 수정
     await axios.put(
         `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}`,
-        {
-          comment: item.content
-        },
-        config
+        { comment: item.content },
+        { headers: { Authorization: `Bearer ${token}` } }
     )
     await fetchPost()
   } catch (err) {
@@ -236,28 +205,22 @@ const onSubmitCommentEdit = async (item) => {
   }
 }
 
-// 게시글 좋아요 (공감) 증가
+// 좋아요(게시글/댓글)
 const onLike = async (item = null) => {
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
+    const config = { headers: { Authorization: `Bearer ${token}` } }
     if (item) {
-      // 댓글, 답글
       await axios.post(
-        `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}/like`,
-        null,
-        config
+          `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${item.id}/like`,
+          null,
+          config
       )
       item.likeCount = (item.likeCount || 0) + 1
     } else {
-      // 게시글
       await axios.post(
-        `${API_BASE_URL}/api/boards/${post.value.id}/like`,
-        null,
-        config
+          `${API_BASE_URL}/api/boards/${post.value.id}/like`,
+          null,
+          config
       )
       await fetchPost()
     }
@@ -270,54 +233,43 @@ const onLike = async (item = null) => {
   }
 }
 
-// 스크랩 기능
+// 스크랩(추후 구현)
 const onScrap = () => {
   console.log('스크랩 버튼 클릭')
 }
 
-// 대댓글 기능 (CommentList에서 처리)
+// 대댓글 폼
 const onReply = (comment) => {
   console.log('대댓글 버튼 클릭:', comment)
 }
 
-// 수정 기능
-const onEdit = async (item) => {
-  // 본문 수정 버튼인지 검증하고, 열려있으면 닫고 닫혀있으면 여는 기능
+// 게시글/댓글/대댓글 수정 버튼
+const onEdit = (item) => {
   if (item === post.value) {
     postEditVisible.value = !postEditVisible.value
   }
 }
 
-// 수정 취소 기능
+// 수정 취소
 const onCancelEdit = () => {
   postEditVisible.value = false
 }
 
-// 삭제 기능 // 본문 댓글 대댓글 전부 이 메소드로 합쳤는데 필요하면 나눠드림
-// 타입으로 구분해서 처리하면 될 듯 합니다
-const onDelete = async (item) => {
+// 삭제 요청 (공통)
+const onDelete = (item) => {
   deleteTarget = item
   const message = item === post.value
       ? '정말 게시글을 삭제하시겠습니까?'
       : '정말 댓글을 삭제하시겠습니까?'
-  
   showDeleteModal({ message })
 }
 
-// 삭제 확인 핸들러
+// 삭제 확정
 const handleDeleteConfirm = async () => {
   if (!deleteTarget) return
-  
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-
-    // item이 게시글인지, 댓글인지, 대댓글인지 구분
+    const config = { headers: { Authorization: `Bearer ${token}` } }
     if (deleteTarget === post.value) {
-      // 게시글 삭제
       await axios.delete(
           `${API_BASE_URL}/api/boards/detail/${post.value.id}`,
           config
@@ -325,7 +277,6 @@ const handleDeleteConfirm = async () => {
       hideDeleteModal()
       await router.push('/main-page/notice')
     } else {
-      // 댓글 대댓글 삭제
       await axios.delete(
           `${API_BASE_URL}/api/boards/detail/${post.value.id}/comments/${deleteTarget.id}`,
           config
@@ -334,28 +285,23 @@ const handleDeleteConfirm = async () => {
       await fetchPost()
     }
   } catch (err) {
-    console.error('삭제 실패', err.response?.data || err.message || err);
+    console.error('삭제 실패', err.response?.data || err.message || err)
     hideDeleteModal()
   } finally {
     deleteTarget = null
   }
 }
 
-// 채팅 기능
-const onChat = (item) => {
-  console.log('채팅 버튼 클릭:', item)
-}
+// 채팅, 신고 기능(구현시 연결)
+const onChat = (item) => { console.log('채팅 버튼 클릭:', item) }
+const onReport = (item) => { console.log('신고 버튼 클릭:', item) }
 
-// 신고 기능
-const onReport = (item) => {
-  console.log('신고 버튼 클릭:', item)
-}
-
-// 글 목록 이동
+// 게시글 목록으로 이동
 const goToList = () => {
   router.push('/main-page/notice')
 }
 </script>
+
 
 <style lang="scss" scoped>
 @import '@/assets/scss/style';
