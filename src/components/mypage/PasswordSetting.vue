@@ -210,7 +210,7 @@ const savePassword = async () => {
 
 .password-setting-box {
   width: 478px;
-  height: 362px;
+  height: 375px;
   border: 1px solid #DDDDDD;
   border-radius: 15px;
   background: $white;
@@ -338,7 +338,7 @@ const savePassword = async () => {
         line-height: 1.2;
         color: $white;
         cursor: pointer;
-        padding: 8px 20px;
+        padding: 8px 25px;
 
         &:hover {
           background: $royalblue;

@@ -111,7 +111,7 @@
 import {ref, onMounted, computed, watch, onUnmounted} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from '../../utils/axios';
-import LoadingModal from '@/components/common/LoadingModal.vue';
+import LoadingModal from '@/components/common/modal/LoadingModal.vue';
 import { useLoadingModal } from '@/composables/useModal.js';
 
 /*####### 변수들 #######*/

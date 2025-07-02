@@ -43,12 +43,19 @@
         <p>아직 아무도 문제를 풀지 않았습니다.</p>
       </div>
     </div>
+    
+    <!-- 접근 제한 모달 -->
+    <AccessRestrictionModal 
+      :is-visible="showAccessRestrictionModal"
+      @close="closeAccessRestrictionModal"
+    />
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import RankingItem from '@/components/daily-problem/RankingItem.vue'
+import AccessRestrictionModal from '@/components/common/modal/AccessRestrictionModal.vue'
 import { useDailyRanking } from '@/composables/useDailyRanking'
 
 // 랭킹 컴포저블 사용
@@ -59,30 +66,52 @@ const {
   expandedRankingId,
   submissionCode,
   isLoadingCode,
+  hasUserSolved,
   fetchTodayRankings,
+  checkUserSolvedToday,
   toggleRankingExpansion
 } = useDailyRanking()
 
+// 접근 제한 모달 상태 관리
+const showAccessRestrictionModal = ref(false)
+
 /**
- * 컴포넌트 마운트 시 랭킹 데이터 로드
+ * 컴포넌트 마운트 시 랭킹 데이터 로드 및 사용자 해결 상태 확인
  */
-onMounted(() => {
-  fetchTodayRankings()
+onMounted(async () => {
+  await fetchTodayRankings()
+  await checkUserSolvedToday()
 })
 
 /**
  * 랭킹 새로고침
  */
-const refreshRankings = () => {
-  fetchTodayRankings()
+const refreshRankings = async () => {
+  await fetchTodayRankings()
+  await checkUserSolvedToday()
 }
 
 /**
  * 랭킹 아이템 확장/축소 토글 핸들러
+ * 사용자가 오늘 문제를 해결하지 않았다면 접근 제한 모달 표시
  * @param {Object} ranking - 랭킹 객체
  */
 const handleToggleExpansion = (ranking) => {
+  // 사용자가 오늘 문제를 해결하지 않았다면 접근 제한 모달 표시
+  if (!hasUserSolved.value) {
+    showAccessRestrictionModal.value = true
+    return
+  }
+  
+  // 문제를 해결한 경우 코드 조회 허용
   toggleRankingExpansion(ranking.id, ranking.submissionId)
+}
+
+/**
+ * 접근 제한 모달 닫기 함수
+ */
+const closeAccessRestrictionModal = () => {
+  showAccessRestrictionModal.value = false
 }
 </script>
 

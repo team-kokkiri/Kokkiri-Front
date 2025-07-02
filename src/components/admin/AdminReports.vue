@@ -5,7 +5,7 @@
       <button 
         @click="handleRefresh" 
         class="refresh-button"
-        :disabled="isLoading"
+        :disabled="isLoading || isLoadingLocal"
       >
         새로고침
       </button>
@@ -26,7 +26,7 @@
 
     <!-- 신고 리스트 -->
     <div class="reports-content">
-      <div v-if="isLoading" class="loading-state">
+      <div v-if="isLoading || isLoadingLocal" class="loading-state">
         <p>데이터를 불러오는 중...</p>
       </div>
 
@@ -117,15 +117,31 @@ async function loadReports(status = 'PENDING', page = 0) {
       config
     )
 
+    console.log('API 응답:', response.data) // 디버깅용
+
     if (response.data) {
-      reports.value = response.data.content || []
-      totalPages.value = response.data.totalPages || 0
-      
-      // 카운트 업데이트
-      if (status === 'PENDING') {
-        pendingCount.value = response.data.totalElements || 0
+      // API 응답이 배열인 경우와 페이지네이션 객체인 경우 모두 처리
+      if (Array.isArray(response.data)) {
+        reports.value = response.data
+        totalPages.value = 1 // 배열 응답인 경우 페이지가 1개
+        
+        // 카운트 업데이트
+        if (status === 'PENDING') {
+          pendingCount.value = response.data.length
+        } else {
+          processedCount.value = response.data.length
+        }
       } else {
-        processedCount.value = response.data.totalElements || 0
+        // 페이지네이션 객체인 경우
+        reports.value = response.data.content || []
+        totalPages.value = response.data.totalPages || 0
+        
+        // 카운트 업데이트
+        if (status === 'PENDING') {
+          pendingCount.value = response.data.totalElements || 0
+        } else {
+          processedCount.value = response.data.totalElements || 0
+        }
       }
     }
   } catch (error) {

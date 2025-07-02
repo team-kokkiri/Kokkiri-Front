@@ -4,17 +4,17 @@
       <div class="modal-content">
         <div class="image-section">
           <img 
-            src="@/assets/img/마스코트채팅.png" 
-            alt="채팅 마스코트"
+            src="../../../assets/img/마스코트OX.png"
+            alt="삭제 확인 마스코트"
             class="mascot-image"
           />
         </div>
         <div class="message-section">
-          <p class="chat-message">{{ displayMessage }}</p>
+          <p class="delete-message">{{ message }}</p>
         </div>
         <div class="button-section">
-          <button class="btn-confirm" @click="confirmChat">네</button>
-          <button class="btn-cancel" @click="cancelChat">아니오</button>
+          <button class="btn-confirm" @click="confirmDelete">네</button>
+          <button class="btn-cancel" @click="cancelDelete">아니오</button>
         </div>
       </div>
     </div>
@@ -23,7 +23,7 @@
 
 <script>
 export default {
-  name: 'ChatInviteModal',
+  name: 'DeleteConfirmModal',
   props: {
     visible: {
       type: Boolean,
@@ -31,37 +31,15 @@ export default {
     },
     message: {
       type: String,
-      default: '채팅을 시작하시겠습니까?'
-    },
-    targetNickname: {
-      type: String,
-      default: ''
+      default: '정말 삭제하시겠습니까?'
     }
   },
   emits: ['confirm', 'cancel', 'close'],
-  computed: {
-    displayMessage() {
-      if (this.targetNickname) {
-        return `${this.targetNickname}님에게 채팅을 거시겠습니까?`
-      }
-      return this.message
-    }
-  },
-  watch: {
-    visible(newVal) {
-      if (newVal) {
-        // 모달이 열릴 때 DOM이 완전히 렌더링되도록 nextTick 사용
-        this.$nextTick(() => {
-          // 추가적인 초기화 로직이 필요하면 여기에
-        })
-      }
-    }
-  },
   methods: {
-    confirmChat() {
+    confirmDelete() {
       this.$emit('confirm')
     },
-    cancelChat() {
+    cancelDelete() {
       this.$emit('cancel')
     },
     closeModal() {
@@ -126,7 +104,7 @@ export default {
   padding: 5px;
 }
 
-.chat-message {
+.delete-message {
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 700;
   font-size: 24px;

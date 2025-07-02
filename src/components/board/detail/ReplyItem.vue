@@ -3,7 +3,7 @@
     <!-- 대댓글 프로필 -->
     <div class="comment-profile">
       <div class="profile-info">
-        <img class="avatar" :src="reply.avatar || defaultAvatar" alt="아바타" />
+        <img class="avatar" :src="getProfileImageUrl(reply.memberAvatar)" alt="아바타" @error="handleImageError" />
         <span class="nickname">{{ reply.memberNickname }}</span>
       </div>
       <div class="comment-actions">
@@ -65,14 +65,14 @@
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue'
-import defaultAvatar from '@/assets/img/0.png'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 import EditForm from './EditForm.vue'
 import ReplyList from './ReplyList.vue'
 import axios from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import ReportModal from '@/components/common/ReportModal.vue'
-import ChatInviteModal from '@/components/common/ChatInviteModal.vue'
+import ReportModal from '@/components/common/modal/ReportModal.vue'
+import ChatInviteModal from '@/components/common/modal/ChatInviteModal.vue'
 
 const props = defineProps({
   reply: {

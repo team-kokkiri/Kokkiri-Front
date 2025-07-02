@@ -80,11 +80,20 @@
         <span class="text">글 수정 취소</span>
       </button>
     </div>
+    
+    <!-- 글 수정 확인 모달 -->
+    <EditConfirmModal
+      :visible="showEditConfirmModal"
+      @confirm="confirmEdit"
+      @cancel="cancelEdit"
+      @close="closeEditModal"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, defineProps, defineEmits, onMounted } from 'vue'
+import EditConfirmModal from '@/components/common/modal/EditConfirmModal.vue'
 
 // Props
 const props = defineProps({
@@ -114,6 +123,9 @@ const existingImages = ref([])
 
 // 삭제된 기존 이미지 URL 목록 (서버에 삭제 요청할 때 사용)
 const deletedImages = ref([])
+
+// 글 수정 확인 모달 표시 여부
+const showEditConfirmModal = ref(false)
 
 // 파일 입력 참조
 const fileInputRef = ref(null)
@@ -145,6 +157,12 @@ function handleSubmit() {
     return
   }
 
+  // 글 수정 확인 모달 표시
+  showEditConfirmModal.value = true
+}
+
+// 글 수정 확인 처리
+function confirmEdit() {
   // 부모 컴포넌트로 수정된 데이터 전달
   emit('submit', {
     id: props.post.id,
@@ -155,6 +173,18 @@ function handleSubmit() {
     existingImages: existingImages.value, // 남아있는 기존 이미지
     deletedImages: deletedImages.value // 삭제된 기존 이미지
   })
+  
+  showEditConfirmModal.value = false
+}
+
+// 글 수정 취소 처리
+function cancelEdit() {
+  showEditConfirmModal.value = false
+}
+
+// 모달 닫기 처리
+function closeEditModal() {
+  showEditConfirmModal.value = false
 }
 
 // 취소 처리

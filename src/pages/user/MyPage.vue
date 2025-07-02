@@ -23,7 +23,10 @@
 
     <!-- 프로필 사진 변경 -->
     <template v-else-if="currentView === 'profile-image'">
-      <div>프로필 사진 변경 컴포넌트</div>
+      <ProfileImageUpload
+          @back="handleBackToMain"
+          @upload-success="handleProfileUploadSuccess"
+      />
     </template>
 
     <!-- 닉네임 변경 -->
@@ -57,15 +60,12 @@
     </template>
 
     <!-- 회원탈퇴 모달 -->
-    <div v-if="showDeleteModal" class="modal-backdrop">
-      <div class="modal-box">
-        <p class="modal-msg">정말 회원 계정을 삭제하시겠습니까?</p>
-        <div class="modal-btn-group">
-          <button class="modal-btn yes" @click="onDeleteAccount">예</button>
-          <button class="modal-btn no" @click="showDeleteModal = false">아니오</button>
-        </div>
-      </div>
-    </div>
+    <DeleteAccountModal
+      :visible="showDeleteModal"
+      @confirm="confirmAccountDelete"
+      @cancel="cancelAccountDelete"
+      @close="closeDeleteModal"
+    />
   </div>
 </template>
 
@@ -77,6 +77,8 @@ import MyCommunityBox from '@/components/mypage/MyCommunityBox.vue'
 import NicknameSetting from '@/components/mypage/NicknameSetting.vue'
 import PasswordSetting from '@/components/mypage/PasswordSetting.vue'
 import ClassCodeSetting from '@/components/mypage/ClassCodeSetting.vue'
+import DeleteAccountModal from '@/components/common/modal/DeleteAccountModal.vue'
+import ProfileImageUpload from '@/components/mypage/ProfileImageUpload.vue'
 import instance from "@/utils/axios";
 import {useRouter} from "vue-router";
 import {useUserStore} from "@/stores";
@@ -111,7 +113,11 @@ const handleLogout = () => {
 }
 
 const handleProfileImageChange = () => {
-  console.log('프로필 사진 변경 클릭')
+  currentView.value = 'profile-image'
+}
+
+const handleProfileUploadSuccess = () => {
+  currentView.value = 'main'
 }
 
 const handleNicknameChange = () => {
@@ -127,8 +133,8 @@ const handleAccountDelete = () => {
   showDeleteModal.value = true
 }
 
-// 여기 반드시 중괄호로 닫아주세요!!
-const onDeleteAccount = async () => {
+// 회원탈퇴 처리 함수들
+const confirmAccountDelete = async () => {
   try {
     await instance.delete('/api/members', {
       headers: {
@@ -145,7 +151,15 @@ const onDeleteAccount = async () => {
     alert('회원 탈퇴 중 오류가 발생했습니다.')
     showDeleteModal.value = false
   }
-} // <-- 중괄호 추가!
+}
+
+const cancelAccountDelete = () => {
+  showDeleteModal.value = false
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+}
 
 const handleMyPosts = () => {
   router.push(`/main-page/my-written-posts`)
@@ -197,37 +211,5 @@ const handleClassCodeSave = async (classCode) => {
   padding-top: 24px;
   margin-left: auto;
   margin-right: auto;
-}
-
-/* 모달 스타일 예시 */
-.modal-backdrop {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.3);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 2000;
-}
-.modal-box {
-  background: #fff;
-  border-radius: 14px;
-  padding: 32px 24px 24px 24px;
-  min-width: 320px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-  text-align: center;
-}
-.modal-msg {
-  font-size: 1.08rem; margin-bottom: 22px;
-  line-height: 1.6;
-}
-.modal-btn-group {
-  display: flex; gap: 18px; justify-content: center;
-}
-.modal-btn {
-  min-width: 104px; padding: 9px 0;
-  border: none; border-radius: 8px;
-  font-weight: 500; font-size: 1rem;
-  cursor: pointer;
-  &.yes { background: #ff6565; color: #fff; }
-  &.no { background: #eee; color: #222; }
 }
 </style>

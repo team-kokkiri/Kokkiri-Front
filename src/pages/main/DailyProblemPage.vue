@@ -27,6 +27,13 @@
         />
       </div>
     </div>
+    
+    <!-- 축하 모달 -->
+    <CongratulationModal 
+      :is-visible="showCongratulationModal"
+      :rank="userRank"
+      @close="closeCongratulationModal"
+    />
   </div>
 </template>
 
@@ -35,10 +42,15 @@ import { ref, onMounted } from 'vue'
 import ProblemDescription from '@/components/daily-problem/ProblemDescription.vue'
 import CodeEditor from '@/components/daily-problem/CodeEditor.vue'
 import ActionButton from '@/components/common/ActionButton.vue'
+import CongratulationModal from '@/components/common/modal/CongratulationModal.vue'
 import { useDailyProblem } from '@/composables/useDailyProblem'
 
 // 코드 에디터 컴포넌트 참조
 const codeEditorRef = ref(null)
+
+// 축하 모달 상태 관리
+const showCongratulationModal = ref(false)
+const userRank = ref(0)
 
 // 일일 문제 컴포저블 사용
 const { 
@@ -58,7 +70,7 @@ onMounted(() => {
 /**
  * 코드 제출 버튼 클릭 핸들러
  * 에디터에서 코드를 가져와 제출하고 결과를 표시
- * 정답인 경우 문제 데이터를 새로고침하여 랭킹 업데이트
+ * 정답인 경우 문제 데이터를 새로고침하여 랭킹 업데이트 후 축하 모달 표시
  */
 const handleSubmitCode = async () => {
   if (!codeEditorRef.value || !problemData.value?.id) return
@@ -70,13 +82,26 @@ const handleSubmitCode = async () => {
     const result = await submitCode(sourceCode, language)
     codeEditorRef.value.setResult(result.submission)
     
-    // 정답인 경우 문제 데이터 새로고침으로 랭킹 업데이트
+    // 정답인 경우 문제 데이터 새로고침으로 랭킹 업데이트 후 축하 모달 표시
     if (result.accepted) {
       await fetchTodaysProblem()
+      
+      // 랭킹 정보에서 사용자 순위 찾기
+      if (result.ranking) {
+        userRank.value = result.ranking.rankPosition
+        showCongratulationModal.value = true
+      }
     }
   } catch (error) {
     console.error('Failed to submit code:', error)
   }
+}
+
+/**
+ * 축하 모달 닫기 함수
+ */
+const closeCongratulationModal = () => {
+  showCongratulationModal.value = false
 }
 </script>
 

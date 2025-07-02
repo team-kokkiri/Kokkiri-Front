@@ -20,7 +20,7 @@
     <div class="profile-content">
       <div class="profile-image">
         <img
-            :src="userStore.avatar || defaultProfileImage"
+            :src="getProfileImageUrl(userStore.avatar)"
             :alt="`${userStore.email} 프로필 이미지`"
             @error="handleImageError"
         />
@@ -36,15 +36,13 @@
 <script setup>
 import { defineEmits, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
-import defaultProfileImage from '@/assets/img/0.png'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 
 defineEmits(['logout', 'profile-image-change'])
 
 const userStore = useUserStore()
 
-const handleImageError = (event) => {
-  event.target.src = defaultProfileImage
-}
+
 
 const displayName = computed(() => {
   return userStore.displayName || ''
@@ -57,7 +55,7 @@ const displayName = computed(() => {
 .mypage-profile-box {
   width: 478px;
   height: 146px;
-  border: 1px solid #DDDDDD;
+  border: 1px solid $dim-gray;
   border-radius: 15px;
   padding: 22px 19px 27px 19px;
   background: $white;

@@ -4,7 +4,7 @@
       <div class="modal-content">
         <div class="image-section">
           <img 
-            src="@/assets/img/마스코트인증메일.png"
+            src="../../../assets/img/마스코트인증메일.png"
             alt="발송 중 마스코트"
             class="mascot-image"
           />

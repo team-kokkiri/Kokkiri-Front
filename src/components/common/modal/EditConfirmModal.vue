@@ -4,17 +4,17 @@
       <div class="modal-content">
         <div class="image-section">
           <img 
-            src="@/assets/img/마스코트OX.png" 
-            alt="삭제 확인 마스코트"
+            src="../../../assets/img/마스코트글수정.png"
+            alt="글 수정 마스코트"
             class="mascot-image"
           />
         </div>
         <div class="message-section">
-          <p class="delete-message">{{ message }}</p>
+          <p class="edit-message">글을 수정하시겠습니까?</p>
         </div>
         <div class="button-section">
-          <button class="btn-confirm" @click="confirmDelete">네</button>
-          <button class="btn-cancel" @click="cancelDelete">아니오</button>
+          <button class="btn-confirm" @click="confirmEdit">네</button>
+          <button class="btn-cancel" @click="cancelEdit">아니오</button>
         </div>
       </div>
     </div>
@@ -23,23 +23,19 @@
 
 <script>
 export default {
-  name: 'DeleteConfirmModal',
+  name: 'EditConfirmModal',
   props: {
     visible: {
       type: Boolean,
       default: false
-    },
-    message: {
-      type: String,
-      default: '정말 삭제하시겠습니까?'
     }
   },
   emits: ['confirm', 'cancel', 'close'],
   methods: {
-    confirmDelete() {
+    confirmEdit() {
       this.$emit('confirm')
     },
-    cancelDelete() {
+    cancelEdit() {
       this.$emit('cancel')
     },
     closeModal() {
@@ -104,7 +100,7 @@ export default {
   padding: 5px;
 }
 
-.delete-message {
+.edit-message {
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 700;
   font-size: 24px;

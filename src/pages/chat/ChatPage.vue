@@ -132,9 +132,9 @@ async function fetchMoreMembers() {
 
   if (data && data.content) {
     if (memberPage.value === 0) {
-      roomUsers.value = data.content.map(user => ({ ...user, avatar: user.avatarUrl || Avatar }));
+      roomUsers.value = data.content.map(user => ({ ...user, avatar: user.avatar || user.avatarUrl || Avatar }));
     } else {
-      roomUsers.value.push(...data.content.map(user => ({ ...user, avatar: user.avatarUrl || Avatar })));
+      roomUsers.value.push(...data.content.map(user => ({ ...user, avatar: user.avatar || user.avatarUrl || Avatar })));
     }
     hasMoreMembers.value = !data.last;
     userCount.value = data.totalElements;
@@ -251,7 +251,11 @@ async function fetchMessageHistory(roomId) {
     const room = chatRooms.value.find(r => r.roomId === roomId);
     if (room) {
       room.messages = res.data.map(msg => ({
-        id: msg.id, avatar: Avatar, nickname: msg.nickname, time: msg.createdTime, text: msg.message
+        id: msg.id, 
+        avatar: msg.avatar || Avatar, // 백엔드에서 오는 avatar 사용, 없으면 기본 이미지
+        nickname: msg.nickname, 
+        time: msg.createdTime, 
+        text: msg.message
       }));
     }
   } catch (error) { console.error("메시지 내역 로딩 실패:", error); }
@@ -317,7 +321,7 @@ function sendMessage() {
 }
 
 function handleIncomingMessage(msg) {
-  const { roomId, senderEmail, message, createdTime, nickname } = msg;
+  const { roomId, senderEmail, message, createdTime, nickname, avatar } = msg;
   const chatIndex = chatRooms.value.findIndex(c => c.roomId === roomId);
   if (chatIndex !== -1) {
     const chat = chatRooms.value[chatIndex];
@@ -337,7 +341,12 @@ function handleIncomingMessage(msg) {
   }
   if (roomId === activeRoomId.value) {
     currentRoom.value.messages.push({
-      id: Date.now(), avatar: Avatar, nickname: nickname, email: senderEmail, time: createdTime, text: message
+      id: Date.now(), 
+      avatar: avatar || Avatar, // 백엔드에서 오는 avatar 사용, 없으면 기본 이미지
+      nickname: nickname, 
+      email: senderEmail, 
+      time: createdTime, 
+      text: message
     });
   }
 }

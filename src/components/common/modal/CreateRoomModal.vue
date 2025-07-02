@@ -4,7 +4,7 @@
       <div class="modal-content">
         <div class="image-section">
           <img 
-            src="@/assets/img/마스코트채팅방생성.png" 
+            src="../../../assets/img/마스코트채팅방생성.png"
             alt="채팅방 생성 마스코트"
             class="mascot-image"
           />

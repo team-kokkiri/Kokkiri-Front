@@ -50,7 +50,7 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '../../utils/axios';
-import SuccessModal from '@/components/common/SuccessModal.vue';
+import SuccessModal from '@/components/common/modal/SuccessModal.vue';
 import { useSuccessModal } from '@/composables/useModal.js';
 
 const classcode = ref('');

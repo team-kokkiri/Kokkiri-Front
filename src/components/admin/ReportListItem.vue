@@ -129,21 +129,32 @@ async function handleProcess() {
 }
 
 function handlePageMove() {
-  // targetId를 사용하여 해당 게시글로 이동
-  // reportType에 따라 다르게 처리
-  if (props.report.reportType === 'POST') {
-    // 게시글로 이동 - 일단 자유게시판으로 가정
-    // 백엔드에서 boardType 정보를 추가로 제공하면 더 정확하게 라우팅 가능
-    window.open(`/main-page/free-board/${props.report.targetId}`, '_blank')
-  } else if (props.report.reportType === 'COMMENT') {
-    // 댓글이 있는 게시글로 이동 (백엔드에서 게시글 ID를 제공해야 함)
-    // 현재는 targetId가 댓글 ID이므로 처리 불가
-    alert('댓글 페이지 이동은 현재 지원되지 않습니다.')
-  } else if (props.report.reportType === 'USER') {
-    // 사용자 프로필로 이동 - 일단 마이페이지로
-    window.open(`/main-page/mypage`, '_blank')
+  const { reportType, targetId, boardId, boardTypeId } = props.report
+
+  // 게시판 경로 매핑 함수
+  function getBoardUrl(boardTypeId, boardId) {
+    if (boardTypeId === 1) {
+      return `/main-page/free-board/${boardId}`
+    } else if (boardTypeId === 2) {
+      return `/main-page/share-board/${boardId}`
+    } else if (boardTypeId === 4) {
+      return `/main-page/notice/${boardId}`
+    } else if (boardTypeId === 5) {
+      return `/main-page/project-board/${boardId}`
+    } else {
+      return `/main-page/free-board/${boardId}` // 기본값 (예외처리)
+    }
+  }
+
+  if (reportType === 'POST') {
+    // 게시글 이동
+    window.open(getBoardUrl(boardTypeId, targetId), '_blank')
+  } else if (reportType === 'COMMENT') {
+    // 댓글이 달린 게시글로 이동 (글 상세로 이동)
+    window.open(getBoardUrl(boardTypeId, boardId), '_blank')
   }
 }
+
 </script>
 
 <style lang="scss" scoped>

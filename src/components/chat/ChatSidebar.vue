@@ -58,7 +58,7 @@
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue'
-import CreateRoomModal from '@/components/common/CreateRoomModal.vue'
+import CreateRoomModal from '@/components/common/modal/CreateRoomModal.vue'
 
 const isModalOpen = ref(false)
 
@@ -125,7 +125,7 @@ function formatDisplayTime(dateTimeString) {
 $dim-gray: #e0e0e0;
 $white: #ffffff;
 $black: #000000;
-$main-color: #5a7dff;
+$main-color: #2196F3;
 $secondary-kr: "Spoqa Han Sans Neo", sans-serif;
 $primary-kr: "Pretendard", sans-serif;
 $dark-black: #333333;
@@ -166,8 +166,6 @@ $light-gray: #f0f0f0;
 .create-chat-button {
   width: 100%;
   height: 50px;
-  border: 1px dashed $main-color;
-  border-radius: 10px;
   background: $white;
   display: flex;
   align-items: center;
@@ -175,10 +173,11 @@ $light-gray: #f0f0f0;
   cursor: pointer;
   transition: all 0.2s ease;
   color: $main-color;
+  border: 1px solid $main-color;
   &:hover { background-color: rgba($main-color, 0.05); border-style: solid; }
   &:active { transform: translateY(1px); }
-  i { font-size: 20px; margin-right: 8px; }
-  span { font-family: $secondary-kr; font-weight: 700; font-size: 15px; }
+  i { font-size: 24px; margin-right: 8px; }
+  span { font-family: $secondary-kr; font-weight: 700; font-size: 18px; margin-top: 3px }
 }
 .chat-room-list {
   flex-grow: 1;

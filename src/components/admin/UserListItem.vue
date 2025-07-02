@@ -3,15 +3,11 @@
     <div class="user-avatar">
       <div class="avatar-circle">
         <img
-            v-if="user.profileImage"
-            :src="user.profileImage"
+            :src="getProfileImageUrl(user.avatar || user.profileImage)"
             :alt="`${user.name} 프로필`"
             class="avatar-image"
             @error="handleImageError"
         />
-        <div v-else class="avatar-placeholder">
-          {{ getInitials(user.name) }}
-        </div>
       </div>
     </div>
 
@@ -43,6 +39,7 @@
 
 <script setup>
 import { computed, defineProps, defineEmits, ref } from 'vue'
+import { getProfileImageUrl, handleImageError } from '@/utils/profileImage'
 
 // ===== Props =====
 const props = defineProps({
@@ -74,16 +71,6 @@ const isValidUser = computed(() => {
 })
 
 // ===== 유틸리티 함수 (SRP) =====
-function getInitials(name) {
-  if (!name || typeof name !== 'string') return '?'
-
-  const words = name.trim().split(' ')
-  if (words.length === 1) {
-    return name.charAt(0).toUpperCase()
-  }
-  return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
-}
-
 function getRoleText(role) {
   const roleMap = {
     'admin': '관리자',
@@ -105,10 +92,7 @@ function getStatusText(user) {
   return '정상'
 }
 
-function handleImageError(event) {
-  // 이미지 로드 실패 시 기본 아바타로 대체
-  event.target.style.display = 'none'
-}
+// 이미지 에러 처리는 공통 함수 사용
 
 // ===== 이벤트 핸들러 =====
 async function handleManage() {
@@ -171,13 +155,6 @@ async function handleManage() {
         width: 100%;
         height: 100%;
         object-fit: cover;
-      }
-
-      .avatar-placeholder {
-        font-family: $secondary-kr;
-        font-weight: 600;
-        font-size: 24px;
-        color: $dark-black;
       }
     }
   }

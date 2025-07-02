@@ -81,7 +81,7 @@ import PostActionBar from '@/components/board/common/PostActionBar.vue'
 import CommentList from '@/components/board/detail/CommentList.vue'
 import CommentForm from '@/components/board/detail/CommentForm.vue'
 import PostEditForm from '@/components/board/detail/PostEditForm.vue'
-import DeleteConfirmModal from '@/components/common/DeleteConfirmModal.vue'
+import DeleteConfirmModal from '@/components/common/modal/DeleteConfirmModal.vue'
 import { useDeleteConfirmModal } from '@/composables/useModal.js'
 // import boardSample from '@/data/boardSample.json'
 

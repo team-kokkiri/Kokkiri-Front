@@ -142,7 +142,8 @@ async function loadUsersData() {
         isActive: user.isActive === 'Y', // 'Y'일 때만 true
         joinDate: user.createdTime,
         teamName: user.teamName,
-        profileImage: user.avatar
+        profileImage: user.avatar,
+        avatar: user.avatar // UserListItem에서 사용
       }))
     } else {
       usersData.value = []

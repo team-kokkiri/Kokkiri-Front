@@ -19,7 +19,7 @@
           v-for="cell in calendarCells"
           :key="cell.key"
           :class="['calendar-cell', { today: cell.isToday }]"
-          @click="cell.day && openAddDialog(cell)"
+          @click="cell.day && openScheduleModal(cell)"
           tabindex="0"
       >
         <div class="cell-date">{{ cell.day || '' }}</div>
@@ -29,7 +29,7 @@
               :key="event.id"
               :class="['cell-event', { public: event.isPublic, selected: selectedEvent && selectedEvent.id === event.id }]"
               :title="event.description"
-              @click.stop="openDetailDialog(event)"
+              @click.stop="openScheduleModal(cell, event)"
           >
             {{ truncate(event.title, 13) }}
           </div>
@@ -37,87 +37,25 @@
       </div>
     </div>
 
-    <!-- 일정 상세 모달 -->
-    <div v-if="showDetailDialog" class="dialog-backdrop">
-      <div class="dialog event-detail-dialog">
-        <h3>
-          <span v-if="selectedEvent && selectedEvent.isPublic" class="public-label">[공용]</span>
-          <span v-else class="private-label">[개인]</span>
-          {{ selectedEvent && selectedEvent.title }}
-        </h3>
-        <div class="event-date">{{ selectedEvent && selectedEvent.date }}</div>
-        <div class="event-desc">{{ (selectedEvent && selectedEvent.description) || '설명 없음' }}</div>
-        <div class="dialog-btns">
-          <button type="button" @click="closeDetailDialog">닫기</button>
-          <button
-              v-if="canEditOrDelete"
-              type="button"
-              @click="openEditDialog"
-          >수정</button>
-          <button
-              v-if="canEditOrDelete"
-              type="button"
-              @click="deleteEvent"
-          >삭제</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 일정 수정 모달 (분리) -->
-    <div v-if="showEditDialog" class="dialog-backdrop">
-      <div class="dialog">
-        <h3>일정 수정</h3>
-        <form @submit.prevent="submitEditEvent">
-          <input
-              v-model.trim="editEventForm.title"
-              placeholder="제목"
-              required
-              autofocus
-          />
-          <textarea
-              v-model.trim="editEventForm.description"
-              placeholder="설명"
-              rows="2"
-          ></textarea>
-          <div class="dialog-btns">
-            <button type="submit">저장</button>
-            <button type="button" @click="closeEditDialog">취소</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- 일정 추가 모달 -->
-    <div v-if="showAddDialog" class="dialog-backdrop">
-      <div class="dialog">
-        <h3>{{ selectedDayStr }} 일정 추가</h3>
-        <form @submit.prevent="addEvent">
-          <input
-              v-model.trim="newEvent.title"
-              placeholder="제목"
-              required
-              autofocus
-          />
-          <textarea
-              v-model.trim="newEvent.description"
-              placeholder="설명"
-              rows="2"
-          ></textarea>
-          <div class="dialog-btns">
-            <button type="submit">등록</button>
-            <button type="button" @click="closeDialog">취소</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <!-- 새로운 일정 모달 -->
+    <ScheduleModal
+      :is-visible="showScheduleModal"
+      :is-edit-mode="isEditMode"
+      :selected-date="selectedDateStr"
+      :event-data="currentEventData"
+      @close="closeScheduleModal"
+      @submit="handleScheduleSubmit"
+      @delete="handleScheduleDelete"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { toast } from "vue3-toastify";
+
 import axios from '@/utils/axios'
+import ScheduleModal from '@/components/common/modal/ScheduleModal.vue'
 
 const userStore = useUserStore()
 
@@ -186,87 +124,125 @@ async function fetchEvents() {
       memberId: ev.memberId,
     }))
   } catch (e) {
-    toast.error('일정 불러오기 실패: ' + (e.response?.data?.message || e.message),{autoClose:1000})
+    console.error('일정 불러오기 실패:', e.response?.data?.message || e.message)
     calendarEvents.value = []
   }
 }
 
-const showDetailDialog = ref(false)
+// 새로운 모달 관련 상태
+const showScheduleModal = ref(false)
+const isEditMode = ref(false)
 const selectedEvent = ref(null)
+const selectedCell = ref(null)
+const currentEventData = ref({ title: '', description: '' })
 
-const canEditOrDelete = computed(() =>
-    selectedEvent.value &&
-    (
-        // 본인 개인 일정
-        (!selectedEvent.value.isPublic && selectedEvent.value.memberId === userStore.id)
-        ||
-        // 공용 일정 + 내가 관리자
-        (selectedEvent.value.isPublic && userStore.isAdmin)
-    )
-)
+const selectedDateStr = computed(() => {
+  if (!selectedCell.value) return ''
+  const year = currentYear.value
+  const month = String(currentMonth.value).padStart(2, '0')
+  const day = String(selectedCell.value.day).padStart(2, '0')
+  return `${year}-${month}-${day}`
+})
 
-function openDetailDialog(event) {
-  selectedEvent.value = { ...event }
-  showDetailDialog.value = true
+// const canEditOrDelete = computed(() =>
+//     selectedEvent.value &&
+//     (
+//         // 본인 개인 일정
+//         (!selectedEvent.value.isPublic && selectedEvent.value.memberId === userStore.id)
+//         ||
+//         // 공용 일정 + 내가 관리자
+//         (selectedEvent.value.isPublic && userStore.isAdmin)
+//     )
+// )
+
+// 새로운 모달 관련 메서드
+function openScheduleModal(cell, event = null) {
+  selectedCell.value = cell
+  
+  if (event) {
+    // 이벤트 클릭 시 - 수정 모드
+    if (!canEditOrDeleteEvent(event)) {
+      return
+    }
+    selectedEvent.value = event
+    isEditMode.value = true
+    currentEventData.value = {
+      title: event.title,
+      description: event.description
+    }
+  } else {
+    // 빈 날짜 클릭 시 - 추가 모드
+    selectedEvent.value = null
+    isEditMode.value = false
+    currentEventData.value = {
+      title: '',
+      description: ''
+    }
+  }
+  
+  showScheduleModal.value = true
 }
-function closeDetailDialog() {
-  showDetailDialog.value = false
+
+function closeScheduleModal() {
+  showScheduleModal.value = false
   selectedEvent.value = null
+  selectedCell.value = null
+  isEditMode.value = false
+  currentEventData.value = { title: '', description: '' }
 }
 
-// 일정 수정 모달
-const showEditDialog = ref(false)
-const editEventForm = ref({ title: '', description: '', date: '' })
-
-function openEditDialog() {
-  if (!canEditOrDelete.value) {
-    toast.error('본인 개인 일정만 수정할 수 있습니다!',{autoClose:500})
-    return
-  }
-  // 기존 값으로 채우기
-  editEventForm.value = {
-    title: selectedEvent.value.title,
-    description: selectedEvent.value.description,
-    date: selectedEvent.value.date,
-  }
-  showEditDialog.value = true
-}
-function closeEditDialog() {
-  showEditDialog.value = false
+function canEditOrDeleteEvent(event) {
+  return (
+    // 본인 개인 일정
+    (!event.isPublic && event.memberId === userStore.id)
+    ||
+    // 공용 일정 + 내가 관리자
+    (event.isPublic && userStore.isAdmin)
+  )
 }
 
-// 수정 API 호출
-async function submitEditEvent() {
-  if (!editEventForm.value.title.trim()) {
-    toast.success('제목을 입력하세요!',{autoClose:500})
-    return
-  }
+async function handleScheduleSubmit(formData) {
   try {
-    await axios.patch(`/api/calendars/${selectedEvent.value.id}`, {
-      ...editEventForm.value
-    }, { params: { memberId: userStore.id } })
-    toast.success('수정되었습니다!',{autoClose:500})
-    showEditDialog.value = false
-    showDetailDialog.value = false
+    if (isEditMode.value) {
+      // 수정 모드
+      await axios.patch(`/api/calendars/${selectedEvent.value.id}`, {
+        title: formData.title,
+        description: formData.description,
+        date: selectedDateStr.value
+      }, { params: { memberId: userStore.id } })
+
+    } else {
+      // 추가 모드
+      await axios.post('/api/calendars', {
+        title: formData.title,
+        description: formData.description,
+        date: selectedDateStr.value,
+        isPublic: userStore.isAdmin ? true : false
+      }, { params: { memberId: userStore.id } })
+
+    }
+    
+    closeScheduleModal()
     await fetchEvents()
   } catch (e) {
-    toast.error('수정 실패: ' + (e.response?.data?.message || e.message),{autoClose:500})
+    const errMsg = e.response?.data?.message || e.response?.data || e.message
+    console.error('작업 실패:', errMsg)
   }
 }
 
-function deleteEvent() {
-  if (!canEditOrDelete.value) {
-    toast.error('본인 개인 일정만 삭제할 수 있습니다!',{autoClose:500})
-    return
-  }
-  if (confirm('정말 삭제할까요?')) {
-    axios.delete(`/api/calendars/${selectedEvent.value.id}`, { params: { memberId: userStore.id } })
-        .then(() => {
-          toast.success('삭제되었습니다!',{autoClose:500})
-          closeDetailDialog()
-          fetchEvents()
-        })
-        .catch(e => toast.error('삭제 실패: ' + (e.response?.data?.message || e.message)),{autoClose:500})
+async function handleScheduleDelete() {
+  if (!selectedEvent.value) return
+  
+  try {
+    await axios.delete(`/api/calendars/${selectedEvent.value.id}`, { 
+      params: { memberId: userStore.id } 
+    })
+
+    closeScheduleModal()
+    await fetchEvents()
+  } catch (e) {
+    const errMsg = e.response?.data?.message || e.message
+    console.error('삭제 실패:', errMsg)
   }
 }
 
@@ -292,51 +268,6 @@ function nextMonth() {
     currentMonth.value += 1
   }
   fetchEvents()
-}
-
-const showAddDialog = ref(false)
-const selectedDay = ref(null)
-const newEvent = ref({ title: '', description: '' })
-
-const selectedDayStr = computed(() =>
-    selectedDay.value
-        ? `${currentYear.value}-${String(currentMonth.value).padStart(2, '0')}-${String(selectedDay.value).padStart(2, '0')}`
-        : ''
-)
-
-function openAddDialog(cell) {
-  selectedDay.value = cell.day
-  showAddDialog.value = true
-  newEvent.value = { title: '', description: '' }
-  nextTick(() => {
-    document.querySelector('.dialog input')?.focus()
-  })
-}
-
-function closeDialog() {
-  showAddDialog.value = false
-  newEvent.value = { title: '', description: '' }
-}
-
-async function addEvent() {
-  const dateStr = selectedDayStr.value
-  if (!newEvent.value.title.trim()) {
-    toast.success('제목을 입력해 주세요!',{autoClose:1000})
-    return
-  }
-  try {
-    await axios.post('/api/calendars', {
-      ...newEvent.value,
-      date: dateStr,
-      isPublic: userStore.isAdmin ? true : false
-    }, { params: { memberId: userStore.id } })
-    toast.success('일정이 등록되었습니다!',{autoClose:500})
-    showAddDialog.value = false
-    await fetchEvents()
-  } catch (e) {
-    const errMsg = e.response?.data?.message || e.response?.data || e.message
-    toast.error('등록 실패: ' + errMsg)
-  }
 }
 </script>
 
@@ -468,17 +399,16 @@ async function addEvent() {
   color: #fff;
   font-weight: 600;
 }
-/* === 모달 === */
-.dialog-backdrop {
-  position: fixed; top:0; left:0; width:100vw; height:100vh;
-  background: rgba(0,0,0,0.3);
-  display:flex; align-items:center; justify-content:center;
-  z-index: 9999;
+
+.cell-event.selected {
+  box-shadow: 0 0 0 2.5px #1976d2 inset;
+  border: 2px solid #1976d2;
+  background: #fffbe6 !important;
+  color: #1976d2 !important;
+  font-weight: bold;
+  z-index: 1;
 }
-.dialog {
-  background:#fff; padding:2.4rem; border-radius:1.2rem; min-width:320px; box-shadow: 0 4px 24px #0002;
-}
-.dialog-btns { display:flex; gap:1rem; margin-top:1.4rem; }
+
 @media (max-width: 1050px) {
   .calendar-container {
     max-width: 98vw;
@@ -502,114 +432,4 @@ async function addEvent() {
   .calendar-cell { min-height: 28px; font-size: 0.91em; padding: 4px 2px; }
   .calendar-day-label { font-size: 0.91em; }
 }
-.dialog-backdrop {
-  position: fixed; top:0; left:0; width:100vw; height:100vh;
-  background: rgba(0,0,0,0.3);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 2000;
-  animation: fadein-bg .18s;
-}
-@keyframes fadein-bg {
-  0% { background: rgba(0,0,0,0); }
-  100% { background: rgba(0,0,0,0.3); }
-}
-.dialog {
-  background: #fff;
-  padding: 2.2rem 1.5rem 1.8rem 1.5rem;
-  border-radius: 1.2rem;
-  min-width: 340px;
-  box-shadow: 0 4px 32px #0003;
-  animation: scalein .18s;
-}
-@keyframes scalein {
-  0% { transform: scale(0.98); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-.dialog h3 {
-  font-size: 1.3em;
-  font-weight: bold;
-  margin-bottom: 1.2rem;
-  color: #1a2a55;
-  letter-spacing: 1px;
-}
-.dialog input, .dialog textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 1rem;
-  border: 1.5px solid #d4deec;
-  border-radius: 7px;
-  padding: 10px 12px;
-  font-size: 1em;
-  background: #f8fbff;
-  outline: none;
-  transition: border 0.2s;
-}
-.dialog input:focus, .dialog textarea:focus {
-  border: 1.5px solid #1976d2;
-  background: #f4faff;
-}
-.dialog-btns {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
-}
-.dialog-btns button {
-  background: #1976d2;
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  border-radius: 7px;
-  padding: 9px 24px;
-  font-size: 1.01em;
-  cursor: pointer;
-  transition: background 0.14s;
-}
-.dialog-btns button[type="button"] {
-  background: #d4deec;
-  color: #455;
-}
-.dialog-btns button:active {
-  filter: brightness(0.96);
-}
-
-.cell-event.selected {
-  box-shadow: 0 0 0 2.5px #1976d2 inset;
-  border: 2px solid #1976d2;
-  background: #fffbe6 !important;
-  color: #1976d2 !important;
-  font-weight: bold;
-  z-index: 1;
-}
-
-.event-detail-dialog {
-  min-width: 340px;
-  max-width: 92vw;
-  box-shadow: 0 6px 32px #1976d222;
-}
-.public-label {
-  color: #1976d2;
-  font-weight: bold;
-  margin-right: 6px;
-}
-.private-label {
-  color: #b9e769;
-  font-weight: bold;
-  margin-right: 6px;
-}
-.event-date {
-  font-size: 1.08em;
-  margin-bottom: 0.8em;
-  color: #4a67ad;
-}
-.event-desc {
-  margin-bottom: 1.2em;
-  color: #2c3540;
-  white-space: pre-line;
-  min-height: 2.6em;
-}
-@media (max-width: 700px) {
-  .dialog { min-width: 90vw; padding: 1.2rem 1vw 1rem 1vw; }
-}
-
 </style>
