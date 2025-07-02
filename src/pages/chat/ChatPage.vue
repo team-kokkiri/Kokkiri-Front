@@ -47,11 +47,19 @@
             @send-message="sendMessage"
             @toggle-menu="toggleMenu"
             @open-invite="openInvite"
-            @leave-room="handleLeaveRoom"
+            @leave-room="handleShowExitModal"
             @open-user-list="openList"
         />
       </div>
     </section>
+
+    <!-- 채팅방 나가기 모달 -->
+    <ChatExitModal
+        :visible="showExitModalVisible"
+        @confirm="confirmLeaveRoom"
+        @cancel="cancelLeaveRoom"
+        @close="cancelLeaveRoom"
+    />
   </div>
 </template>
 
@@ -61,6 +69,7 @@ import ChatSidebar from '@/components/chat/ChatSidebar.vue';
 import InviteView from '@/components/chat/InviteView.vue';
 import ChatMainArea from '@/components/chat/ChatMainArea.vue';
 import ChatUserList from '@/components/chat/ChatUserList.vue';
+import ChatExitModal from '@/components/common/modal/ChatExitModal.vue';
 
 // 유틸 및 라이브러리 임포트
 import Avatar from '@/assets/img/0.png';
@@ -95,6 +104,7 @@ const userCount = ref(0);
 const memberPage = ref(0);
 const isMemberLoading = ref(false);
 const hasMoreMembers = ref(true);
+const showExitModalVisible = ref(false);
 let searchDebounceTimer = null;
 
 const route = useRoute();
@@ -210,7 +220,18 @@ async function selectRoom(roomId) {
   }
 }
 
-async function handleLeaveRoom() {
+// 채팅방 나가기 모달 열기
+function handleShowExitModal() {
+  if (!activeRoomId.value) {
+    alert("나갈 채팅방을 먼저 선택해주세요.");
+    return;
+  }
+  showExitModalVisible.value = true;
+  menuOpen.value = false; // 메뉴 닫기
+}
+
+// 채팅방 나가기 확인
+async function confirmLeaveRoom() {
   if (!activeRoomId.value) return;
   
   try {
@@ -220,10 +241,17 @@ async function handleLeaveRoom() {
     const leftRoomId = activeRoomId.value;
     chatRooms.value = chatRooms.value.filter(room => room.roomId !== leftRoomId);
     activeRoomId.value = null;
+    showExitModalVisible.value = false;
   } catch (error) {
     console.error("채팅방 나가기 실패:", error);
     alert("채팅방을 나가는 데 실패했습니다.");
+    showExitModalVisible.value = false;
   }
+}
+
+// 채팅방 나가기 취소
+function cancelLeaveRoom() {
+  showExitModalVisible.value = false;
 }
 
 async function fetchChatRooms() {

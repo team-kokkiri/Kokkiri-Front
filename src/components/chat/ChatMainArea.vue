@@ -71,19 +71,6 @@
      </div>
   </div>
 
-  <!-- 나가기 확인 모달 -->
-  <div v-if="showLeaveModal" class="modal-overlay" @click.self="closeLeaveModal">
-    <div class="modal-content">
-      <p class="modal-text">
-        <strong v-if="currentRoom">'{{ currentRoom.roomName }}'</strong> 채팅방을 나가시겠습니까?
-      </p>
-      <div class="modal-actions">
-        <button class="btn-modal btn-confirm" @click="confirmLeave">네</button>
-        <button class="btn-modal btn-cancel" @click="closeLeaveModal">아니오</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 글자 수 제한 경고 모달 -->
   <div v-if="showCharLimitModal" class="modal-overlay" @click.self="closeCharLimitModal">
     <div class="modal-content">
@@ -126,7 +113,6 @@ const menuContainer = ref(null)
 const chatContentRef = ref(null)
 
 // 모달 상태 관리를 위한 ref
-const showLeaveModal = ref(false);
 const showCharLimitModal = ref(false); // 글자 수 제한 모달 상태
 
 // 유효한 메시지만 렌더링하기 위한 computed 속성
@@ -155,16 +141,7 @@ function scrollToBottom() {
 }
 
 function leaveRoom() {
-  showLeaveModal.value = true;
-}
-
-function closeLeaveModal() {
-  showLeaveModal.value = false;
-}
-
-function confirmLeave() {
   emit('leave-room');
-  closeLeaveModal();
 }
 
 // 글자 수 제한 모달 닫기 함수
