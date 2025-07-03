@@ -26,7 +26,7 @@
             >
           </template>
           <template v-else>
-            <div class="form-label-content">
+            <div class="form-content">
               <template v-for="(line, idx) in titleLines" :key="idx">
                 <div>{{ line }}</div>
               </template>
@@ -36,7 +36,7 @@
 
         <!-- 일정 내용 -->
         <div class="form-group">
-          <label class="form-label-content"><span>내용 :</span></label>
+          <label class="form-label"><span>내용 :</span></label>
           <template v-if="isEditMode">
       <textarea
           v-model="formData.description"
@@ -46,7 +46,7 @@
       ></textarea>
           </template>
           <template v-else>
-            <div class="form-label-content">
+            <div class="form-content">
               <template v-for="(line, idx) in descriptionLines" :key="idx">
                 <div>{{ line }}</div>
               </template>
@@ -132,9 +132,9 @@ const descriptionLines = computed(() => (formData.value.description || '').split
 // Computed
 const modalTitle = computed(() => {
   if (props.isEditMode) {
-    return `${props.selectedDate}\n일정을 수정해주세요!`
+    return `${props.selectedDate}\n일정을 입력해주세요!`
   }
-  return `${props.selectedDate}\n일정을 입력해주세요!`
+  return `${props.selectedDate}`
 })
 
 // Watch for prop changes
@@ -285,18 +285,16 @@ watch(() => props.isVisible, (visible) => {
   margin-right: 0;
 }
 
-.form-label-content {
+.form-content {
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 500;
   font-size: 16px;
   color: #333333;
-  display: inline-block;
-  width: 100%;
-  margin-left: 28px;
-  margin-bottom: 2px;
-  margin-right: 0;
-  align-self: flex-start;
+  flex: 1;
   padding-top: 8px;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  line-height: 1.4;
 }
 
 
