@@ -237,7 +237,7 @@ const getProfileImageUrl = (avatar) => {
   }
   
   // 상대 경로인 경우 백엔드 서버 URL과 결합
-  const baseUrl = 'http://localhost:9090' // 백엔드 서버 URL
+  const baseUrl = 'http://192.168.230.8:9090' // 백엔드 서버 URL
   return baseUrl + avatar
 }
 
