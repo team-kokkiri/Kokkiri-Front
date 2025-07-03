@@ -97,71 +97,6 @@
         </div>
       </div>
 
-      <!-- 히든 테스트 케이스 -->
-      <div class="form-group">
-        <div class="test-cases-section">
-          <div class="test-cases-header">
-            <label class="form-label">히든 테스트 케이스 :</label>
-            <button
-              type="button"
-              @click="addTestCase"
-              class="add-test-case-btn"
-              :disabled="isLoading"
-            >
-              <i class="bi bi-plus-circle"></i>
-              추가
-            </button>
-          </div>
-          
-          <div class="test-cases-list">
-            <div
-              v-for="(testCase, index) in formData.hiddenTestCases"
-              :key="index"
-              class="test-case-item"
-            >
-              <div class="test-case-header">
-                <span class="test-case-number">테스트 케이스 {{ index + 1 }}</span>
-                <button
-                  type="button"
-                  @click="removeTestCase(index)"
-                  class="remove-test-case-btn"
-                  :disabled="isLoading"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-              
-              <div class="test-case-content">
-                <div class="test-case-field">
-                  <label class="test-case-label">입력:</label>
-                  <textarea
-                    v-model="testCase.input"
-                    class="test-case-input"
-                    placeholder="입력 데이터 (없으면 비워두세요)"
-                    :disabled="isLoading"
-                  ></textarea>
-                </div>
-                
-                <div class="test-case-field">
-                  <label class="test-case-label">예상 출력:</label>
-                  <textarea
-                    v-model="testCase.expectedOutput"
-                    class="test-case-input"
-                    placeholder="예상 출력 결과"
-                    :disabled="isLoading"
-                    required
-                  ></textarea>
-                </div>
-              </div>
-            </div>
-            
-            <div v-if="formData.hiddenTestCases.length === 0" class="empty-test-cases">
-              <p>히든 테스트 케이스가 없습니다. '추가' 버튼을 눌러 테스트 케이스를 추가하세요.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- 시간 제한 -->
       <div class="form-group">
         <div class="form-row">
@@ -259,7 +194,6 @@ const formData = ref({
   outputDescription: '',
   sampleInput: '',
   sampleOutput: '',
-  hiddenTestCases: [],
   timeLimit: 1000,
   memoryLimit: 128
 })
@@ -286,7 +220,6 @@ function initializeForm() {
       outputDescription: props.problemData.outputDescription || '',
       sampleInput: props.problemData.sampleInput || '',
       sampleOutput: props.problemData.sampleOutput || '',
-      hiddenTestCases: parseHiddenTestCases(props.problemData.hiddenTestCases) || [],
       timeLimit: props.problemData.timeLimit || 1000,
       memoryLimit: props.problemData.memoryLimit || 128
     }
@@ -301,36 +234,9 @@ function initializeForm() {
       outputDescription: '',
       sampleInput: '',
       sampleOutput: '',
-      hiddenTestCases: [],
       timeLimit: 1000,
       memoryLimit: 128
     }
-  }
-}
-
-// ===== 테스트 케이스 관리 =====
-function parseHiddenTestCases(hiddenTestCasesJson) {
-  if (!hiddenTestCasesJson) return []
-  
-  try {
-    const parsed = JSON.parse(hiddenTestCasesJson)
-    return Array.isArray(parsed) ? parsed : []
-  } catch (e) {
-    console.error('히든 테스트 케이스 파싱 오류:', e)
-    return []
-  }
-}
-
-function addTestCase() {
-  formData.value.hiddenTestCases.push({
-    input: '',
-    expectedOutput: ''
-  })
-}
-
-function removeTestCase(index) {
-  if (confirm('이 테스트 케이스를 삭제하시겠습니까?')) {
-    formData.value.hiddenTestCases.splice(index, 1)
   }
 }
 
@@ -359,18 +265,6 @@ function handleSubmit() {
   if (formData.value.outputDescription?.trim()) {
     submitData.outputDescription = formData.value.outputDescription.trim()
   }
-  
-  // 히든 테스트 케이스 추가 (비어있지 않은 경우만)
-  const validTestCases = formData.value.hiddenTestCases.filter(tc => 
-    tc.expectedOutput && tc.expectedOutput.trim()
-  )
-  
-  if (validTestCases.length > 0) {
-    submitData.hiddenTestCases = validTestCases.map(tc => ({
-      input: tc.input || '',
-      expectedOutput: tc.expectedOutput.trim()
-    }))
-  }
 
   emit('save', submitData)
 }
@@ -391,16 +285,10 @@ function hasChanges() {
            formData.value.inputDescription.trim() ||
            formData.value.outputDescription.trim() ||
            formData.value.sampleInput.trim() ||
-           formData.value.sampleOutput.trim() ||
-           formData.value.hiddenTestCases.length > 0
+           formData.value.sampleOutput.trim()
   }
   
   if (props.mode === 'edit' && props.problemData) {
-    const originalTestCases = parseHiddenTestCases(props.problemData.hiddenTestCases)
-    const currentTestCases = formData.value.hiddenTestCases
-    
-    const testCasesChanged = JSON.stringify(originalTestCases) !== JSON.stringify(currentTestCases)
-    
     return formData.value.title !== props.problemData.title ||
            formData.value.description !== props.problemData.description ||
            formData.value.inputDescription !== (props.problemData.inputDescription || '') ||
@@ -408,8 +296,7 @@ function hasChanges() {
            formData.value.sampleInput !== (props.problemData.sampleInput || '') ||
            formData.value.sampleOutput !== props.problemData.sampleOutput ||
            formData.value.timeLimit !== props.problemData.timeLimit ||
-           formData.value.memoryLimit !== props.problemData.memoryLimit ||
-           testCasesChanged
+           formData.value.memoryLimit !== props.problemData.memoryLimit
   }
   
   return false
@@ -545,165 +432,6 @@ onMounted(() => {
 
     .form-label {
       margin-top: 8px;
-    }
-  }
-}
-
-// 히든 테스트 케이스 스타일
-.test-cases-section {
-  padding: 20px;
-  border-bottom: 1px solid $dim-gray;
-  background: $white;
-
-  .test-cases-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-
-    .form-label {
-      font-family: $secondary-kr;
-      font-weight: 500;
-      font-size: 18px;
-      line-height: 1.252;
-      color: $dark-black;
-      margin: 0;
-    }
-
-    .add-test-case-btn {
-      background: $main-color;
-      color: $white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-family: $secondary-kr;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-
-      &:hover:not(:disabled) {
-        background: darken($main-color, 10%);
-        transform: translateY(-1px);
-      }
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-
-      i {
-        font-size: 16px;
-      }
-    }
-  }
-
-  .test-cases-list {
-    .test-case-item {
-      background: $silver-gray;
-      border: 1px solid $dim-gray;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      padding: 15px;
-
-      .test-case-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-
-        .test-case-number {
-          font-family: $secondary-kr;
-          font-weight: 500;
-          font-size: 16px;
-          color: $dark-black;
-        }
-
-        .remove-test-case-btn {
-          background: #dc3545;
-          color: $white;
-          border: none;
-          border-radius: 4px;
-          padding: 6px 10px;
-          cursor: pointer;
-          font-size: 14px;
-          transition: all 0.2s ease;
-
-          &:hover:not(:disabled) {
-            background: darken(#dc3545, 10%);
-          }
-
-          &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-          }
-        }
-      }
-
-      .test-case-content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-
-        .test-case-field {
-          .test-case-label {
-            display: block;
-            font-family: $secondary-kr;
-            font-weight: 500;
-            font-size: 14px;
-            color: $dark-black;
-            margin-bottom: 6px;
-          }
-
-          .test-case-input {
-            width: 100%;
-            min-height: 60px;
-            border: 1px solid $dim-gray;
-            border-radius: 4px;
-            padding: 8px 12px;
-            font-family: $secondary-kr;
-            font-size: 14px;
-            color: $dark-black;
-            resize: vertical;
-            transition: border-color 0.2s ease;
-
-            &:focus {
-              outline: none;
-              border-color: $main-color;
-              box-shadow: 0 0 0 2px rgba($main-color, 0.1);
-            }
-
-            &:disabled {
-              background-color: darken($silver-gray, 5%);
-              color: $silver-black;
-              cursor: not-allowed;
-            }
-
-            &::placeholder {
-              color: $light-black;
-              font-size: 13px;
-            }
-          }
-        }
-      }
-    }
-
-    .empty-test-cases {
-      text-align: center;
-      padding: 30px 20px;
-      color: $silver-black;
-      background: $silver-gray;
-      border: 1px dashed $dim-gray;
-      border-radius: 8px;
-
-      p {
-        margin: 0;
-        font-family: $secondary-kr;
-        font-size: 14px;
-        line-height: 1.4;
-      }
     }
   }
 }
