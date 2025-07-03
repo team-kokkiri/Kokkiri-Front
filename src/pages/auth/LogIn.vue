@@ -48,10 +48,10 @@
       <div class="login-divider">
         <span>간편 로그인</span>
         <div class="easy-login-box">
-          <a :href="'http://localhost:9090/oauth2/authorization/kakao'" class="sns-btn kakao">
+          <a :href="`${API_BASE_URL}/oauth2/authorization/kakao`" class="sns-btn kakao">
             <img src="../../assets/img/카카오로고.svg" alt="카카오" />
           </a>
-          <a :href="'http://localhost:9090/oauth2/authorization/google'" class="sns-btn google">
+          <a :href="`${API_BASE_URL}/oauth2/authorization/google`" class="sns-btn google">
             <img src="../../assets/img/구글로고.svg" alt="구글" />
           </a>
         </div>
@@ -74,6 +74,7 @@ const password = ref('');
 const errorMessage = ref('');
 const router = useRouter();
 const userStore = useUserStore()
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
 /*####### 로그인 데이터 전송 #######*/
 const handleLogin = async () => {

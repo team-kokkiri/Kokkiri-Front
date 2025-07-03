@@ -5,55 +5,84 @@
       <div class="modal-icon">
         <div class="icon-placeholder"></div>
       </div>
-      
+
       <!-- 제목 영역 -->
       <div class="modal-title">
         {{ modalTitle }}
       </div>
-      
-      <!-- 폼 영역 -->
+
+      <!-- ...중략... -->
       <div class="form-section">
         <!-- 일정 제목 -->
         <div class="form-group">
           <label class="form-label"><span>제목 :</span></label>
-          <input 
-            v-model="formData.title"
-            type="text" 
-            class="form-input"
-            placeholder="일정 제목을 입력하세요"
-            ref="titleInput"
-          >
+          <template v-if="isEditMode">
+            <input
+                v-model="formData.title"
+                type="text"
+                class="form-input"
+                placeholder="일정 제목을 입력하세요"
+                ref="titleInput"
+            >
+          </template>
+          <template v-else>
+            <div class="form-content">
+              <template v-for="(line, idx) in titleLines" :key="idx">
+                <div>{{ line }}</div>
+              </template>
+            </div>
+          </template>
         </div>
-        
+
         <!-- 일정 내용 -->
         <div class="form-group">
-          <label class="form-label-content"><span>내용 :</span></label>
-          <textarea 
-            v-model="formData.description"
-            class="form-textarea"
-            placeholder="일정 내용을 입력하세요"
-            rows="4"
-          ></textarea>
+          <label class="form-label"><span>내용 :</span></label>
+          <template v-if="isEditMode">
+      <textarea
+          v-model="formData.description"
+          class="form-textarea"
+          placeholder="일정 내용을 입력하세요"
+          rows="4"
+      ></textarea>
+          </template>
+          <template v-else>
+            <div class="form-content">
+              <template v-for="(line, idx) in descriptionLines" :key="idx">
+                <div>{{ line }}</div>
+              </template>
+            </div>
+          </template>
         </div>
       </div>
-      
+
       <!-- 버튼 영역 -->
       <div class="button-section">
-        <button 
-          type="button" 
-          class="btn btn-register"
-          @click="handleSubmit"
-        >
-          {{ isEditMode ? '수정' : '등록' }}
-        </button>
-        <button 
-          type="button" 
-          :class="['btn', 'btn-delete', { disabled: !isEditMode }]"
-          @click="handleDelete"
-          :disabled="!isEditMode"
-        >
-          삭제
-        </button>
+        <template v-if="isEditMode">
+          <button
+              type="button"
+              class="btn btn-register"
+              @click="handleSubmit"
+          >
+            {{ selectedEventIsNull ? '등록' : '수정' }}
+          </button>
+          <button
+              type="button"
+              :class="['btn', 'btn-delete', { disabled: !isEditMode }]"
+              @click="handleDelete"
+              :disabled="!isEditMode"
+          >
+            삭제
+          </button>
+        </template>
+        <template v-else>
+          <button
+              type="button"
+              class="btn btn-register"
+              @click="handleBackdropClick"
+          >
+            닫기
+          </button>
+        </template>
       </div>
     </div>
   </div>
@@ -97,16 +126,20 @@ const formData = ref({
   description: ''
 })
 
+const titleLines = computed(() => (formData.value.title || '').split('\n'));
+const descriptionLines = computed(() => (formData.value.description || '').split('\n'));
+
 // Computed
 const modalTitle = computed(() => {
   if (props.isEditMode) {
-    return `${props.selectedDate}\n일정을 수정해주세요!`
+    return `${props.selectedDate}\n일정을 입력해주세요!`
   }
-  return `${props.selectedDate}\n일정을 입력해주세요!`
+  return `${props.selectedDate}`
 })
 
 // Watch for prop changes
 watch(() => props.eventData, (newData) => {
+  console.log("모달 받은 eventData:", newData);
   formData.value = {
     title: newData.title || '',
     description: newData.description || ''
@@ -121,6 +154,8 @@ watch(() => props.isVisible, (visible) => {
   }
 })
 
+const selectedEventIsNull = computed(() => props.eventData && !props.eventData.id)
+
 // Methods
 const handleBackdropClick = () => {
   emit('close')
@@ -131,7 +166,7 @@ const handleSubmit = () => {
     alert('제목을 입력해주세요!')
     return
   }
-  
+
   emit('submit', {
     title: formData.value.title.trim(),
     description: formData.value.description.trim()
@@ -140,7 +175,7 @@ const handleSubmit = () => {
 
 const handleDelete = () => {
   if (!props.isEditMode) return
-  
+
   if (confirm('정말 삭제하시겠습니까?')) {
     emit('delete')
   }
@@ -234,7 +269,8 @@ watch(() => props.isVisible, (visible) => {
   margin-bottom: 20px;
   position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .form-label {
@@ -249,18 +285,16 @@ watch(() => props.isVisible, (visible) => {
   margin-right: 0;
 }
 
-.form-label-content {
+.form-content {
   font-family: 'Spoqa Han Sans Neo', sans-serif;
   font-weight: 500;
   font-size: 16px;
   color: #333333;
-  display: inline-block;
-  width: 60px;
-  margin-left: 28px;
-  margin-bottom: 2px;
-  margin-right: 0;
-  align-self: flex-start;
+  flex: 1;
   padding-top: 8px;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+  line-height: 1.4;
 }
 
 

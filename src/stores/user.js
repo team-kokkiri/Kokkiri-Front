@@ -84,37 +84,48 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    // async login({ token }) {
+    //   try {
+    //     this.setToken(token);
+    //
+    //     // axios 사용시
+    //     const response = await instance.get('/api/members/me', {
+    //       headers: { Authorization: `Bearer ${token}` }
+    //     });
+    //
+    //     const userInfo = response.data;
+    //
+    //     this.setUserInfo({
+    //       id: userInfo.id,
+    //       email: userInfo.email,
+    //       role: userInfo.role,
+    //       avatar: userInfo.avatar,
+    //       nickname: userInfo.nickname,
+    //     });
+    //
+    //     localStorage.setItem('accessToken', token);
+    //     localStorage.setItem('id', userInfo.id);
+    //     localStorage.setItem('email', userInfo.email);
+    //     localStorage.setItem('role', userInfo.role);
+    //     localStorage.setItem('avatar', userInfo.avatar);
+    //     localStorage.setItem('nickname', userInfo.nickname);
+    //
+    //     return { success: true };
+    //   } catch (error) {
+    //     console.error('Login action error:', error);
+    //     return { success: false, error: error.message };
+    //   }
+    // },
+
     async login({ token }) {
-      try {
-        this.setToken(token);
+      this.setToken(token); // accessToken localStorage에 저장
 
-        // axios 사용시
-        const response = await instance.get('/api/members/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+      // 인터셉터에서 자동으로 Authorization 헤더추가
+      const response = await instance.get('/api/members/me');
 
-        const userInfo = response.data;
+      this.setUserInfo(response.data); // 사용자 정보 상태에 저장
 
-        this.setUserInfo({
-          id: userInfo.id,
-          email: userInfo.email,
-          role: userInfo.role,
-          avatar: userInfo.avatar,
-          nickname: userInfo.nickname,
-        });
-
-        localStorage.setItem('accessToken', token);
-        localStorage.setItem('id', userInfo.id);
-        localStorage.setItem('email', userInfo.email);
-        localStorage.setItem('role', userInfo.role);
-        localStorage.setItem('avatar', userInfo.avatar);
-        localStorage.setItem('nickname', userInfo.nickname);
-
-        return { success: true };
-      } catch (error) {
-        console.error('Login action error:', error);
-        return { success: false, error: error.message };
-      }
+      return { success: true };
     },
 
     restoreUser: async function() {
