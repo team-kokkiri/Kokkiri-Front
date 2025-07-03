@@ -42,7 +42,7 @@
       :is-visible="showScheduleModal"
       :is-edit-mode="isEditMode"
       :selected-date="selectedDateStr"
-      :event-data="currentEventData"
+      :event-data="eventDataForModal"
       @close="closeScheduleModal"
       @submit="handleScheduleSubmit"
       @delete="handleScheduleDelete"
@@ -58,7 +58,7 @@ import axios from '@/utils/axios'
 import ScheduleModal from '@/components/common/modal/ScheduleModal.vue'
 
 const userStore = useUserStore()
-
+const eventDataForModal = computed(() => ({ ...currentEventData.value }));
 const today = new Date()
 const currentMonth = ref(today.getMonth() + 1)
 const currentYear = ref(today.getFullYear())
@@ -158,6 +158,7 @@ const selectedDateStr = computed(() => {
 // 새로운 모달 관련 메서드
 function openScheduleModal(cell, event = null) {
   selectedCell.value = cell
+  console.log('openScheduleModal 호출됨! cell:', cell, 'event:', event);
 
   if (event) {
     selectedEvent.value = event

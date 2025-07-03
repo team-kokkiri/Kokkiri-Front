@@ -26,7 +26,11 @@
             >
           </template>
           <template v-else>
-            <div class="form-label-content">{{ props.eventData.title }}</div>
+            <div class="form-label-content">
+              <template v-for="(line, idx) in titleLines" :key="idx">
+                <div>{{ line }}</div>
+              </template>
+            </div>
           </template>
         </div>
 
@@ -42,13 +46,14 @@
       ></textarea>
           </template>
           <template v-else>
-            <div class="form-label-content" style="white-space: pre-line;">{{ props.eventData.description }}</div>
+            <div class="form-label-content">
+              <template v-for="(line, idx) in descriptionLines" :key="idx">
+                <div>{{ line }}</div>
+              </template>
+            </div>
           </template>
         </div>
       </div>
-
-      <!-- 버튼 영역은 위에 안내한 대로만 바꿔줘! -->
-
 
       <!-- 버튼 영역 -->
       <div class="button-section">
@@ -121,6 +126,9 @@ const formData = ref({
   description: ''
 })
 
+const titleLines = computed(() => (formData.value.title || '').split('\n'));
+const descriptionLines = computed(() => (formData.value.description || '').split('\n'));
+
 // Computed
 const modalTitle = computed(() => {
   if (props.isEditMode) {
@@ -131,6 +139,7 @@ const modalTitle = computed(() => {
 
 // Watch for prop changes
 watch(() => props.eventData, (newData) => {
+  console.log("모달 받은 eventData:", newData);
   formData.value = {
     title: newData.title || '',
     description: newData.description || ''
@@ -260,7 +269,8 @@ watch(() => props.isVisible, (visible) => {
   margin-bottom: 20px;
   position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .form-label {
@@ -281,7 +291,7 @@ watch(() => props.isVisible, (visible) => {
   font-size: 16px;
   color: #333333;
   display: inline-block;
-  width: 60px;
+  width: 100%;
   margin-left: 28px;
   margin-bottom: 2px;
   margin-right: 0;
