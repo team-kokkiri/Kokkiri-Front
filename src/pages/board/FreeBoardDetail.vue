@@ -3,6 +3,7 @@
   <PostEditForm 
     v-if="postEditVisible && post"
     :post="post"
+    :boardTypeId="post.boardTypeId"
     @submit="onSubmitEdit"
     @cancel="onCancelEdit"
   />

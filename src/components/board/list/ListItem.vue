@@ -56,7 +56,10 @@ function resolveImageUrl(url) {
 }
 
 function handleClick() {
-  emit('click', props.item.id)
+  emit('click', {
+    itemId: props.item.id,
+    boardTypeId: props.item.boardTypeId, // ← 게시판 ID가 포함되어 있어야 함
+  })
 }
 
 function formatDate(dateString) {
