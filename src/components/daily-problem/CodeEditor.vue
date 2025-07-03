@@ -31,9 +31,14 @@ const props = defineProps({
 })
 
 // 코드 에디터 상태
-const sourceCode = ref(`public class Main {
+const sourceCode = ref(`import java.util.Scanner;
+
+public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello World");
+        Scanner sc = new Scanner(System.in);
+        int a = sc.nextInt();
+        int b = sc.nextInt();
+        System.out.println(a + b);
     }
 }`)
 

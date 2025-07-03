@@ -96,17 +96,12 @@
   </div>
   
   <!-- '모두 읽음' 확인 모달 -->
-  <div v-if="showMarkAllAsReadModal" class="modal-overlay" @click.self="closeMarkAllAsReadModal">
-    <div class="modal-content">
-      <p class="modal-text">
-        모든 알림을 삭제하시겠습니까?
-      </p>
-      <div class="modal-actions">
-        <button class="btn-modal btn-confirm" @click="confirmMarkAllAsRead">네</button>
-        <button class="btn-modal btn-cancel" @click="closeMarkAllAsReadModal">아니오</button>
-      </div>
-    </div>
-  </div>
+  <NotificationDeleteModal
+    :visible="showMarkAllAsReadModal"
+    @confirm="confirmMarkAllAsRead"
+    @cancel="closeMarkAllAsReadModal"
+    @close="closeMarkAllAsReadModal"
+  />
 
   <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
     <div class="modal-content">
@@ -126,6 +121,7 @@ import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, defineProps
 import { useRouter, useRoute } from 'vue-router';
 import { useNotifications } from '@/composables/useNotifications';
 import { useUserStore } from '@/stores/user';
+import NotificationDeleteModal from './modal/NotificationDeleteModal.vue';
 
 const props = defineProps({
   notifications: Array,

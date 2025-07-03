@@ -81,7 +81,7 @@
           />
         </div>
         <div class="form-actions-right">
-          <label class="checkbox-wrap">
+          <label class="checkbox-wrap" v-if="props.boardTypeId === 1">
             <input
                 type="checkbox"
                 v-model="formData.questionYn"
