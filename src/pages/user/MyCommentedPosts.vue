@@ -37,20 +37,15 @@ const token = localStorage.getItem('accessToken')
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080'
 
 const boardConfig = {
-  showBoardType: false,
-  showPreview: false,
+  showBoardType: true,
+  showPreview: true,
+  showThumbnail: true,
   emptyMessage: '댓글을 작성한 게시물이 없습니다.',
   emptyDescription: '댓글을 작성하면 여기에 표시됩니다.'
 }
 
-const boardTypeMap = {
-  '자유게시판': 1,
-  '자료공유 게시판': 2,
-  '공지사항': 4,
-  '프로젝트 소개': 5
-}
-
 const fetchMyCommentedList = async () => {
+  console.log('myCommentedList:', myCommentedList.value)
   try {
     const res = await axios.get(`${API_BASE_URL}/api/boards/my/commented`, {
       headers: {
@@ -62,11 +57,38 @@ const fetchMyCommentedList = async () => {
       }
     })
     const data = res.data
-    myCommentedList.value = data.boardListResDtos.map(item => ({
-      ...item,
-      boardId: boardTypeMap[item.boardType?.trim()] || 1, // 기본값 1(자유게시판)
-      id: item.id
-    }))
+
+    myCommentedList.value = data.boardListResDtos.map(item => {
+      let boardId
+      const boardTypeMap = {
+        '자유게시판': 1,
+        '자료공유 게시판': 2,
+        '공지사항': 4,
+        '프로젝트 소개': 5
+      }
+      // ↓ 이 부분 추가!
+      console.log(
+          '[매핑체크]', item.boardType,
+          '→', boardTypeMap[item.boardType?.trim()],
+          'boardId:', boardId
+      )
+      boardId = boardTypeMap[item.boardType?.trim()] || null
+
+      return {
+        id: item.id,
+        boardId: boardId,
+        boardTitle: item.boardTitle,
+        boardContent: item.boardContent,
+        thumbnailUrl: item.thumbnailUrl && !item.thumbnailUrl.startsWith('http')
+          ? `${item.thumbnailUrl}`
+          : item.thumbnailUrl || null,
+        boardType: item.boardType,
+        createdAt: item.createdAt,
+        writer: item.writer,
+      }
+    })
+    console.log('최종 myCommentedList.value:', myCommentedList.value)
+    console.log(data)
   } catch (err) {
     console.error('댓글 단 글 목록 가져오기 실패:', err)
   }
