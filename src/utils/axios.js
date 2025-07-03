@@ -8,9 +8,8 @@ const instance = axios.create({
     withCredentials: true,  // 리프레시 토큰 쿠키 전달
 });
 
-// 요청 인터셉터: accessToken이 있으면 자동 헤더 추가 (단, 이미 있으면 덮어쓰지 않음)
+//요청 인터셉터: accessToken이 있으면 자동 헤더 추가 (단, 이미 있으면 덮어쓰지 않음)
 instance.interceptors.request.use(config => {
-    // 재요청 시 이미 Authorization이 있다면 건드리지 않음
     if (!config.headers.Authorization) {
         const token = localStorage.getItem('accessToken');
         if (token) {

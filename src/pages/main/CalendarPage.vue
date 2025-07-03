@@ -42,7 +42,7 @@
       :is-visible="showScheduleModal"
       :is-edit-mode="isEditMode"
       :selected-date="selectedDateStr"
-      :event-data="currentEventData"
+      :event-data="eventDataForModal"
       @close="closeScheduleModal"
       @submit="handleScheduleSubmit"
       @delete="handleScheduleDelete"
@@ -58,7 +58,7 @@ import axios from '@/utils/axios'
 import ScheduleModal from '@/components/common/modal/ScheduleModal.vue'
 
 const userStore = useUserStore()
-
+const eventDataForModal = computed(() => ({ ...currentEventData.value }));
 const today = new Date()
 const currentMonth = ref(today.getMonth() + 1)
 const currentYear = ref(today.getFullYear())
@@ -158,30 +158,47 @@ const selectedDateStr = computed(() => {
 // 새로운 모달 관련 메서드
 function openScheduleModal(cell, event = null) {
   selectedCell.value = cell
-  
+  console.log('openScheduleModal 호출됨! cell:', cell, 'event:', event);
+
   if (event) {
-    // 이벤트 클릭 시 - 수정 모드
-    if (!canEditOrDeleteEvent(event)) {
+    selectedEvent.value = event
+
+    // "공용 일정"이고 "일반유저"일 때만 읽기전용!
+    if (event.isPublic && !userStore.isAdmin) {
+      isEditMode.value = false
+      currentEventData.value = {
+        title: event.title,
+        description: event.description
+      }
+      showScheduleModal.value = true
       return
     }
-    selectedEvent.value = event
-    isEditMode.value = true
-    currentEventData.value = {
-      title: event.title,
-      description: event.description
+
+    //그 외(내 개인 일정 or 공용+관리자)는 수정모드
+    if (canEditOrDeleteEvent(event)) {
+      isEditMode.value = true
+      currentEventData.value = {
+        title: event.title,
+        description: event.description
+      }
+      showScheduleModal.value = true
+      return
     }
+
+    // (본인 일정도, 공용도 아니면 아무것도 안 뜨게!)
+    return
   } else {
-    // 빈 날짜 클릭 시 - 추가 모드
+    // 빈 날짜 클릭 → 새 일정 추가 모달 (항상 수정모드)
     selectedEvent.value = null
-    isEditMode.value = false
+    isEditMode.value = true
     currentEventData.value = {
       title: '',
       description: ''
     }
+    showScheduleModal.value = true
   }
-  
-  showScheduleModal.value = true
 }
+
 
 function closeScheduleModal() {
   showScheduleModal.value = false
@@ -203,14 +220,13 @@ function canEditOrDeleteEvent(event) {
 
 async function handleScheduleSubmit(formData) {
   try {
-    if (isEditMode.value) {
+    if (selectedEvent.value) {
       // 수정 모드
       await axios.patch(`/api/calendars/${selectedEvent.value.id}`, {
         title: formData.title,
         description: formData.description,
         date: selectedDateStr.value
       }, { params: { memberId: userStore.id } })
-
     } else {
       // 추가 모드
       await axios.post('/api/calendars', {
@@ -219,9 +235,7 @@ async function handleScheduleSubmit(formData) {
         date: selectedDateStr.value,
         isPublic: userStore.isAdmin ? true : false
       }, { params: { memberId: userStore.id } })
-
     }
-    
     closeScheduleModal()
     await fetchEvents()
   } catch (e) {
