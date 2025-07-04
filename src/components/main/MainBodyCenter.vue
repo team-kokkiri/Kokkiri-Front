@@ -4,7 +4,7 @@
       <!-- 메인 공지사항 배너 -->
       <div class="main-notice-banner">
         <div class="banner-content">
-          <img src="@/assets/img/광고배너.png" alt="공지사항 배너" />
+          <img src="@/assets/img/배너2.png" alt="공지사항 배너" />
         </div>
       </div>
 

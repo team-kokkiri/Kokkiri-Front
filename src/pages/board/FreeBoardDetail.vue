@@ -284,7 +284,7 @@ const onLike = async (item = null) => {
       await fetchPost()
     }
   } catch (err) {
-    if (err.response?.status === 400) {
+    if (err.response?.status === 400 || err.response?.status === 500) {
       alert('이미 좋아요를 누르셨습니다.')
     } else {
       console.error('좋아요 실패', err)
