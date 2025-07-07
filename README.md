@@ -16,16 +16,16 @@ $ npm start
 <br/>
 
 # 1. Project Overview (프로젝트 개요)
-- 프로젝트 이름: 모여봐요 동아리숲!
-- 프로젝트 설명: 전국 대학 동아리 일정관리 및 홍보 커뮤니티
+- 프로젝트 이름: KOKKIRI 프로젝트
+- 프로젝트 설명: KOSA 끼리 논다! KOSA 회원들을 위한 개발자 커뮤니티 
 
 <br/>
 <br/>
 
 # 2. Team Members (팀원 및 팀 소개)
-| 이동규 | 신유승 | 김나연 | 이승준 |
+| 김지은 | 박 준 | 이 휘 | 이동규 |
 |:------:|:------:|:------:|:------:|
-| <img src="https://github.com/user-attachments/assets/c1c2b1e3-656d-4712-98ab-a15e91efa2da" alt="이동규" width="150"> | <img src="https://github.com/user-attachments/assets/78ec4937-81bb-4637-975d-631eb3c4601e" alt="신유승" width="150"> | <img src="https://github.com/user-attachments/assets/78ce1062-80a0-4edb-bf6b-5efac9dd992e" alt="김나연" width="150"> | <img src="https://github.com/user-attachments/assets/beea8c64-19de-4d91-955f-ed24b813a638" alt="이승준" width="150"> |
+| <img src="https://github.com/user-attachments/assets/1e7f2b8a-7845-493c-829a-8acf88a67850" alt="김지은" width="150"> | <img src="[https://github.com/user-attachments/assets/78ec4937-81bb-4637-975d-631eb3c4601e](https://github.com/user-attachments/assets/79082892-4557-4d88-9acf-d82c9b3e95f4)" alt="박준" width="150"> | <img src="https://github.com/user-attachments/assets/7cfb7364-567f-4de4-88d1-d53bbeccb0ca" alt="이휘" width="150"> | <img src="https://github.com/user-attachments/assets/2905387f-e0bf-423a-8af0-d92626d8c556" alt="이동규" width="150"> |
 | PL | FE | FE | FE |
 | [GitHub](https://github.com/LDK1009) | [GitHub](https://github.com/SinYusi) | [GitHub](https://github.com/nay3on) | [GitHub](https://github.com/conconcc) |
 
