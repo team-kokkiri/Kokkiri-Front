@@ -106,6 +106,11 @@ $ npm start
 
 <br/>
 
+# 7. API 명세서
+[<img src="https://github.com/user-attachments/assets/9b498be9-0e8a-4f0e-bc52-013535aa22af" alt="회원가입" width="100%"/>](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
+
+<br/>
+
 
 
 # 4. Tasks & Responsibilities (작업 및 역할 분담)
