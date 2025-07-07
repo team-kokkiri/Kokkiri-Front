@@ -1,30 +1,92 @@
-# kokkiri-front
+# Kokkiri(코사끼리)
 
-Kokkiri-front는 Vue 3 기반으로 개발되는 웹 프론트엔드 애플리케이션입니다. 실시간 통신과 인증 기능을 제공하는 인터페이스 구현을 목표로 하며, UI 구성에는 **Vuetify**, 페이지 이동에는 **Vue Router**를 사용할 예정입니다.
+**KOKKIRI**는 KOSA (한국소프트웨어산업협회) 수강생들을 위한 전용 커뮤니티 플랫폼입니다. 
 
-## 요구 사항
-* **Node.js 16** 이상 권장
-* 의존성 설치: `npm install`
+## 🐘 주요 기능
 
-## Project setup
-```
-npm install
-```
+- **사용자 관리**:
+    - 자체 회원가입 및 로그인 기능
+    - JWT를 이용한 인증/인가 처리
+    - OAuth2 소셜 로그인 (Google, Kakao)
+    - 프로필 정보 수정 (닉네임, 프로필 이미지 변경)
+    - 비밀번호 변경 및 찾기 기능
+- **게시판 및 댓글**:
+    - 다양한 종류의 게시판 (자유, 자료공유, 공지사항, 프로젝트 소개, HOT(좋아요 10개 이상))
+    - 게시글 및 대댓글 CRUD 기능
+    - 게시글 및 댓글 좋아요 기능
+    - 파일 첨부 기능
+- **실시간 채팅 및 알림**:
+    - WebSocket과 STOMP를 이용한 실시간 그룹/개인 채팅
+    - 채팅방 생성, 참여, 나가기 및 멤버 초대
+    - SSE(Server-Sent Events)를 이용한 실시간 알림 (댓글, 좋아요, 채팅 초대 등)
+- **코딩 문제 및 랭킹**:
+    - 매일 새로운 코딩 문제 제공 (스케줄링)
+    - Judge0 API 연동을 통한 코드 컴파일 및 채점
+    - 제출 내역 관리 및 결과 확인
+    - 일일 랭킹 시스템 (빠른 풀이 순)
+- **캘린더**:
+    - 개인 일정 및 팀 공용 일정 관리
+- **관리자 기능**:
+    - 관리자 대시보드 (사용자, 게시글 현황 통계)
+    - 회원 관리 (권한 변경, 계정 활성화/비활성화)
+    - 신고 관리
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+# 프론트엔드 리드미
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## 🛠️ 기술 스택
 
-### Lints and fixes files
-```
-npm run lint
-```
+- **프레임워크**: Vue.js 3
+- **상태 관리**: Pinia
+- **라우팅**: Vue Router
+- **HTTP 통신**: Axios
+- **실시간 통신**: StompJS, SockJS
+- **스타일링**: SCSS
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+---
+
+## 🚀 시작하기
+
+### 1. 의존성 설치
+
+Bash
+
+`npm install`
+
+### 2. 개발 서버 실행
+
+Bash
+
+`npm run serve`
+
+### 3. 프로덕션 빌드
+
+Bash
+
+`npm run build`
+
+### 4. 코드 린팅 및 수정
+
+Bash
+
+`npm run lint`
+
+---
+
+## 📂 디렉토리 구조
+
+`src/
+├── assets/         # 이미지, SCSS 등 정적 에셋
+├── components/     # 재사용 가능한 컴포넌트
+│   ├── admin/      # 관리자 페이지 컴포넌트
+│   ├── board/      # 게시판 관련 컴포넌트
+│   ├── common/     # 공통 레이아웃, 모달 등
+│   ├── daily-problem/ # 일일 문제 관련 컴포넌트
+│   └── ...
+├── composables/    # 재사용 가능한 로직 (커스텀 훅)
+├── data/           # 정적 데이터 (목록 등)
+├── pages/          # 라우터에 연결될 페이지 컴포넌트
+├── router/         # Vue Router 설정
+├── stores/         # Pinia 상태 관리
+└── utils/          # Axios 인스턴스 등 유틸리티 함수`
+
+# GIF 리스트
