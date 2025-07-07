@@ -273,22 +273,30 @@ $ npm start
     | 채팅 참여 멤버 리스트 | X                 | O             |
     | 채팅 나가기      | X                 | O             |
 
+    <br/>
+
     <img width="917" height="619" alt="1대1채팅1" src="https://github.com/user-attachments/assets/e7e88b9b-7ee5-4403-ba63-32cf44f7c0a6" />
+    <br/>
     <img width="910" height="611" alt="1대1채팅2" src="https://github.com/user-attachments/assets/e050d296-6a77-4855-9e2a-9fa1cc21a2ca" />
 
   - **그룹 채팅**
+    <br/>
     <img src="https://github.com/user-attachments/assets/0e61f768-7617-4691-83a4-85dbdf8e0aaf" alt="그룹 채팅"/>
 
   - **그룹 채팅 초대**
+    <br/>
     <img src="https://github.com/user-attachments/assets/b9cfdf51-d05b-41dd-9bc9-cc0b17cfbe7c" alt="그룹 채팅 초대"/>
 
   - **그룹 채팅 나가기**
+    <br/>
     <img src="https://github.com/user-attachments/assets/2dc312f5-96ad-4ec4-8082-802eac457e3e" alt="그룹 채팅 나가기"/>
 
   - **그룹 채팅 멤버 리스트**
+    <br/>
     <img src="https://github.com/user-attachments/assets/ae975954-1235-4640-a74f-f4787474211f" alt="그룹 채팅 멤버 리스트"/>
 
   - **게시글/댓글에서 채팅 걸기**
+    <br/>
     <img src="https://github.com/user-attachments/assets/adc5beb5-1d97-4d9a-88ec-5c9ca2b30178" alt="게시글/댓글에서 채팅"/>
 </details>
 
@@ -299,15 +307,19 @@ $ npm start
 
   - **채팅 초대 알림**  
     (알림 클릭시 채팅창으로 이동)  
+    <br/>
     <img src="https://github.com/user-attachments/assets/68c988c7-dde1-40ae-9a78-1e668b533f18" alt="채팅 초대 알림"/>
 
   - **댓글/좋아요 알림**  
     (알림 클릭시 게시글로 이동)  
+    <br/>
     <img src="https://github.com/user-attachments/assets/b5af4125-0d58-4dc2-ba6b-95dba3d7c2d1" alt="댓글/좋아요 알림"/>
 
   - **알림 리스트 스크롤 페이징**  
+    <br/>
     <img src="https://github.com/user-attachments/assets/22926dca-004c-40eb-80ad-e6c4d87da369" alt="알림 리스트 스크롤 페이징"/>
 
 </details>
+
 
 
