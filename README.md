@@ -111,7 +111,7 @@ $ npm start
   <img src="https://github.com/user-attachments/assets/4b332e6d-cb12-44d5-bfbf-0cb17af6f242" alt="Postman" width="120"/>
 </a>
 
-<br/>
+
 [API 명세서 바로가기](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
 
 
