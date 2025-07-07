@@ -154,33 +154,41 @@ $ npm start
 
 
 # 8. GIF 리스트
-<details>
-  <summary>대시보드</summary>
-  <br/>
-  <img width="1808" height="1349" alt="대시보드" src="https://github.com/user-attachments/assets/2ffdc0d9-1edc-41d6-9502-02c683895eb4" />
-</details>
+# 8. GIF 리스트
 
 <details>
-  <summary>회원관리</summary>
+  <summary>관리자 페이지</summary>
   <br/>
-  <img src="https://github.com/user-attachments/assets/2955a507-8e16-43c6-8f65-6b0d6036fbc3" alt="회원관리" />
+
+  <details>
+    <summary>대시보드</summary>
+    <br/>
+    <img width="1808" height="1349" alt="대시보드" src="https://github.com/user-attachments/assets/2ffdc0d9-1edc-41d6-9502-02c683895eb4" />
+  </details>
+
+  <details>
+    <summary>회원관리</summary>
+    <br/>
+    <img src="https://github.com/user-attachments/assets/2955a507-8e16-43c6-8f65-6b0d6036fbc3" alt="회원관리" />
+  </details>
+
+  <details>
+    <summary>문제관리</summary>
+    <br/>
+    <img src="https://github.com/user-attachments/assets/93b588d7-7153-47e1-a509-6130d0b44715" alt="문제관리" />
+  </details>
+
+  <details>
+    <summary>신고관리</summary>
+    <br/>
+    <img src="https://github.com/user-attachments/assets/085eb926-9cee-4717-9f81-a68fc64d94af" alt="신고관리" />
+  </details>
+
+  <details>
+    <summary>문제풀기</summary>
+    <br/>
+    <img src="https://github.com/user-attachments/assets/d345380a-0faa-4c86-ac62-f67182259897" alt="문제풀기" />
+  </details>
 </details>
 
-<details>
-  <summary>문제관리</summary>
-  <br/>
-  <img src="https://github.com/user-attachments/assets/93b588d7-7153-47e1-a509-6130d0b44715" alt="문제관리" />
-</details>
-
-<details>
-  <summary>신고관리</summary>
-  <br/>
-  <img src="https://github.com/user-attachments/assets/085eb926-9cee-4717-9f81-a68fc64d94af" alt="신고관리" />
-</details>
-
-<details>
-  <summary>문제풀기</summary>
-  <br/>
-  <img src="https://github.com/user-attachments/assets/d345380a-0faa-4c86-ac62-f67182259897" alt="문제풀기" />
-</details>
 
