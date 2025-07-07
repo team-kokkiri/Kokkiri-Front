@@ -7,9 +7,9 @@
 ```bash
 $ npm start
 ```
-[발표자료](https://www.miricanvas.com/v/14tyw7c)
-[프론트엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Front)
-[백엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Back)
+[발표자료](https://www.miricanvas.com/v/14tyw7c)<br/>
+[프론트엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Front)<br/>
+[백엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Back)<br/>
 
 
 <br/>
