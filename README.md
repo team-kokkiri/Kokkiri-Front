@@ -154,30 +154,29 @@ $ npm start
 
 # 8. GIF 리스트
 <details>
-  <summary>디자인 / 퍼블리싱</summary>
+  <summary>디자인</summary>
   <br/>
 
-  <details>
-    <summary>디자인</summary>
-    <br/>
-    - **샘플**<br/>
-      <img width="3194" height="1174" alt="디자인샘플" src="https://github.com/user-attachments/assets/47d791b5-f33d-4cc0-98e7-e9ac01fb6958" />
+  - **샘플**
+    <img width="3194" height="1174" alt="디자인샘플" src="https://github.com/user-attachments/assets/47d791b5-f33d-4cc0-98e7-e9ac01fb6958" />
 
-    - **GIF**<br/> 
-      <img src="https://github.com/user-attachments/assets/67ddf25c-f091-4e17-ae55-40693af8e8f7" alt="디자인 gif" />
-  </details>
-
-  <details>
-    <summary>퍼블리싱</summary>
-    <br/>
-    - **샘플**<br/>  
-      <img src="https://github.com/user-attachments/assets/53de2925-1a9f-4be7-8fbf-e66c67827792" alt="와이어프레임 샘플" />
-
-    - **GIF**<br/>  
-      <img src="https://github.com/user-attachments/assets/4b390347-28bd-4ce3-8973-329db183a29d" alt="와이어프레임 gif" />
-  </details>
+  - **GIF**
+    <img src="https://github.com/user-attachments/assets/67ddf25c-f091-4e17-ae55-40693af8e8f7" alt="디자인 gif" />
 
 </details>
+
+<details>
+  <summary>퍼블리싱</summary>
+  <br/>
+
+  - **샘플**
+    <img src="https://github.com/user-attachments/assets/53de2925-1a9f-4be7-8fbf-e66c67827792" alt="와이어프레임 샘플" />
+
+  - **GIF**
+    <img src="https://github.com/user-attachments/assets/4b390347-28bd-4ce3-8973-329db183a29d" alt="와이어프레임 gif" />
+
+</details>
+
 
 <details>
   <summary>관리자 페이지 / 일일 코딩 문제 / 순위 </summary>
