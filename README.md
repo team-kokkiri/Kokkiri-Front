@@ -46,6 +46,8 @@
 
 <br/>
 <br/>
+<img width="964" alt="코끼리 기술스택" src="https://github.com/user-attachments/assets/f6fbfead-5bf3-4059-98e9-455912dc2318" />
+
 
 # 2. Team Members (팀원 및 팀 소개)
 | 김지은 | 박 준 | 이 휘 | 이동규 |
