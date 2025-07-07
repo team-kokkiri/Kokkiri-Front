@@ -43,10 +43,10 @@
 ![SockJS](https://img.shields.io/badge/SockJS-990000?style=for-the-badge)
 ![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=for-the-badge&logo=sass&logoColor=white)
 
+<br/>
+<br/>
+<img width="960" alt="코끼리 기술스택" src="https://github.com/user-attachments/assets/86af03ba-0367-4658-900c-63245411b4f6" />
 
-<br/>
-<br/>
-<img width="961" alt="코끼리 기술스택" src="https://github.com/user-attachments/assets/2da03e45-87e7-4be9-a0c7-ab1c67282370" />
 <br/>
 
 
@@ -320,21 +320,39 @@
 </details>
 
 <details>
-  <summary>게시판(추후 더 추가 예정)</summary>
+  <summary>게시판</summary>
   <br/>
 
-  - **게시글 작성**  
+  - **게시글 작성** 
     (프로젝트 소개 게시글 작성)  
     <br/>
     <img src="https://github.com/user-attachments/assets/de1bb991-d951-4e0c-b0b8-b20350e64ed8" alt="프로젝트 소개 게시글 작성"/>
 
-  - **댓글/좋아요 알림**  
-    (알림 클릭시 게시글로 이동)  
+    (질문글 작성)  
+    <br/>
+    <img src="https://github.com/user-attachments/assets/8dc6b13a-acf9-4ddb-98a7-07a57a56b76d" alt="질문글 작성"/>
+
+  - **게시글 수정**
+    (게시글 첨부파일 수정)  
+    <br/>
+    <img src="https://github.com/user-attachments/assets/b5be76b1-fa50-4ad5-b4ba-e31ae3e4c91d" alt="게시글 수정"/>
+    
+
+  - **댓글/답글 작성, 삭제**  
+    (댓글/답글 작성, 댓글 삭제시 답글은 삭제되지 않음)  
     <br/>
     <img src="https://github.com/user-attachments/assets/e2e763ad-a244-4cc3-9578-216af3880f56" alt="댓글 작성"/>
 
+  - **내가 쓴 글/댓글 단 글 확인**  
+    <br/>
+    <img src="https://github.com/user-attachments/assets/05dcd1a1-b078-4acb-9a1e-2914369c6a8c" alt="내가 쓴 글/댓글 단 글 확인"/>
+
+  - **게시글/댓글 신고**   
+    <br/>
+    <img src="https://github.com/user-attachments/assets/ee078679-dc79-4949-a028-73ea07d53c86" alt="게시글/댓글 신고"/>
 
 </details>
+
 
 
 
