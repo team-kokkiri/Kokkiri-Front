@@ -142,6 +142,15 @@ $ npm start
 
 <br/>
 
+- 채팅 로직
+<img src="https://github.com/user-attachments/assets/51928dd5-7cc7-4efc-8703-445778b0e0b2" alt="문제" width="100%"/>
+
+<br/>
+
+- 실시간 알림 로직
+<img src="https://github.com/user-attachments/assets/aa35f668-86bd-4bd2-9a09-0fbf068f42f2" alt="문제" width="100%"/>
+
+<br/>
 # 7. API 명세서
 <a href="https://documenter.getpostman.com/view/45626435/2sB2xChp5W" target="_blank">
   <img src="https://github.com/user-attachments/assets/4b332e6d-cb12-44d5-bfbf-0cb17af6f242" alt="Postman" width="120"/>
