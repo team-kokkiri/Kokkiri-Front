@@ -3,17 +3,6 @@
 <br/>
 <br/>
 
-# 0. Getting Started (시작하기)
-```bash
-$ npm start
-```
-[발표자료](https://www.miricanvas.com/v/14tyw7c)<br/>
-[프론트엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Front)<br/>
-[백엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Back)<br/>
-
-
-<br/>
-<br/>
 
 # 1. Project Overview (프로젝트 개요)
 - 프로젝트 이름: KOKKIRI 프로젝트
