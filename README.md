@@ -19,6 +19,42 @@ $ npm start
 - 프로젝트 이름: KOKKIRI 프로젝트
 - 프로젝트 설명: KOKKIRI는 KOSA (한국소프트웨어산업협회) 수강생들을 위한 전용 커뮤니티 플랫폼입니다. 
 
+## 🛠️ 기술 스택
+
+---
+
+### 🟩 Back-end
+
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Java](https://img.shields.io/badge/Java%2017-007396?style=for-the-badge&logo=java&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white)
+![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![Hibernate](https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jwt&logoColor=white)
+![OAuth2](https://img.shields.io/badge/OAuth2-0066FF?style=for-the-badge&logo=oauth&logoColor=white)
+![WebSocket](https://img.shields.io/badge/WebSocket-333333?style=for-the-badge)
+![STOMP](https://img.shields.io/badge/STOMP-4FC08D?style=for-the-badge)
+![Spring WebFlux](https://img.shields.io/badge/Spring%20WebFlux-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![SSE](https://img.shields.io/badge/SSE-6DB33F?style=for-the-badge)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Judge0](https://img.shields.io/badge/Judge0-F06F00?style=for-the-badge)
+![Lombok](https://img.shields.io/badge/Lombok-FFA518?style=for-the-badge&logo=lombok&logoColor=white)
+![H2](https://img.shields.io/badge/H2%20Database-4479A1?style=for-the-badge&logo=h2&logoColor=white)
+
+---
+
+### 🟦 Front-end
+
+![Vue.js](https://img.shields.io/badge/Vue.js%203-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white)
+![Pinia](https://img.shields.io/badge/Pinia-F8DC3E?style=for-the-badge&logo=pinia&logoColor=black)
+![Vue Router](https://img.shields.io/badge/Vue%20Router-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge)
+![StompJS](https://img.shields.io/badge/StompJS-4FC08D?style=for-the-badge)
+![SockJS](https://img.shields.io/badge/SockJS-990000?style=for-the-badge)
+![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=for-the-badge&logo=sass&logoColor=white)
+
+
 <br/>
 <br/>
 
