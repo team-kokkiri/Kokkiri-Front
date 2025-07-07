@@ -7,7 +7,7 @@
 ```bash
 $ npm start
 ```
-[서비스 링크](https://club-project-one.vercel.app/)
+[발표자료]([https://club-project-one.vercel.app/](https://www.miricanvas.com/v/14tyw7c))
 
 <br/>
 <br/>
