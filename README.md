@@ -46,7 +46,8 @@
 
 <br/>
 <br/>
-<img width="964" alt="코끼리 기술스택" src="https://github.com/user-attachments/assets/f6fbfead-5bf3-4059-98e9-455912dc2318" />
+<img width="961" alt="코끼리 기술스택" src="https://github.com/user-attachments/assets/2da03e45-87e7-4be9-a0c7-ab1c67282370" />
+<br/>
 
 
 # 2. Team Members (팀원 및 팀 소개)
