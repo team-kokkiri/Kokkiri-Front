@@ -82,7 +82,27 @@ $ npm start
 
 # 6. 주요 기능 다이어그램
 - 회원가입&이메일인증
-<img src="https://github.com/user-attachments/assets/9b498be9-0e8a-4f0e-bc52-013535aa22af" alt="ERD" width="100%"/>
+<img src="https://github.com/user-attachments/assets/9b498be9-0e8a-4f0e-bc52-013535aa22af" alt="회원가입" width="100%"/>
+
+<br/>
+
+- Ouath2 + 팀코드
+<img src="https://github.com/user-attachments/assets/d79192ec-dfed-42a0-82f7-1c7e0a0666e7" alt="오어스" width="100%"/>
+
+<br/>
+
+- 게시판 구조
+<img src="https://github.com/user-attachments/assets/6e64d8f4-2b26-4a03-a88a-ab23c3645e9e" alt="게시판" width="100%"/>
+
+<br/>
+
+- 파일 저장 로직
+<img src="https://github.com/user-attachments/assets/42ddff03-bba3-45ba-bc13-3fc0238b42d1" alt="파일" width="100%"/>
+
+<br/>
+
+- 문제 채점 로직
+<img src="https://github.com/user-attachments/assets/f37f2436-ff49-4994-bcee-2b2e8f4fef80" alt="문제" width="100%"/>
 
 <br/>
 
