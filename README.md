@@ -33,6 +33,7 @@ $ npm start
 <br/>
 
 # 3. Key Features (주요 기능)
+<img src="https://github.com/user-attachments/assets/dd164870-d83e-4093-b56f-aff062ebdd48" alt="메뉴트리" width="100%"/>
 - **회원가입**:
   - 회원가입 시 DB에 유저정보가 등록됩니다.
 
