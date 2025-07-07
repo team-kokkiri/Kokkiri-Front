@@ -158,7 +158,8 @@ $ npm start
   <summary>관리자 페이지 / 일일 코딩 문제 / 순위 </summary>
   <br/>
 
-  - **대시보드**<br/>
+  - **대시보드**
+    <br/>
     <img width="1808" height="1349" alt="대시보드" src="https://github.com/user-attachments/assets/2ffdc0d9-1edc-41d6-9502-02c683895eb4" />
 
   - **회원관리**<br/>  
