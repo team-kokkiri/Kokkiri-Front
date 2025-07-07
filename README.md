@@ -90,7 +90,7 @@
     - 일일 랭킹 시스템 (빠른 풀이 순)
  
 - **캘린더**:
-    - 개인 일정 및 팀 공용 일정 관리
+    - 개인 일정 및 협회 공용 일정 관리
    
 - **관리자 기능**:
     - 관리자 대시보드 (사용자, 게시글 현황 통계)
@@ -136,7 +136,7 @@
 <br/>
 
 - 채팅 로직
-<img src="https://github.com/user-attachments/assets/51928dd5-7cc7-4efc-8703-445778b0e0b2" alt="문제" width="100%"/>
+<img src="https://github.com/user-attachments/assets/273ad8a0-7108-4576-95ff-1b8b8a908ff2" alt="문제" width="100%"/>
 
 <br/>
 
