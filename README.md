@@ -107,7 +107,10 @@ $ npm start
 <br/>
 
 # 7. API 명세서
-[![View API docs](https://img.shields.io/badge/Postman-View%20Docs-orange?logo=postman)](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
+[![Postman](https://assets.getpostman.com/common-share/postman-logo-horizontal-short-white.svg)](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
+
+[API 명세서 바로가기](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
+
 
 
 <br/>
