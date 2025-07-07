@@ -68,9 +68,25 @@ $ npm start
     - 관리자 대시보드 (사용자, 게시글 현황 통계)
     - 회원 관리 (권한 변경, 계정 활성화/비활성화)
     - 신고 관리
+<br/>
+
+# 4. ERD
+<img src="https://github.com/user-attachments/assets/aafe99fd-deb7-4ca1-9682-f39fb0650f7e" alt="ERD" width="100%"/>
 
 <br/>
+
+# 5. 서비스 아키텍처
+<img src="https://github.com/user-attachments/assets/a2a28ce7-cf4e-4d25-94b0-587b278b7fff" alt="ERD" width="100%"/>
+
 <br/>
+
+# 6. 주요 기능 다이어그램
+- 회원가입&이메일인증
+<img src="https://github.com/user-attachments/assets/9b498be9-0e8a-4f0e-bc52-013535aa22af" alt="ERD" width="100%"/>
+
+<br/>
+
+
 
 # 4. Tasks & Responsibilities (작업 및 역할 분담)
 |  |  |  |
