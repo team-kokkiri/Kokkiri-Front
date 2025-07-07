@@ -34,6 +34,7 @@ $ npm start
 
 # 3. Key Features (주요 기능)
 <img src="https://github.com/user-attachments/assets/dd164870-d83e-4093-b56f-aff062ebdd48" alt="메뉴트리" width="100%"/>
+<br/>
 - **사용자 관리**:
     - 자체 회원가입 및 로그인 기능
     - JWT를 이용한 인증/인가 처리
