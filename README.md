@@ -26,8 +26,8 @@ $ npm start
 | 김지은 | 박 준 | 이 휘 | 이동규 |
 |:------:|:------:|:------:|:------:|
 | <img src="https://github.com/user-attachments/assets/1e7f2b8a-7845-493c-829a-8acf88a67850" alt="김지은" width="150"> | <img src="https://github.com/user-attachments/assets/79082892-4557-4d88-9acf-d82c9b3e95f4" alt="박준" width="150"> | <img src="https://github.com/user-attachments/assets/7cfb7364-567f-4de4-88d1-d53bbeccb0ca" alt="이휘" width="150"> | <img src="https://github.com/user-attachments/assets/2905387f-e0bf-423a-8af0-d92626d8c556" alt="이동규" width="150"> |
-| PL | FE | FE | FE |
-| [GitHub](https://github.com/LDK1009) | [GitHub](https://github.com/SinYusi) | [GitHub](https://github.com/nay3on) | [GitHub](https://github.com/conconcc) |
+| PL | BE | BE | FE |
+| [GitHub](https://github.com/keemzleun) | [GitHub](https://github.com/myjuniverse) | [GitHub](https://github.com/0630hwi) | [GitHub](https://github.com/Gorani77) |
 
 <br/>
 <br/>
