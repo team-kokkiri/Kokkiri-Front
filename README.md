@@ -316,5 +316,22 @@
 
 </details>
 
+<details>
+  <summary>게시판(추후 더 추가 예정)</summary>
+  <br/>
+
+  - **게시글 작성**  
+    (프로젝트 소개 게시글 작성)  
+    <br/>
+    <img src="https://github.com/user-attachments/assets/de1bb991-d951-4e0c-b0b8-b20350e64ed8" alt="프로젝트 소개 게시글 작성"/>
+
+  - **댓글/좋아요 알림**  
+    (알림 클릭시 게시글로 이동)  
+    <br/>
+    <img src="https://github.com/user-attachments/assets/e2e763ad-a244-4cc3-9578-216af3880f56" alt="댓글 작성"/>
+
+
+</details>
+
 
 
