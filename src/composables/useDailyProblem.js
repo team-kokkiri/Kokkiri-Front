@@ -87,11 +87,18 @@ export function useDailyProblem() {
         return result
       }
     } catch (err) {
+      // 400 에러인 경우 중복 제출로 간주
+      if (err.response?.status === 400) {
+        const duplicateError = new Error('DUPLICATE_SUBMISSION')
+        duplicateError.originalError = err
+        throw duplicateError
+      }
+
       error.value = err.response?.data?.status_message || '코드 제출에 실패했습니다.'
       console.error('Failed to submit code:', err)
       throw err
     } finally {
-      isSubmitting.value = false
+          isSubmitting.value = false
     }
   }
 

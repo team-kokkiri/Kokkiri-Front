@@ -93,7 +93,12 @@ const handleSubmitCode = async () => {
       }
     }
   } catch (error) {
-    console.error('Failed to submit code:', error)
+    // 중복 제출 에러 처리
+    if (error.message === 'DUPLICATE_SUBMISSION') {
+      alert('오늘 이미 문제를 해결하셨습니다.')
+    } else {
+      console.error('Failed to submit code:', error)
+    }
   }
 }
 

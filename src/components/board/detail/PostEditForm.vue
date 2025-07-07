@@ -151,9 +151,6 @@ onMounted(() => {
       existingImages.value = [...props.post.files]
     } else if (props.post.fileUrls && props.post.fileUrls.length > 0) {
       // 기존 fileUrls만 있는 경우 (호환성)
-      // existingImages.value = props.post.fileUrls.map(url => ({ fileUrl: url }))
-            
-      // 바꾼거
       existingImages.value = props.post.fileUrls.map(url => ({
         id: null,
         fileUrl: url
@@ -193,10 +190,6 @@ function confirmEdit() {
     questionYn: formData.value.questionYn,
     attachedImages: formData.value.attachedImages, // 새로 추가된 이미지
     existingImages: existingImages.value, // 남아있는 기존 이미지
-    
-    // deletedImages: deletedImages.value // 삭제된 기존 이미지
-
-    // 바꾼거
     deletedImages: deletedImages.value, // 삭제된 기존 이미지
     keepFileIds: existingImages.value
       .filter(file => file.id != null)

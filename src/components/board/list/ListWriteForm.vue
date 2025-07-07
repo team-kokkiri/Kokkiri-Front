@@ -135,20 +135,22 @@ function handleSubmit() {
     alert('제목과 내용을 입력해주세요.')
     return
   }
-  showWriteConfirmModal.value = true
-}
 
-// 글 작성 확정
-function confirmWrite() {
+  // 프로젝트 소개 게시판은 이미지 필수
   if (props.boardTypeId === 5) {
     const hasImage = formData.value.attachedImages.some(file =>
-        file.type && file.type.startsWith('image/')
+      file.type && file.type.startsWith('image/')
     )
     if (!hasImage) {
       alert('프로젝트 소개 게시판은 이미지 1개 이상 첨부해야 합니다.')
       return
     }
   }
+  showWriteConfirmModal.value = true
+}
+
+// 글 작성 확정
+function confirmWrite() {
   emit('submit', {
     boardTitle: formData.value.boardTitle,
     boardContent: formData.value.boardContent,
