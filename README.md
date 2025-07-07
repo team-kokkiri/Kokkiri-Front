@@ -96,6 +96,7 @@
 <br/>
 
 # 4. ERD
+[🔗 ERD Cloud 바로가기](https://www.erdcloud.com/d/kLGZ5inT9nzpM2THR)
 <img src="https://github.com/user-attachments/assets/aafe99fd-deb7-4ca1-9682-f39fb0650f7e" alt="ERD" width="100%"/>
 
 <br/>
@@ -147,12 +148,17 @@
   <img src="https://github.com/user-attachments/assets/4b332e6d-cb12-44d5-bfbf-0cb17af6f242" alt="Postman" width="120"/>
 </a>
 
-[API 명세서 바로가기](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
+[🔗 API 명세서 바로가기](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
+
+<br/>
+
+# 8. Figma
+[🔗 Figma 바로가기](https://www.figma.com/design/IPRKvLQHsuVDeQXJbMqQXz/html.to.design-%E2%80%94-by-%E2%80%B9div%E2%80%BARIOTS-%E2%80%94-Import-websites-to-Figma-designs--web-html-css---Community-?node-id=938-46&t=dJVUKIC9RptowM9g-1)
 
 
 <br/>
 
-# 8. GIF 리스트
+# 9. GIF 리스트
 <details>
   <summary>디자인</summary>
   <br/>
