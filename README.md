@@ -17,7 +17,7 @@ $ npm start
 
 # 1. Project Overview (프로젝트 개요)
 - 프로젝트 이름: KOKKIRI 프로젝트
-- 프로젝트 설명: KOSA 끼리 논다! KOSA 회원들을 위한 개발자 커뮤니티 
+- 프로젝트 설명: KOKKIRI는 KOSA (한국소프트웨어산업협회) 수강생들을 위한 전용 커뮤니티 플랫폼입니다. 
 
 <br/>
 <br/>
