@@ -107,7 +107,7 @@ $ npm start
 <br/>
 
 # 7. API 명세서
-[![Postman](https://assets.getpostman.com/common-share/postman-logo-horizontal-short-white.svg)](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
+[![Postman](https://github.com/user-attachments/assets/4b332e6d-cb12-44d5-bfbf-0cb17af6f242)](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
 
 [API 명세서 바로가기](https://documenter.getpostman.com/view/45626435/2sB2xChp5W)
 
