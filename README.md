@@ -189,4 +189,49 @@ $ npm start
   </details>
 </details>
 
+<details>
+  <summary>로그인/회원가입</summary>
+  <br/>
+
+  - **일반 회원가입**  
+    <img src="https://github.com/user-attachments/assets/86160475-4486-4cac-a45c-d4187f7abb4c" alt="일반 회원가입"/>
+
+  - **Oauth2(구글)**  
+    <img src="https://github.com/user-attachments/assets/64e88552-3227-4e69-94df-1cacae9375d6" alt="구글 로그인"/>
+
+  - **Oauth2(카카오)**  
+    <img src="https://github.com/user-attachments/assets/40478dbd-5d5d-42b4-b667-6fa061df4952" alt="카카오 로그인"/>
+
+  - **비밀번호 찾기**  
+    <img src="https://github.com/user-attachments/assets/0dacbfa4-5555-482a-b67f-fec41d36a1b9" alt="비밀번호 찾기"/>
+
+</details>
+
+<details>
+  <summary>마이페이지</summary>
+  <br/>
+
+  - **프로필 변경**  
+    <img src="https://github.com/user-attachments/assets/47aad239-12b6-4f58-9d77-d65145785d6e" alt="프로필 변경"/>
+
+  - **닉네임 변경**  
+    <img src="https://github.com/user-attachments/assets/2eae0825-14e6-4d06-8c37-b6918ff5b959" alt="닉네임 변경"/>
+
+  - **비밀번호 변경**  
+    <img src="https://github.com/user-attachments/assets/044a9af5-398c-4e75-bf32-8079c893f1ad" alt="비밀번호 변경"/>
+
+  - **회원탈퇴**  
+    <img src="https://github.com/user-attachments/assets/27fcbb2e-04fa-42fa-9562-85bfc36d7c86" alt="회원탈퇴"/>
+</details>
+
+<details>
+  <summary>캘린더</summary>
+  <br/>
+
+  - **관리자**  
+    <img src="https://github.com/user-attachments/assets/45c2d7f7-80e7-4292-895a-eb4df800a94c" alt="캘린더(관리자)"/>
+
+  - **일반 사용자**  
+    <img src="https://github.com/user-attachments/assets/7526b484-0df0-42be-8d5a-f3aef1fdce99" alt="캘린더(일반사용자)"/>
+</details>
 
