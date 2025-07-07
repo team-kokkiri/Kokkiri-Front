@@ -7,7 +7,10 @@
 ```bash
 $ npm start
 ```
-[발표자료]([https://club-project-one.vercel.app/](https://www.miricanvas.com/v/14tyw7c))
+[발표자료](https://www.miricanvas.com/v/14tyw7c)
+[프론트엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Front)
+[백엔드 페이지](https://github.com/team-kokkiri/Kokkiri-Back)
+
 
 <br/>
 <br/>
