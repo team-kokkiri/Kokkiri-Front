@@ -152,8 +152,6 @@ $ npm start
 
 <br/>
 
-
-# 8. GIF 리스트
 # 8. GIF 리스트
 
 <details>
